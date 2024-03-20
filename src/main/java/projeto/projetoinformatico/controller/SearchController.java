@@ -21,13 +21,15 @@ public class SearchController {
 
     @GetMapping("/search")
     public ResponseEntity<SearchResult> performSearch(
-            @RequestParam Double latitude,
-            @RequestParam Double longitude,
+            @RequestParam Double lat1,
+            @RequestParam Double lon2,
+            @RequestParam Double lat2,
+            @RequestParam Double lon1,
             @RequestParam Long startTime,
             @RequestParam Long endTime
     ) {
         // Call the search service to perform the search
-        SearchResult searchResult = searchService.performSearch(latitude, longitude, startTime, endTime);
+        SearchResult searchResult = searchService.performSearch(lat1, lon1,lat2 ,lon2, startTime, endTime);
 
         // Check if search result is not null
         if (searchResult != null) {
