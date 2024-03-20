@@ -30,11 +30,11 @@ public class SearchControllerTests {
     @Test
     public void testPerformSearch() {
         // Mock the behavior of the searchService.performSearch method
-        when(searchService.performSearch(10.0, 20.0, 100L, 200L))
+        when(searchService.performSearch(10.0, 20.0, -10.0,-20.0, 100L, 200L))
                 .thenReturn(new SearchResult(Collections.singletonList("Result")));
 
         // Call the controller method
-        SearchResult result = searchController.performSearch(10.0, 20.0, 100L, 200L).getBody();
+        SearchResult result = searchController.performSearch(10.0, 20.0, -10.0,-20.0, 100L, 200L).getBody();
 
         // Verify that the result is as expected
         assertEquals(Collections.singletonList("Result"), result.getItemLabels());
