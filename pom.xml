@@ -57,6 +57,34 @@
             <version>3.17.0</version>
             <type>pom</type>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.1.0-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.wikidata.wdtk/wdtk-rdf -->
+        <dependency>
+            <groupId>org.wikidata.wdtk</groupId>
+            <artifactId>wdtk-rdf</artifactId>
+            <version>0.14.7</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.wikidata.wdtk/wdtk-util -->
+        <dependency>
+            <groupId>org.wikidata.wdtk</groupId>
+            <artifactId>wdtk-util</artifactId>
+            <version>0.14.7</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.wikidata.wdtk/wdtk-datamodel -->
+        <dependency>
+            <groupId>org.wikidata.wdtk</groupId>
+            <artifactId>wdtk-datamodel</artifactId>
+            <version>0.14.7</version>
+        </dependency>
 
     </dependencies>
 
