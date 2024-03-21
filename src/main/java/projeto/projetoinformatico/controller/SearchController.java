@@ -24,12 +24,29 @@ public class SearchController {
             @RequestParam Double lat1,
             @RequestParam Double lon2,
             @RequestParam Double lat2,
+            @RequestParam Double lon1
+    ) {
+        // Call the search service to perform the search
+        SearchResult searchResult = searchService.performSearch(lat1, lon1,lat2 ,lon2);
+
+        // Check if search result is not null
+        if (searchResult != null) {
+            return ResponseEntity.ok(searchResult);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+    @GetMapping("/searchTime")
+    public ResponseEntity<SearchResult> performSearchTime(
+            @RequestParam Double lat1,
+            @RequestParam Double lon2,
+            @RequestParam Double lat2,
             @RequestParam Double lon1,
             @RequestParam Long startTime,
             @RequestParam Long endTime
     ) {
         // Call the search service to perform the search
-        SearchResult searchResult = searchService.performSearch(lat1, lon1,lat2 ,lon2, startTime, endTime);
+        SearchResult searchResult = searchService.performSearchTime(lat1, lon1,lat2 ,lon2, startTime, endTime);
 
         // Check if search result is not null
         if (searchResult != null) {

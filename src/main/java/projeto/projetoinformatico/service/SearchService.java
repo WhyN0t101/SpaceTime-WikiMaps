@@ -7,23 +7,32 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.model.SearchResult;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SearchService {
 
 
-    @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2, #startTime, #endTime }")
+    @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2}")
 
-    public SearchResult performSearch(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime)  {
-        String sparqlQuery = constructSparqlQuery(lat1, lon1,lat2,lon2 ,startTime, endTime);
-        List<String> results = executeSparqlQuery(sparqlQuery);
+    public SearchResult performSearch(Double lat1, Double lon1, Double lat2, Double lon2)  {
+        String sparqlQuery = constructSparqlQuery(lat1, lon1,lat2,lon2);
+        List<Map<String, String>> results = executeSparqlQuery(sparqlQuery);
         return new projeto.projetoinformatico.model.SearchResult(results); // Fully qualify the SearchResult class
     }
+    @Cacheable(value = "searchCacheTime", key = "{ #lat1, #lat2, #lon1, #lon2, #startTime, #endTime }")
 
+    public SearchResult performSearchTime(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime)  {
+        String sparqlQuery = constructSparqlQueryTime(lat1, lon1,lat2,lon2 ,startTime, endTime);
+        List<Map<String, String>> results = executeSparqlQuery(sparqlQuery);
+        return new projeto.projetoinformatico.model.SearchResult(results);
+    }
 
-    private List<String> executeSparqlQuery(String sparqlQuery) {
+    private List<Map<String, String>> executeSparqlQuery(String sparqlQuery) {
         // Define the Wikidata SPARQL endpoint URL
         String sparqlEndpoint = "https://query.wikidata.org/sparql";
 
@@ -38,16 +47,33 @@ public class SearchService {
             ResultSet results = qexec.execSelect();
 
             // Process the result set and extract relevant information
-            List<String> resultList = new ArrayList<>();
+            List<Map<String, String>> resultList = new ArrayList<>();
             while (results.hasNext()) {
-                // Extract item label from each result row and add it to the resultList
+                // Extract variables from each result row and add them to the resultList
                 QuerySolution solution = results.nextSolution();
+                Map<String, String> resultMap = new HashMap<>();
 
-                //DEFINE LABEL TO OBTAIN <<<<--------------
-                RDFNode itemLabelNode = solution.get("personLabel");
+                // Extract itemLabel
+                RDFNode itemLabelNode = solution.get("itemLabel");
                 if (itemLabelNode != null) {
-                    resultList.add(itemLabelNode.toString());
+                    resultMap.put("itemLabel", itemLabelNode.toString());
                 }
+
+                // Extract where
+                RDFNode whereNode = solution.get("where");
+                if (whereNode != null) {
+                    resultMap.put("where", whereNode.toString());
+                }
+
+                // Extract url
+                RDFNode urlNode = solution.get("url");
+                if (urlNode != null) {
+                    resultMap.put("url", urlNode.toString());
+                }
+
+                // Extract other variables as needed...
+
+                resultList.add(resultMap);
             }
 
             return resultList;
@@ -57,31 +83,62 @@ public class SearchService {
         }
     }
 
-    private String constructSparqlQuery(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime) {
-        // Construct the SPARQL query with variables
-        String sparqlQuery = "PREFIX wd: <http://www.wikidata.org/entity/>\n" +
-                "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n" +
-                "PREFIX schema: <http://schema.org/>\n" +
+
+    private String constructSparqlQuery(Double lat1, Double lon1, Double lat2, Double lon2) {
+        String sparqlQuery = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX wikibase: <http://wikiba.se/ontology#>\n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "PREFIX bd: <http://www.bigdata.com/rdf#>\n" +
+                "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n"+
                 "\n" +
-                "SELECT ?person ?personLabel ?birthdate\n" +
-                "WHERE\n" +
-                "{\n" +
-                "  ?person wdt:P31 wd:Q5;          # Instance of human\n" +
-                "          wdt:P21 wd:Q6581097;    # Gender male\n" +
-                "          wdt:P19 ?placeOfBirth; # Place of birth\n" +
-                "          wdt:P569 ?birthdate.   # Date of birth\n" +
-                "  \n" +
-                "  FILTER(YEAR(?birthdate) = 2002)\n" +
-                "  FILTER(?placeOfBirth IN (wd:Q45, wd:Q29))  # Filter for Portugal and Spain\n" +
-                "  \n" +
-                "  ?placeOfBirth wdt:P625 ?coord.\n" +
-                "  FILTER(?coord >= \"Point(" + lon1 + " " + lat1 + ")\"^^geo:wktLiteral && ?coord <= \"Point(" + lon2 + " " + lat2 + ")\"^^geo:wktLiteral)  # Bounding box covering Portugal and Spain\n" +
-                "  \n" +
-                "  ?person rdfs:label ?personLabel.\n" +
-                "  FILTER(LANG(?personLabel) = \"en\") # Filter for English labels\n" +
-                "}\n";
+                "SELECT DISTINCT ?item ?itemLabel ?when ?where ?url\n" +
+                "WHERE {\n" +
+                "  ?url schema:about ?item .\n" +
+                "  ?url schema:inLanguage \"pt\" .\n" +
+                "  FILTER (STRSTARTS(str(?url), \"https://pt.wikipedia.org/\")).\n" +
+                "  SERVICE wikibase:box {\n" +
+                "    ?item wdt:P625 ?where .\n" +
+                "    bd:serviceParam wikibase:cornerSouthWest \"Point(" + lon1 + " " + lat2 + ")\"^^geo:wktLiteral.\n" +
+                "    bd:serviceParam wikibase:cornerNorthEast \"Point(" + lon2 + " " + lat1 + ")\"^^geo:wktLiteral.\n" +
+                "  }\n" +
+                "\n" +
+                "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\" . }\n" +
+                "}\n" +
+                "ORDER BY ASC(?when)\n" +
+                "LIMIT 1000\n" +
+                "";
+        // Return the SPARQL query
+        return sparqlQuery;
+    }
+    private String constructSparqlQueryTime(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime) {
+        // Construct the SPARQL query with variables
+        String sparqlQuery = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX wikibase: <http://wikiba.se/ontology#>\n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX bd: <http://www.bigdata.com/rdf#>\n" +
+                "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n" +
+                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?item ?itemLabel ?when ?where ?url\n" +
+                "WHERE {\n" +
+                "  ?url schema:about ?item .\n" +
+                "  ?url schema:inLanguage \"pt\" .\n" +
+                "  FILTER (STRSTARTS(str(?url), \"https://pt.wikipedia.org/\")).\n" +
+                "  SERVICE wikibase:box {\n" +
+                "    ?item wdt:P625 ?where .\n" +
+                "    bd:serviceParam wikibase:cornerSouthWest \"Point(" + lon1 + " " + lat1 + ")\"^^geo:wktLiteral.\n" +
+                "    bd:serviceParam wikibase:cornerNorthEast \"Point(" + lon2 + " " + lat2 + ")\"^^geo:wktLiteral.\n" +
+                "  }\n" +
+                "  OPTIONAL { \n" +
+                "    ?item wdt:P585 ?when . \n" +
+                "    BIND (YEAR(?when) AS ?year) .\n" +
+                "    FILTER(?year >= " + startTime + " && ?year <= " + endTime + ").\n" +
+                "  }\n" +
+                "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\" . }\n" +
+                "}\n" +
+                "ORDER BY ASC(?when)\n" +
+                "LIMIT 1000\n" +
+                "";
 
         // Return the SPARQL query
         return sparqlQuery;

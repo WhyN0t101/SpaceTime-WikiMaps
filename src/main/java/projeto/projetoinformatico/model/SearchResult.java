@@ -1,19 +1,20 @@
 package projeto.projetoinformatico.model;
 
 import java.util.List;
+import java.util.Map;
 
 public class SearchResult {
-    private List<String> itemLabels;
+    private List<Map<String, String>> itemLabels;
 
-    public SearchResult(List<String> itemLabels) {
+    public SearchResult(List<Map<String, String>> itemLabels) {
         this.itemLabels = itemLabels;
     }
 
-    public List<String> getItemLabels() {
+    public List<Map<String, String>> getItemLabels() {
         return itemLabels;
     }
 
-    public void setItemLabels(List<String> itemLabels) {
+    public void setItemLabels(List<Map<String, String>> itemLabels) {
         this.itemLabels = itemLabels;
     }
 }
