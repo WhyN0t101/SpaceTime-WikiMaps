@@ -24,7 +24,7 @@ public class SearchService {
         List<Map<String, String>> results = executeSparqlQuery(sparqlQuery);
         return new projeto.projetoinformatico.model.SearchResult(results); // Fully qualify the SearchResult class
     }
-    @Cacheable(value = "searchCacheTime", key = "{ #lat1, #lat2, #lon1, #lon2, #startTime, #endTime }")
+    @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2, #startTime, #endTime }")
 
     public SearchResult performSearchTime(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime)  {
         String sparqlQuery = constructSparqlQueryTime(lat1, lon1,lat2,lon2 ,startTime, endTime);
