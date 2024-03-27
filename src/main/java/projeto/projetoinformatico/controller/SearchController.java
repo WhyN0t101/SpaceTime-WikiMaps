@@ -20,7 +20,7 @@ public class SearchController {
     private final SearchService searchService;
     private static final double REQUESTS_PER_SECOND = 20.0; // Set the desired rate here
 
-    private static RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
+    private static final RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
 
     // Inject SearchService
     @Autowired
