@@ -1,5 +1,8 @@
 package projeto.projetoinformatico.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.service.UserService;
@@ -16,6 +19,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         // Additional validation if needed
+        System.out.println(user);
         User newUser = userService.createUser(user);
         return ResponseEntity.ok(newUser);
     }
