@@ -2,6 +2,7 @@ package projeto.projetoinformatico.users;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
@@ -18,22 +19,27 @@ import java.util.List;
 @Data
 public class User implements UserDetails {
 
-    @Setter
-    @Getter
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
-    @Getter
     @Column(unique = true)
+    @Getter
+    @Setter
     private String username;
 
-    @Setter
     @Getter
+    @Setter
     private String password;
 
     private Role role;
+
+    @Getter
+    @Setter
+    private String email;
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -60,6 +66,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 
 }

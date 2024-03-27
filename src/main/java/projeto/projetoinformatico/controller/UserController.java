@@ -19,7 +19,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         // Additional validation if needed
-        System.out.println(user);
+        //System.out.println(user);
         User newUser = userService.createUser(user);
         return ResponseEntity.ok(newUser);
     }
