@@ -38,7 +38,9 @@ public class SearchController {
             // If rate limit exceeded, return 429 Too Many Requests
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(null);
         }
-
+        if(validCoord(lat1, lon2, lat2, lon1)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         // Call the search service to perform the search
         SearchResult searchResult = searchService.performSearch(lat1, lon1, lat2, lon2);
 
@@ -64,7 +66,9 @@ public class SearchController {
             // If rate limit exceeded, return 429 Too Many Requests
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(null);
         }
-
+        if(validCoord(lat1, lon2, lat2, lon1)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         // Call the search service to perform the search
         SearchResult searchResult = searchService.performSearchTime(lat1, lon1, lat2, lon2, startTime, endTime);
 
@@ -74,5 +78,33 @@ public class SearchController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+    @GetMapping("/search/country")
+    public ResponseEntity<SearchResult> performSearchCountry(
+            @RequestParam String country,
+            @RequestParam Long year
+    ) {
+        // Acquire a permit from RateLimiter
+        if (!rateLimiter.tryAcquire()) {
+            // If rate limit exceeded, return 429 Too Many Requests
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(null);
+        }
+        // Call the search service to perform the search
+        SearchResult searchResult = searchService.performSearchYear(country,year);
+
+        // Check if search result is not null
+        if (searchResult != null) {
+            return ResponseEntity.ok(searchResult);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    private boolean validCoord(Double lat1, Double lon1, Double lat2, Double lon2) {
+        if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
+          return true;
+        }
+        return lat1 < -90 || lat1 > 90 || lon1 < -180 || lon1 > 180 ||
+                lat2 < -90 || lat2 > 90 || lon2 < -180 || lon2 > 180;
     }
 }
