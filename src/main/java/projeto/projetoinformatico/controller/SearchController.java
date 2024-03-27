@@ -36,7 +36,7 @@ public class SearchController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-    @GetMapping("/searchTime")
+    @GetMapping("/search/time")
     public ResponseEntity<SearchResult> performSearchTime(
             @RequestParam Double lat1,
             @RequestParam Double lon2,

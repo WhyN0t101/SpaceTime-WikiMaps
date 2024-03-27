@@ -70,12 +70,8 @@ public class SearchService {
                 if (urlNode != null) {
                     resultMap.put("url", urlNode.toString());
                 }
-
-                // Extract other variables as needed...
-
                 resultList.add(resultMap);
             }
-
             return resultList;
         } finally {
             // Release resources
@@ -85,28 +81,27 @@ public class SearchService {
 
 
     private String constructSparqlQuery(Double lat1, Double lon1, Double lat2, Double lon2) {
-        String sparqlQuery = "PREFIX schema: <http://schema.org/>\n" +
-                "PREFIX wikibase: <http://wikiba.se/ontology#>\n" +
-                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "PREFIX bd: <http://www.bigdata.com/rdf#>\n" +
-                "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n"+
-                "\n" +
-                "SELECT DISTINCT ?item ?itemLabel ?when ?where ?url\n" +
-                "WHERE {\n" +
-                "  ?url schema:about ?item .\n" +
-                "  ?url schema:inLanguage \"pt\" .\n" +
-                "  FILTER (STRSTARTS(str(?url), \"https://pt.wikipedia.org/\")).\n" +
-                "  SERVICE wikibase:box {\n" +
-                "    ?item wdt:P625 ?where .\n" +
-                "    bd:serviceParam wikibase:cornerSouthWest \"Point(" + lon1 + " " + lat2 + ")\"^^geo:wktLiteral.\n" +
-                "    bd:serviceParam wikibase:cornerNorthEast \"Point(" + lon2 + " " + lat1 + ")\"^^geo:wktLiteral.\n" +
-                "  }\n" +
-                "\n" +
-                "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\" . }\n" +
-                "}\n" +
-                "ORDER BY ASC(?when)\n" +
-                "LIMIT 1000\n" +
-                "";
+        String sparqlQuery =
+                        "PREFIX schema: <http://schema.org/>\n" +
+                        "PREFIX wikibase: <http://wikiba.se/ontology#>\n" +
+                        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                        "PREFIX bd: <http://www.bigdata.com/rdf#>\n" +
+                        "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n" +
+                        "\n" +
+                        "SELECT DISTINCT ?item ?itemLabel ?when ?where ?url\n" +
+                        "WHERE {\n" +
+                        "  ?url schema:about ?item .\n" +
+                        "  ?url schema:inLanguage \"pt\" .\n" +
+                        "  FILTER (STRSTARTS(str(?url), \"https://pt.wikipedia.org/\")) .\n" +
+                        "  SERVICE wikibase:box {\n" +
+                        "    ?item wdt:P625 ?where .\n" +
+                        "    bd:serviceParam wikibase:cornerSouthWest \"Point(-9.52 36.95)\"^^geo:wktLiteral .\n" +
+                        "    bd:serviceParam wikibase:cornerNorthEast \"Point(-6.18 42.16)\"^^geo:wktLiteral .\n" +
+                        "  }\n" +
+                        "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\" . }\n" +
+                        "}\n" +
+                        "ORDER BY ASC(?when)\n" +
+                        "LIMIT 1000";
         // Return the SPARQL query
         return sparqlQuery;
     }
