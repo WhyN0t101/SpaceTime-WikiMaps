@@ -10,6 +10,7 @@ import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.service.SearchService;
 
 import java.util.Collections;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -30,13 +31,13 @@ public class SearchControllerTests {
     @Test
     public void testPerformSearch() {
         // Mock the behavior of the searchService.performSearch method
-        when(searchService.performSearch(10.0, 20.0, -10.0,-20.0, 100L, 200L))
-                .thenReturn(new SearchResult(Collections.singletonList("Result")));
+        when(searchService.performSearch(10.0, 20.0, -10.0, -20.0))
+                .thenReturn(new SearchResult(Collections.singletonList(Map.of("key", "value"))));
 
         // Call the controller method
-        SearchResult result = searchController.performSearch(10.0, 20.0, -10.0,-20.0, 100L, 200L).getBody();
+        SearchResult result = searchController.performSearch(10.0, 20.0, -10.0, -20.0).getBody();
 
         // Verify that the result is as expected
-        assertEquals(Collections.singletonList("Result"), result.getItemLabels());
+        assertEquals(Collections.singletonList(Map.of("key", "value")), result.getItemLabels());
     }
 }
