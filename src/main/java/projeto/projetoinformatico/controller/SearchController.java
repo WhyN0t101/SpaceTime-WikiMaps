@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.service.SearchService;
 
+import java.time.Year;
+
 @RestController
 @Validated
 public class SearchController {
@@ -66,7 +68,9 @@ public class SearchController {
             // If rate limit exceeded, return 429 Too Many Requests
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(null);
         }
-        if(validCoord(lat1, lon2, lat2, lon1)){
+        endTime = Math.max(endTime,startTime);
+        startTime = Math.min(endTime,startTime);
+        if(validCoord(lat1, lon2, lat2, lon1) || validYear(startTime) || validYear(endTime)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
         // Call the search service to perform the search
@@ -91,7 +95,9 @@ public class SearchController {
         }
         // Call the search service to perform the search
         SearchResult searchResult = searchService.performSearchYear(country,year);
-
+        if(validYear(year)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         // Check if search result is not null
         if (searchResult != null) {
             return ResponseEntity.ok(searchResult);
@@ -106,5 +112,13 @@ public class SearchController {
         }
         return lat1 < -90 || lat1 > 90 || lon1 < -180 || lon1 > 180 ||
                 lat2 < -90 || lat2 > 90 || lon2 < -180 || lon2 > 180;
+    }
+    private boolean validYear(Long year) {
+        // Define the range of valid years
+        final int MIN_YEAR = 0;  // Assuming year 0 or later is valid
+        final int MAX_YEAR = Year.now().getValue();  // Get the current year
+
+        // Check if the year falls within the valid range
+        return year != null && year >= MIN_YEAR && year <= MAX_YEAR;
     }
 }

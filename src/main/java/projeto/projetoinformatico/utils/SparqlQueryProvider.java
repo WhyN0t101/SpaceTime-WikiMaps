@@ -87,12 +87,15 @@ public class SparqlQueryProvider {
                 "LIMIT 1000\n" +
                 "";
     }
+
+    //TODO
     public String constructSparqlQueryTimeAndCountry(Long year, String country) {
         return "PREFIX schema: <http://schema.org/>\n" +
                 "PREFIX wikibase: <http://wikiba.se/ontology#>\n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX bd: <http://www.bigdata.com/rdf#>\n" +
                 "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n" +
+                "PREFIX wd: <http://www.wikidata.org/entity/>\n" + // Define the wd prefix
                 "\n" +
                 "SELECT DISTINCT ?item ?itemLabel ?when ?where ?url\n" +
                 "WHERE {\n" +
@@ -113,4 +116,5 @@ public class SparqlQueryProvider {
                 "LIMIT 1000\n" +
                 "";
     }
+
 }
