@@ -8,7 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.model.SearchResult;
-
+import projeto.projetoinformatico.utils.SparqlQueryProvider;
 import java.util.*;
 
 @EnableCaching
@@ -17,14 +17,19 @@ public class SearchService {
 
     @Value("${sparql.endpoint}")
     private String sparqlEndpoint; // Inject SPARQL endpoint URL
+    private final SparqlQueryProvider sparqlQuery;
 
+    @Autowired
+    public SearchService(SparqlQueryProvider sparqlQuery) {
+        this.sparqlQuery = sparqlQuery;
+    }
     @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2}")
     public SearchResult performSearch(Double lat1, Double lon1, Double lat2, Double lon2) {
         try {
             // Validate the coordinates
             validateCoordinates(lat1, lon1, lat2, lon2);
             // Proceed with the search
-            String sparqlQuery = constructSparqlQuery(lat1, lon1, lat2, lon2);
+            String sparqlQuery = this.sparqlQuery.constructSparqlQuery(lat1, lon1, lat2, lon2);
             List<Map<String, String>> results = executeSparqlQuery(sparqlQuery);
             return new SearchResult(results);
         } catch (IllegalArgumentException e) {
@@ -42,7 +47,21 @@ public class SearchService {
             validateCoordinates(lat1, lon1, lat2, lon2);
 
             // Proceed with the search
-            String sparqlQuery = constructSparqlQueryTime(lat1, lon1, lat2, lon2, startTime, endTime);
+            String sparqlQuery = this.sparqlQuery.constructSparqlQueryTime(lat1, lon1, lat2, lon2, startTime, endTime);
+            List<Map<String, String>> results = executeSparqlQuery(sparqlQuery);
+            return new SearchResult(results);
+        } catch (IllegalArgumentException e) {
+            // Log the error
+            System.err.println("Invalid coordinates provided: " + e.getMessage());
+            // Return a response indicating the error
+            return new SearchResult(Collections.emptyList());
+        }
+    }
+    @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2, #startTime, #endTime }")
+    public SearchResult performSearchYear(String country, Long year) {
+        try {
+            // Proceed with the search
+            String sparqlQuery = this.sparqlQuery.constructSparqlQueryTimeAndCountry(year,country);
             List<Map<String, String>> results = executeSparqlQuery(sparqlQuery);
             return new SearchResult(results);
         } catch (IllegalArgumentException e) {
@@ -82,62 +101,6 @@ public class SearchService {
         return resultList;
     }
 
-
-    private String constructSparqlQuery(Double lat1, Double lon1, Double lat2, Double lon2) {
-        // Return the SPARQL query
-        return "PREFIX schema: <http://schema.org/>\n" +
-        "PREFIX wikibase: <http://wikiba.se/ontology#>\n" +
-        "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-        "PREFIX bd: <http://www.bigdata.com/rdf#>\n" +
-        "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n" +
-        "\n" +
-        "SELECT DISTINCT ?item ?itemLabel ?when ?where ?url\n" +
-        "WHERE {\n" +
-        "  ?url schema:about ?item .\n" +
-        "  ?url schema:inLanguage \"pt\" .\n" +
-        "  FILTER (STRSTARTS(str(?url), \"https://pt.wikipedia.org/\")) .\n" +
-        "  SERVICE wikibase:box {\n" +
-        "    ?item wdt:P625 ?where .\n" +
-        "    bd:serviceParam wikibase:cornerSouthWest \"Point(-9.52 36.95)\"^^geo:wktLiteral .\n" +
-        "    bd:serviceParam wikibase:cornerNorthEast \"Point(-6.18 42.16)\"^^geo:wktLiteral .\n" +
-        "  }\n" +
-        "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\" . }\n" +
-        "}\n" +
-        "ORDER BY ASC(?when)\n" +
-        "LIMIT 1000";
-    }
-    private String constructSparqlQueryTime(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime) {
-        // Construct the SPARQL query with variables
-
-        // Return the SPARQL query
-        return "PREFIX schema: <http://schema.org/>\n" +
-                "PREFIX wikibase: <http://wikiba.se/ontology#>\n" +
-                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "PREFIX bd: <http://www.bigdata.com/rdf#>\n" +
-                "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n" +
-                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
-                "\n" +
-                "SELECT DISTINCT ?item ?itemLabel ?when ?where ?url\n" +
-                "WHERE {\n" +
-                "  ?url schema:about ?item .\n" +
-                "  ?url schema:inLanguage \"pt\" .\n" +
-                "  FILTER (STRSTARTS(str(?url), \"https://pt.wikipedia.org/\")).\n" +
-                "  SERVICE wikibase:box {\n" +
-                "    ?item wdt:P625 ?where .\n" +
-                "    bd:serviceParam wikibase:cornerSouthWest \"Point(" + lon1 + " " + lat1 + ")\"^^geo:wktLiteral.\n" +
-                "    bd:serviceParam wikibase:cornerNorthEast \"Point(" + lon2 + " " + lat2 + ")\"^^geo:wktLiteral.\n" +
-                "  }\n" +
-                "  OPTIONAL { \n" +
-                "    ?item wdt:P585 ?when . \n" +
-                "    BIND (YEAR(?when) AS ?year) .\n" +
-                "    FILTER(?year >= " + startTime + " && ?year <= " + endTime + ").\n" +
-                "  }\n" +
-                "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\" . }\n" +
-                "}\n" +
-                "ORDER BY ASC(?when)\n" +
-                "LIMIT 1000\n" +
-                "";
-    }
     private void validateCoordinates(Double lat1, Double lon1, Double lat2, Double lon2) {
         if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
             throw new IllegalArgumentException("Latitude and longitude values cannot be null");
