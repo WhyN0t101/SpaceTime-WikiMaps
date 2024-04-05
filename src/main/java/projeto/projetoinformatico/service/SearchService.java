@@ -1,8 +1,6 @@
 package projeto.projetoinformatico.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.RDFNode;
@@ -28,13 +26,16 @@ public class SearchService {
 
     @Value("${sparql.endpoint}")
     private String sparqlEndpoint; // Inject SPARQL endpoint URL
+
     private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
 
     private final SparqlQueryProvider sparqlQueryProvider;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public SearchService(SparqlQueryProvider sparqlQueryProvider) {
+    public SearchService(SparqlQueryProvider sparqlQueryProvider, ObjectMapper objectMapper) {
         this.sparqlQueryProvider = sparqlQueryProvider;
+        this.objectMapper = objectMapper;
     }
 
     @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2}")
@@ -73,18 +74,8 @@ public class SearchService {
     }
 
     @Cacheable(value = "searchCache", key = "{ #sparqlQuery.hashCode() }")
-    public SearchResult perfomSparqlQuery(String sparqlQuery) {
+    public SearchResult executeSparqlQuery(String sparqlQuery) {
         try {
-            return executeSparqlQuery(sparqlQuery);
-        } catch (Exception e) {
-            logger.error("Error executing SPARQL query: " + sparqlQuery, e);
-            throw new SparqlQueryException("Error executing SPARQL query", e);
-        }
-    }
-
-    private SearchResult executeSparqlQuery(String sparqlQuery) {
-        try {
-            // Execute the SPARQL query asynchronously
             CompletableFuture<List<Map<String, String>>> futureResults = CompletableFuture.supplyAsync(() -> {
                 try (QueryExecution qexec = QueryExecutionFactory.sparqlService(sparqlEndpoint, sparqlQuery)) {
                     ResultSet resultSet = qexec.execSelect();
@@ -92,7 +83,6 @@ public class SearchService {
                 }
             });
 
-            // Wait for the asynchronous execution to complete and get the results
             List<Map<String, String>> results = futureResults.get();
             return new SearchResult(results);
         } catch (InterruptedException | ExecutionException e) {
@@ -100,21 +90,12 @@ public class SearchService {
             throw new SparqlQueryException("Error executing SPARQL query", e);
         }
     }
+
     public SearchResult executeSparqlQueryFromJsonString(String jsonString) {
         try {
-            // Initialize ObjectMapper
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            // Deserialize JSON string into a Map<String, String>
             Map<String, String> jsonMap = objectMapper.readValue(jsonString, new TypeReference<Map<String, String>>(){});
-
-            // Extract the SPARQL query from the JSON
             String sparqlQuery = jsonMap.get("query");
-
-            // Combine the extracted SPARQL query with common prefixes
             sparqlQuery = sparqlQueryProvider.constructSparqlQuery(sparqlQuery);
-
-            // Execute the SPARQL query and return the result
             return executeSparqlQuery(sparqlQuery);
         } catch (IOException e) {
             logger.error("Error parsing JSON: " + e.getMessage());
@@ -122,13 +103,11 @@ public class SearchService {
         }
     }
 
-
     private List<Map<String, String>> processQueryResults(ResultSet results) {
         List<Map<String, String>> resultList = new ArrayList<>();
         while (results.hasNext()) {
             QuerySolution solution = results.nextSolution();
             Map<String, String> resultMap = new HashMap<>();
-
             Iterator<String> varNames = solution.varNames();
             while (varNames.hasNext()) {
                 String varName = varNames.next();

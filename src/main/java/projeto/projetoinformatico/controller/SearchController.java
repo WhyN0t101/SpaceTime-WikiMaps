@@ -8,8 +8,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.service.SearchService;
+import projeto.projetoinformatico.utils.SparqlQueryException;
 
 import java.time.Year;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api")
@@ -38,11 +40,15 @@ public class SearchController {
         if (!isValidCoordinate(lat1, lon2, lat2, lon1)) {
             return ResponseEntity.badRequest().build();
         }
-        SearchResult searchResult = searchService.performSearch(lat1, lon1, lat2, lon2);
-        return (searchResult != null) ? ResponseEntity.ok(searchResult) : ResponseEntity.notFound().build();
+        try {
+            SearchResult searchResult = searchService.performSearch(lat1, lon1, lat2, lon2);
+            return ResponseEntity.ok(searchResult);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    @GetMapping("/api/search/time")
+    @GetMapping("/search/time")
     public ResponseEntity<SearchResult> performSearchTime(
             @RequestParam Double lat1,
             @RequestParam Double lon2,
@@ -57,8 +63,12 @@ public class SearchController {
         if (!isValidCoordinate(lat1, lon2, lat2, lon1) || !isValidYearRange(startTime, endTime)) {
             return ResponseEntity.badRequest().build();
         }
-        SearchResult searchResult = searchService.performSearchTime(lat1, lon1, lat2, lon2, startTime, endTime);
-        return (searchResult != null) ? ResponseEntity.ok(searchResult) : ResponseEntity.notFound().build();
+        try {
+            SearchResult searchResult = searchService.performSearchTime(lat1, lon1, lat2, lon2, startTime, endTime);
+            return ResponseEntity.ok(searchResult);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/search/country")
@@ -72,15 +82,24 @@ public class SearchController {
         if (!isValidYear(year)) {
             return ResponseEntity.badRequest().build();
         }
-        SearchResult searchResult = searchService.performSearchYear(country, year);
-        return (searchResult != null) ? ResponseEntity.ok(searchResult) : ResponseEntity.notFound().build();
+        try {
+            SearchResult searchResult = searchService.performSearchYear(country, year);
+            return ResponseEntity.ok(searchResult);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PostMapping("/sparql")
     public ResponseEntity<SearchResult> executeSparqlQuery(@RequestBody String sparqlQuery) {
+        if (!rateLimiter.tryAcquire()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+        }
         try {
             SearchResult searchResult = searchService.executeSparqlQueryFromJsonString(sparqlQuery);
             return ResponseEntity.ok(searchResult);
+        } catch (SparqlQueryException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new SearchResult(Collections.emptyList()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -91,7 +110,6 @@ public class SearchController {
                 lat1 >= -90 && lat1 <= 90 && lon1 >= -180 && lon1 <= 180 &&
                 lat2 >= -90 && lat2 <= 90 && lon2 >= -180 && lon2 <= 180;
     }
-
 
     private boolean isValidYear(Long year) {
         final int MIN_YEAR = 0;  // Assuming year 0 or later is valid

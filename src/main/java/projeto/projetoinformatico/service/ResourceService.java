@@ -21,12 +21,12 @@ public class ResourceService {
     @Cacheable(value = "searchCache", key = "{ #itemId }")
     public SearchResult getItem(String itemId) {
         String sparqlQuery = sparqlQueryProvider.buildItemQuery(itemId);
-        return searchService.perfomSparqlQuery(sparqlQuery);
+        return searchService.executeSparqlQuery(sparqlQuery);
     }
 
     @Cacheable(value = "searchCache", key = "{ #propertyId }")
     public SearchResult getProperty(String propertyId) {
         String sparqlQuery = sparqlQueryProvider.buildPropertyQuery(propertyId);
-        return searchService.perfomSparqlQuery(sparqlQuery);
+        return searchService.executeSparqlQuery(sparqlQuery);
     }
 }

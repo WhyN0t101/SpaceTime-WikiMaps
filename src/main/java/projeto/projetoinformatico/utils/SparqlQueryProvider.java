@@ -1,16 +1,13 @@
 package projeto.projetoinformatico.utils;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SparqlQueryProvider {
-   private static final String PREFIXES = "PREFIX schema: <http://schema.org/>\n" +
-           "PREFIX wikibase: <http://wikiba.se/ontology#>\n" +
-           "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-           "PREFIX bd: <http://www.bigdata.com/rdf#>\n" +
-           "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n" +
-           "PREFIX wd: <http://www.wikidata.org/entity/>\n" +
-           "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n";
+
+    @Value("${sparql.prefixes}")
+    private String PREFIXES; // Inject SPARQL prefixes
 
     public String constructSparqlQuery(String sparqlQuery) {
         // Combine common prefixes with the provided SPARQL query
@@ -70,12 +67,6 @@ public class SparqlQueryProvider {
 
        // Construct SPARQL query with the box filter
        return PREFIXES +
-               "PREFIX schema: <http://schema.org/>\n" +
-               "PREFIX wikibase: <http://wikiba.se/ontology#>\n" +
-               "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-               "PREFIX bd: <http://www.bigdata.com/rdf#>\n" +
-               "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n" +
-               "\n" +
                "SELECT DISTINCT ?item ?itemLabel ?when ?where ?url\n" +
                "WHERE {\n" +
                "  ?url schema:about ?item .\n" +
