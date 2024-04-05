@@ -1,5 +1,9 @@
 package projeto.projetoinformatico.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.RDFNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +17,7 @@ import projeto.projetoinformatico.utils.SparqlQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -93,6 +98,27 @@ public class SearchService {
         } catch (InterruptedException | ExecutionException e) {
             logger.error("Error executing SPARQL query: " + sparqlQuery, e);
             throw new SparqlQueryException("Error executing SPARQL query", e);
+        }
+    }
+    public SearchResult executeSparqlQueryFromJsonString(String jsonString) {
+        try {
+            // Initialize ObjectMapper
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // Deserialize JSON string into a Map<String, String>
+            Map<String, String> jsonMap = objectMapper.readValue(jsonString, new TypeReference<Map<String, String>>(){});
+
+            // Extract the SPARQL query from the JSON
+            String sparqlQuery = jsonMap.get("query");
+
+            // Combine the extracted SPARQL query with common prefixes
+            sparqlQuery = sparqlQueryProvider.constructSparqlQuery(sparqlQuery);
+
+            // Execute the SPARQL query and return the result
+            return executeSparqlQuery(sparqlQuery);
+        } catch (IOException e) {
+            logger.error("Error parsing JSON: " + e.getMessage());
+            throw new SparqlQueryException("Error parsing JSON", e);
         }
     }
 

@@ -9,6 +9,7 @@ import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.users.User;
 
 @RestController
+@RequestMapping("/api") ///////////////<-------------
 public class UserController {
     private final UserService userService;
 

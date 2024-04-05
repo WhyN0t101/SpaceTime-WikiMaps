@@ -12,6 +12,7 @@ import projeto.projetoinformatico.service.SearchService;
 import java.time.Year;
 
 @RestController
+@RequestMapping("/api")
 @Validated
 public class SearchController {
 
@@ -24,7 +25,7 @@ public class SearchController {
         this.searchService = searchService;
     }
 
-    @GetMapping("/api/search")
+    @GetMapping("/search")
     public ResponseEntity<SearchResult> performSearch(
             @RequestParam Double lat1,
             @RequestParam Double lon2,
@@ -60,7 +61,7 @@ public class SearchController {
         return (searchResult != null) ? ResponseEntity.ok(searchResult) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/api/search/country")
+    @GetMapping("/search/country")
     public ResponseEntity<SearchResult> performSearchCountry(
             @RequestParam String country,
             @RequestParam Long year
@@ -75,10 +76,10 @@ public class SearchController {
         return (searchResult != null) ? ResponseEntity.ok(searchResult) : ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/api/sparql")
+    @PostMapping("/sparql")
     public ResponseEntity<SearchResult> executeSparqlQuery(@RequestBody String sparqlQuery) {
         try {
-            SearchResult searchResult = searchService.perfomSparqlQuery(sparqlQuery);
+            SearchResult searchResult = searchService.executeSparqlQueryFromJsonString(sparqlQuery);
             return ResponseEntity.ok(searchResult);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -90,6 +91,7 @@ public class SearchController {
                 lat1 >= -90 && lat1 <= 90 && lon1 >= -180 && lon1 <= 180 &&
                 lat2 >= -90 && lat2 <= 90 && lon2 >= -180 && lon2 <= 180;
     }
+
 
     private boolean isValidYear(Long year) {
         final int MIN_YEAR = 0;  // Assuming year 0 or later is valid
