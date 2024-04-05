@@ -49,8 +49,9 @@ public class SecurityConfig {
                                 .anyRequest().authenticated())*/
                 .authorizeHttpRequests(request -> request.requestMatchers("/register")
                         .permitAll()
-                        .requestMatchers("/search").permitAll()
-                        .requestMatchers("/search/time").permitAll()
+                        .requestMatchers("/api/search").permitAll()
+                        .requestMatchers("/api/search/time").permitAll()
+                        .requestMatchers("/api/sparql").permitAll()
                         .anyRequest().authenticated()
                 )
                 //.httpBasic(Customizer.withDefaults())

@@ -9,7 +9,13 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
+import projeto.projetoinformatico.utils.SparqlQueryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @EnableCaching
 @Service
@@ -17,25 +23,23 @@ public class SearchService {
 
     @Value("${sparql.endpoint}")
     private String sparqlEndpoint; // Inject SPARQL endpoint URL
-    private final SparqlQueryProvider sparqlQuery;
+    private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
+
+    private final SparqlQueryProvider sparqlQueryProvider;
 
     @Autowired
-    public SearchService(SparqlQueryProvider sparqlQuery) {
-        this.sparqlQuery = sparqlQuery;
+    public SearchService(SparqlQueryProvider sparqlQueryProvider) {
+        this.sparqlQueryProvider = sparqlQueryProvider;
     }
+
     @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2}")
     public SearchResult performSearch(Double lat1, Double lon1, Double lat2, Double lon2) {
         try {
-            // Validate the coordinates
             validateCoordinates(lat1, lon1, lat2, lon2);
-            // Proceed with the search
-            String sparqlQuery = this.sparqlQuery.constructSparqlQuery(lat1, lon1, lat2, lon2);
-            List<Map<String, String>> results = executeSparqlQuery(sparqlQuery);
-            return new SearchResult(results);
+            String sparqlQuery = sparqlQueryProvider.constructSparqlQuery(lat1, lon1, lat2, lon2);
+            return executeSparqlQuery(sparqlQuery);
         } catch (IllegalArgumentException e) {
-            // Log the error
-            System.err.println("Invalid coordinates provided: " + e.getMessage());
-            // Return a response indicating the error
+            logger.error("Invalid coordinates provided: " + e.getMessage());
             return new SearchResult(Collections.emptyList());
         }
     }
@@ -43,58 +47,69 @@ public class SearchService {
     @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2, #startTime, #endTime }")
     public SearchResult performSearchTime(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime) {
         try {
-            // Validate the coordinates
             validateCoordinates(lat1, lon1, lat2, lon2);
-
-            // Proceed with the search
-            String sparqlQuery = this.sparqlQuery.constructSparqlQueryTime(lat1, lon1, lat2, lon2, startTime, endTime);
-            List<Map<String, String>> results = executeSparqlQuery(sparqlQuery);
-            return new SearchResult(results);
+            String sparqlQuery = sparqlQueryProvider.constructSparqlQueryTime(lat1, lon1, lat2, lon2, startTime, endTime);
+            return executeSparqlQuery(sparqlQuery);
         } catch (IllegalArgumentException e) {
-            // Log the error
-            System.err.println("Invalid coordinates provided: " + e.getMessage());
-            // Return a response indicating the error
+            logger.error("Invalid coordinates provided: " + e.getMessage());
             return new SearchResult(Collections.emptyList());
         }
     }
+
     @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2, #startTime, #endTime }")
     public SearchResult performSearchYear(String country, Long year) {
         try {
-            // Proceed with the search
-            String sparqlQuery = this.sparqlQuery.constructSparqlQueryTimeAndCountry(year,country);
-            List<Map<String, String>> results = executeSparqlQuery(sparqlQuery);
-            return new SearchResult(results);
+            String sparqlQuery = sparqlQueryProvider.constructSparqlQueryTimeAndCountry(year, country);
+            return executeSparqlQuery(sparqlQuery);
         } catch (IllegalArgumentException e) {
-            // Log the error
-            System.err.println("Invalid coordinates provided: " + e.getMessage());
-            // Return a response indicating the error
+            logger.error("Invalid coordinates provided: " + e.getMessage());
             return new SearchResult(Collections.emptyList());
         }
     }
 
-    private List<Map<String, String>> executeSparqlQuery(String sparqlQuery) {
-        try (QueryExecution qexec = QueryExecutionFactory.sparqlService(sparqlEndpoint, sparqlQuery)) {
-            ResultSet results = qexec.execSelect();
-            return processQueryResults(results);
+    @Cacheable(value = "searchCache", key = "{ #sparqlQuery.hashCode() }")
+    public SearchResult perfomSparqlQuery(String sparqlQuery) {
+        try {
+            return executeSparqlQuery(sparqlQuery);
+        } catch (Exception e) {
+            logger.error("Error executing SPARQL query: " + sparqlQuery, e);
+            throw new SparqlQueryException("Error executing SPARQL query", e);
         }
     }
+
+    private SearchResult executeSparqlQuery(String sparqlQuery) {
+        try {
+            // Execute the SPARQL query asynchronously
+            CompletableFuture<List<Map<String, String>>> futureResults = CompletableFuture.supplyAsync(() -> {
+                try (QueryExecution qexec = QueryExecutionFactory.sparqlService(sparqlEndpoint, sparqlQuery)) {
+                    ResultSet resultSet = qexec.execSelect();
+                    return processQueryResults(resultSet);
+                }
+            });
+
+            // Wait for the asynchronous execution to complete and get the results
+            List<Map<String, String>> results = futureResults.get();
+            return new SearchResult(results);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error executing SPARQL query: " + sparqlQuery, e);
+            throw new SparqlQueryException("Error executing SPARQL query", e);
+        }
+    }
+
 
     private List<Map<String, String>> processQueryResults(ResultSet results) {
         List<Map<String, String>> resultList = new ArrayList<>();
         while (results.hasNext()) {
             QuerySolution solution = results.nextSolution();
             Map<String, String> resultMap = new HashMap<>();
-            RDFNode itemLabelNode = solution.get("itemLabel");
-            if (itemLabelNode != null) {
-                resultMap.put("itemLabel", itemLabelNode.toString());
-            }
-            RDFNode whereNode = solution.get("where");
-            if (whereNode != null) {
-                resultMap.put("where", whereNode.toString());
-            }
-            RDFNode urlNode = solution.get("url");
-            if (urlNode != null) {
-                resultMap.put("url", urlNode.toString());
+
+            Iterator<String> varNames = solution.varNames();
+            while (varNames.hasNext()) {
+                String varName = varNames.next();
+                RDFNode rdfNode = solution.get(varName);
+                if (rdfNode != null) {
+                    resultMap.put(varName, rdfNode.toString());
+                }
             }
             resultList.add(resultMap);
         }
@@ -110,9 +125,4 @@ public class SearchService {
             throw new IllegalArgumentException("Invalid latitude or longitude values");
         }
     }
-
-
-
 }
-
-
