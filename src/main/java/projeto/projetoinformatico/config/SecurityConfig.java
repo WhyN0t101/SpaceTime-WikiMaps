@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/search").permitAll()
                         .requestMatchers("/api/search/time").permitAll()
                         .requestMatchers("/api/sparql").permitAll()
+                        .requestMatchers("/api/auth/signup").permitAll()
                         .requestMatchers("/api/items/{itemId}").permitAll()
                         .requestMatchers("/api/properties/{propertyId}").permitAll()
                         .anyRequest().authenticated()
