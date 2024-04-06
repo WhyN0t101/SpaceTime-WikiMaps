@@ -83,14 +83,12 @@ public class SparqlQueryProvider {
                "LIMIT 1000";
    }
 
-
-
-    public String buildItemQuery(String itemId) {
-        // Construct and return SPARQL query to retrieve information about a Wikidata item
-        // based on the provided item ID
+   
+    public String buildItemQuery(String entityId) {
         return PREFIXES +
-                "SELECT DISTINCT ?item ?label WHERE { wd:" + itemId + " rdfs:label ?label. }";
+                "SELECT DISTINCT ?property ?value WHERE { wd:" + entityId + " ?property ?value. }";
     }
+
 
     public String buildPropertyQuery(String propertyId) {
         // Construct and return SPARQL query to retrieve information about a Wikidata property
