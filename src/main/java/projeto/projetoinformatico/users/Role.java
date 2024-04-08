@@ -4,5 +4,5 @@ public enum Role {
     ANONYMOUS,
     EDITOR,
     ADMIN,
-    User
+    USER
 }
