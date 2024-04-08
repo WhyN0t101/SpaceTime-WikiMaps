@@ -15,7 +15,7 @@ import projeto.projetoinformatico.users.UserRepository;
 @SpringBootApplication
 @EnableCaching
 @EntityScan("projeto.projetoinformatico.users")
-public class ProjetoInformaticoApplication {
+public class ProjetoInformaticoApplication implements CommandLineRunner {
 
     @Autowired
     private UserRepository userRepository;
@@ -24,7 +24,7 @@ public class ProjetoInformaticoApplication {
         SpringApplication.run(ProjetoInformaticoApplication.class, args);
     }
 
- /*   public void run(String... args){
+    public void run(String... args){
         User adminAccount = userRepository.findByRole(Role.ADMIN);
         if(adminAccount == null){
             User user = new User();
@@ -38,6 +38,4 @@ public class ProjetoInformaticoApplication {
 
         }
     }
-
-  */
 }
