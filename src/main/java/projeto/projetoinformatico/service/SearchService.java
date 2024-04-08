@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 public class SearchService {
 
     @Value("${sparql.endpoint}")
-    private String sparqlEndpoint; // Inject SPARQL endpoint URL
+    private String sparqlEndpoint;
 
     private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
 

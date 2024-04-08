@@ -56,6 +56,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/signin").permitAll()
                         .requestMatchers("/api/items/{itemId}").permitAll()
                         .requestMatchers("/api/properties/{propertyId}").permitAll()
+                        .requestMatchers("/api/data/geolocation/{itemId}").permitAll()
+                        .requestMatchers("/api/data/property-values/{item_id}/{property_id}").permitAll()
                         .anyRequest().authenticated()
                 )
                 //.httpBasic(Customizer.withDefaults())
