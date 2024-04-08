@@ -1,6 +1,7 @@
 package projeto.projetoinformatico.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +12,8 @@ import projeto.projetoinformatico.service.ResourceService;
 @RequestMapping("/api")
 public class ResourceController {
 
-    private final ResourceService resourceService;
+    @Autowired
+    private ResourceService resourceService;
 
     @Autowired
     public ResourceController(ResourceService resourceService) {
@@ -28,5 +30,24 @@ public class ResourceController {
     public ResponseEntity<SearchResult> getWikidataProperty(@PathVariable String propertyId) {
        SearchResult property = resourceService.getProperty(propertyId);
         return ResponseEntity.ok(property);
+    }
+    @GetMapping("/data/geolocation/{item_id}")
+    public ResponseEntity<?> getGeolocationData(@PathVariable("item_id") String itemId) {
+        try {
+            SearchResult geolocationData = resourceService.getGeolocationData(itemId);
+            return ResponseEntity.ok(geolocationData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    @GetMapping("/data/property-values/{item_id}/{property_id}")
+    public ResponseEntity<?> getPropertyValues(@PathVariable("item_id") String itemId,
+                                               @PathVariable("property_id") String propertyId) {
+        try {
+            SearchResult propertyValue = resourceService.getPropertyValues(itemId, propertyId);
+            return ResponseEntity.ok(propertyValue);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

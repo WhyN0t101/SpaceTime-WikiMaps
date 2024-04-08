@@ -17,6 +17,16 @@ public class ResourceService {
         this.searchService = searchService;
         this.sparqlQueryProvider = sparqlQueryProvider;
     }
+    @Cacheable(value = "searchCache", key = "{ #itemId, #propertyId }")
+    public SearchResult getPropertyValues(String itemId, String propertyId) {
+        String sparqlQuery = sparqlQueryProvider.buildPropertyItemQuery(itemId,propertyId);
+        return searchService.executeSparqlQuery(sparqlQuery);
+    }
+    @Cacheable(value = "searchCache", key = "{ #itemId }")
+    public  SearchResult getGeolocationData(String itemId) {
+        String sparqlQuery = sparqlQueryProvider.buildGeoQuery(itemId);
+        return searchService.executeSparqlQuery(sparqlQuery);
+    }
 
     @Cacheable(value = "searchCache", key = "{ #itemId }")
     public SearchResult getItem(String itemId) {
