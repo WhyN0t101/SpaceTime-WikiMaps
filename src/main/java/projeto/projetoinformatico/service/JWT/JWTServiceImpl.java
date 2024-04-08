@@ -7,21 +7,17 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import projeto.projetoinformatico.users.User;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Map;
 import java.util.function.Function;
 
 @Service
 public class JWTServiceImpl {
 
-    private String generateToken(UserDetails userDetails){
-        return Jwts.builder().setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
-                .signWith(getSiginKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
+
 
     public String extractUsername(String token){
         return extractClaim(token, Claims::getSubject);
@@ -48,5 +44,20 @@ public class JWTServiceImpl {
 
     private boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
+    }
+    public String generateToken(UserDetails userDetails){
+        return Jwts.builder().setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .signWith(getSiginKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String  generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 604800000))//refresh de 7 dias
+                .signWith(getSiginKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 }
