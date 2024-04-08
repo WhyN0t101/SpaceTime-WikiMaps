@@ -16,6 +16,12 @@
 ## Definir o Data Source como a DB Demo
 ![image](https://github.com/WhyN0t101/SpaceTime-WikiMaps/assets/100608872/8a2044bf-62f6-47c7-881c-579038ddb847)
 
+## Correr a aplicação pelo menos 1 vez para criar as tabelas necessárias, a aplicação cria automaticamente um Admin na base de dados
+## Confirmar a criação dos dados na Base de Dados
+![image](https://github.com/WhyN0t101/SpaceTime-WikiMaps/assets/100608872/eb909d28-8148-4ac0-a98d-548ab7492c75)
+![image](https://github.com/WhyN0t101/SpaceTime-WikiMaps/assets/100608872/ae87a03f-97da-4af1-a7eb-5f68e95d943e)
+
+
 
 
 
