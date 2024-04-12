@@ -24,6 +24,11 @@ public class Layer {
     @Getter
     @Setter
     @Column(nullable = false)
+    private String description;
+
+    @Getter
+    @Setter
+    @Column(nullable = false)
     private Date timestamp;
 
     @Getter
