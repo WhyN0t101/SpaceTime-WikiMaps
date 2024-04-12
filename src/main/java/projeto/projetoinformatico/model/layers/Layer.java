@@ -39,7 +39,7 @@ public class Layer {
     @Getter
     @Setter
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String searchQuery;
+    private String query;
 
     public String getUsername() {
         return username;
@@ -65,12 +65,12 @@ public class Layer {
         this.timestamp = timestamp;
     }
 
-    public String getSearchQuery() {
-        return searchQuery;
+    public String getQuery() {
+        return query;
     }
 
-    public void setSearchQuery(String searchQuery) {
-        this.searchQuery = searchQuery;
+    public void setQuery(String searchQuery) {
+        this.query = searchQuery;
     }
 
     public String getSearchResult() {

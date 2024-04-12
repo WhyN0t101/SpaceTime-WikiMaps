@@ -6,7 +6,7 @@ import java.util.Map;
 public class LayerRequest {
     private String name;
     private String description;
-    private String sparqlQuery;
+    private String query;
     private List<Map<String, String>> results;
 
     public String getName() {
@@ -25,12 +25,12 @@ public class LayerRequest {
         this.description = description;
     }
 
-    public String getSparqlQuery() {
-        return sparqlQuery;
+    public String getQuery() {
+        return query;
     }
 
-    public void setSparqlQuery(String sparqlQuery) {
-        this.sparqlQuery = sparqlQuery;
+    public void setSparqlQuery(String query) {
+        this.query = query;
     }
 
     public List<Map<String, String>> getResults() {

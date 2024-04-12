@@ -76,8 +76,9 @@ public class SearchService {
     @Cacheable(value = "searchCache", key = "{ #sparqlQuery.hashCode() }")
     public SearchResult executeSparqlQuery(String sparqlQuery) {
         try {
+            String sparqlQueryWithPrefixes = sparqlQueryProvider.constructSparqlQuery(sparqlQuery); // Prepend prefixes
             CompletableFuture<List<Map<String, String>>> futureResults = CompletableFuture.supplyAsync(() -> {
-                try (QueryExecution qexec = QueryExecutionFactory.sparqlService(sparqlEndpoint, sparqlQuery)) {
+                try (QueryExecution qexec = QueryExecutionFactory.sparqlService(sparqlEndpoint, sparqlQueryWithPrefixes)) {
                     ResultSet resultSet = qexec.execSelect();
                     return processQueryResults(resultSet);
                 }
@@ -90,6 +91,7 @@ public class SearchService {
             throw new SparqlQueryException("Error executing SPARQL query", e);
         }
     }
+
 
     public SearchResult executeSparqlQueryFromJsonString(String jsonString) {
         try {

@@ -28,9 +28,9 @@ public class LayerService {
         newLayer.setUsername(username);
         newLayer.setDescription(layerRequest.getDescription());
         newLayer.setTimestamp(new Date());
-        newLayer.setSearchQuery(layerRequest.getSparqlQuery());
+        newLayer.setQuery(layerRequest.getQuery());
         // Execute the SPARQL query and get the results
-        SearchResult searchResult = searchService.executeSparqlQuery(layerRequest.getSparqlQuery());
+        SearchResult searchResult = searchService.executeSparqlQuery(layerRequest.getQuery());
 
         // Convert the search result to JSON string and set it to the layer
         ObjectMapper objectMapper = new ObjectMapper();
