@@ -3,10 +3,10 @@ package projeto.projetoinformatico.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import projeto.projetoinformatico.model.Layer;
+import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.service.UserService;
-import projeto.projetoinformatico.users.Role;
-import projeto.projetoinformatico.users.User;
+import projeto.projetoinformatico.model.users.Role;
+import projeto.projetoinformatico.model.users.User;
 
 import java.util.List;
 

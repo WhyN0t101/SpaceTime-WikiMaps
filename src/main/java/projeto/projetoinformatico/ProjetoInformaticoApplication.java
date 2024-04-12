@@ -6,16 +6,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import projeto.projetoinformatico.users.Role;
-import projeto.projetoinformatico.users.User;
-import projeto.projetoinformatico.users.UserRepository;
+import projeto.projetoinformatico.model.users.Role;
+import projeto.projetoinformatico.model.users.User;
+import projeto.projetoinformatico.model.users.UserRepository;
 
 @SpringBootApplication
 @EnableCaching
-@EntityScan(basePackages = {"projeto.projetoinformatico.users", "projeto.projetoinformatico.model"})
+@EntityScan(basePackages = {"projeto.projetoinformatico.model.users", "projeto.projetoinformatico.model.layers"})
 //@EnableJpaRepositories(basePackages = "projeto.projetoinformatico.model")
 public class ProjetoInformaticoApplication implements CommandLineRunner {
 

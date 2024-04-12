@@ -4,18 +4,16 @@ package projeto.projetoinformatico.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import projeto.projetoinformatico.dto.JwtAuthenticationResponse;
-import projeto.projetoinformatico.dto.RefreshTokenRequest;
-import projeto.projetoinformatico.dto.SignInRequest;
-import projeto.projetoinformatico.dto.SignUpRequest;
+import projeto.projetoinformatico.requests.JwtAuthenticationResponse;
+import projeto.projetoinformatico.requests.RefreshTokenRequest;
+import projeto.projetoinformatico.requests.SignInRequest;
+import projeto.projetoinformatico.requests.SignUpRequest;
 import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
-import projeto.projetoinformatico.users.Role;
-import projeto.projetoinformatico.users.User;
-import projeto.projetoinformatico.users.UserRepository;
+import projeto.projetoinformatico.model.users.Role;
+import projeto.projetoinformatico.model.users.User;
+import projeto.projetoinformatico.model.users.UserRepository;
 
 import java.util.HashMap;
 

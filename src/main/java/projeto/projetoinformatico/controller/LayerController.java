@@ -2,8 +2,8 @@ package projeto.projetoinformatico.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import projeto.projetoinformatico.model.Layer;
-import projeto.projetoinformatico.model.LayerRequest;
+import projeto.projetoinformatico.model.layers.Layer;
+import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.service.LayerService;
 
 import java.util.List;

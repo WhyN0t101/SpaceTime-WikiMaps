@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.model;
+package projeto.projetoinformatico.requests;
 
 import java.util.List;
 import java.util.Map;

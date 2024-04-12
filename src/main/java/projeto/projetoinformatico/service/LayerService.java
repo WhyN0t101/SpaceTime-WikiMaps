@@ -1,8 +1,8 @@
 package projeto.projetoinformatico.service;
 
 import org.springframework.stereotype.Service;
-import projeto.projetoinformatico.model.Layer;
-import projeto.projetoinformatico.model.LayerRequest;
+import projeto.projetoinformatico.model.layers.Layer;
+import projeto.projetoinformatico.requests.LayerRequest;
 
 import java.util.List;
 

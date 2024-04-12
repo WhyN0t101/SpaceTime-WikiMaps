@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.model;
+package projeto.projetoinformatico.model.layers;
 
 import jakarta.persistence.*;
 import lombok.Data;

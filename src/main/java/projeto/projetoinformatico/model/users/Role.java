@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.users;
+package projeto.projetoinformatico.model.users;
 
 public enum Role {
     ANONYMOUS,

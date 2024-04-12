@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.dto;
+package projeto.projetoinformatico.requests;
 
 import lombok.Data;
 

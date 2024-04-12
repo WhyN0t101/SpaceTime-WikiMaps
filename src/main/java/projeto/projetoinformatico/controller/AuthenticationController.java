@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import projeto.projetoinformatico.dto.JwtAuthenticationResponse;
-import projeto.projetoinformatico.dto.RefreshTokenRequest;
-import projeto.projetoinformatico.dto.SignInRequest;
-import projeto.projetoinformatico.dto.SignUpRequest;
+import projeto.projetoinformatico.requests.JwtAuthenticationResponse;
+import projeto.projetoinformatico.requests.RefreshTokenRequest;
+import projeto.projetoinformatico.requests.SignInRequest;
+import projeto.projetoinformatico.requests.SignUpRequest;
 import projeto.projetoinformatico.service.AuthenticationService;
-import projeto.projetoinformatico.users.User;
+import projeto.projetoinformatico.model.users.User;
 
 @RestController
 @RequestMapping("/api/auth")

@@ -1,7 +1,7 @@
-package projeto.projetoinformatico.dto;
+package projeto.projetoinformatico.requests;
 
 import lombok.Data;
-import projeto.projetoinformatico.users.Role;
+
 @Data
 public class SignUpRequest {
 

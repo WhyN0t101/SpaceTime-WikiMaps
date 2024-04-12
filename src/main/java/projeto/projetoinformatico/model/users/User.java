@@ -1,11 +1,10 @@
-package projeto.projetoinformatico.users;
+package projeto.projetoinformatico.model.users;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

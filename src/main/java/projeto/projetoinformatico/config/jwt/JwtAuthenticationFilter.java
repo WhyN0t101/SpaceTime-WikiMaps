@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.config;
+package projeto.projetoinformatico.config.jwt;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;

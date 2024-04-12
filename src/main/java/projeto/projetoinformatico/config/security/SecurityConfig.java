@@ -1,14 +1,12 @@
-package projeto.projetoinformatico.config;
+package projeto.projetoinformatico.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,10 +18,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import projeto.projetoinformatico.config.jwt.JwtAuthenticationFilter;
 import projeto.projetoinformatico.service.UserService;
-import projeto.projetoinformatico.users.Role;
-
-import javax.security.auth.kerberos.EncryptionKey;
+import projeto.projetoinformatico.model.users.Role;
 
 @Configuration
 @EnableWebSecurity

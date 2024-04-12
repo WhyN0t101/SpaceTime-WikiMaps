@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.users;
+package projeto.projetoinformatico.model.users;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -7,10 +7,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import projeto.projetoinformatico.model.Layer;
-import projeto.projetoinformatico.users.Role;
-import projeto.projetoinformatico.users.User;
-import projeto.projetoinformatico.users.UserRepository;
+import projeto.projetoinformatico.model.layers.Layer;
+import projeto.projetoinformatico.model.users.Role;
+import projeto.projetoinformatico.model.users.User;
+import projeto.projetoinformatico.model.users.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
