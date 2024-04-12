@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import projeto.projetoinformatico.service.UserService;
+import projeto.projetoinformatico.users.Role;
 
 import javax.security.auth.kerberos.EncryptionKey;
 
@@ -52,8 +53,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/search").permitAll()
                         .requestMatchers("/api/search/time").permitAll()
                         .requestMatchers("/api/sparql").permitAll()
-                        .requestMatchers("/api/auth/signup").permitAll()
-                        .requestMatchers("/api/auth/signin").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/admin").hasAnyAuthority(Role.ADMIN.name())
+                        .requestMatchers("/api").hasAnyAuthority(Role.USER.name())
                         .requestMatchers("/api/items/{itemId}").permitAll()
                         .requestMatchers("/api/properties/{propertyId}").permitAll()
                         .requestMatchers("/api/data/geolocation/{itemId}").permitAll()

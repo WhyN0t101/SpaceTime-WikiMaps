@@ -31,4 +31,9 @@ public class UserController {
         }
         return ResponseEntity.ok(user);
     }
+
+    @GetMapping
+    public ResponseEntity<String> sayHello(){
+        return ResponseEntity.ok("Welcome User");
+    }
 }

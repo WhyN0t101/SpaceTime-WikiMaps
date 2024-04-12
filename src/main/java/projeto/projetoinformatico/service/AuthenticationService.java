@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dto.JwtAuthenticationResponse;
+import projeto.projetoinformatico.dto.RefreshTokenRequest;
 import projeto.projetoinformatico.dto.SignInRequest;
 import projeto.projetoinformatico.dto.SignUpRequest;
 import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
@@ -29,6 +30,8 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     private final JWTServiceImpl jwtService;
+
+
 
     public User signup(SignUpRequest signUpRequest){
         User user = new User();
@@ -57,8 +60,27 @@ public class AuthenticationService {
         JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
 
         jwtAuthenticationResponse.setToken(jwt);
-        jwtAuthenticationResponse.setRefreshToken(jwt);
+        jwtAuthenticationResponse.setRefreshToken(refreshtoken);
         return jwtAuthenticationResponse;
 
+    }
+
+    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
+        String userUsername = jwtService.extractUsername(refreshTokenRequest.getToken());
+
+        User user = userRepository.findByUsername(userUsername);
+        if (user == null){
+            throw new IllegalArgumentException("User not found");
+        }
+        if(jwtService.isTokenValid(refreshTokenRequest.getToken(), user)){
+            var jwt = jwtService.generateToken(user);
+
+            JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
+
+            jwtAuthenticationResponse.setToken(jwt);
+            jwtAuthenticationResponse.setRefreshToken(refreshTokenRequest.getToken());
+            return jwtAuthenticationResponse;
+        }
+        return null;
     }
 }
