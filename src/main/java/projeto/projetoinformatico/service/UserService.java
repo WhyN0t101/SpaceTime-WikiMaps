@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import projeto.projetoinformatico.model.Layer;
 import projeto.projetoinformatico.users.Role;
 import projeto.projetoinformatico.users.User;
 import projeto.projetoinformatico.users.UserRepository;
@@ -61,5 +62,8 @@ public class UserService{
     public User getUserById(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         return optionalUser.orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+    }
+    public List<Layer> getUserLayers(Long id) {
+        return null;
     }
 }

@@ -3,6 +3,7 @@ package projeto.projetoinformatico.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import projeto.projetoinformatico.model.Layer;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.users.Role;
 import projeto.projetoinformatico.users.User;
@@ -52,5 +53,17 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(user);
+    }
+    @GetMapping("/users/{id}/layers")
+    public ResponseEntity<List<Layer>> getUserLayers(@PathVariable Long id) {
+        // Retrieve user layers based on user id
+        List<Layer> userLayers = userService.getUserLayers(id);
+
+        // Check if user layers exist and return response accordingly
+        if (userLayers.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(userLayers);
+        }
     }
 }
