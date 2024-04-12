@@ -25,6 +25,10 @@ public class Layer {
     @Getter
     @Setter
     @Column(nullable = false)
+    private String layerName;
+    @Getter
+    @Setter
+    @Column(nullable = false)
     private String description;
 
     @Getter
@@ -37,12 +41,57 @@ public class Layer {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String searchQuery;
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getSearchQuery() {
+        return searchQuery;
+    }
+
+    public void setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
+    }
+
+    public String getSearchResult() {
+        return searchResult;
+    }
+
+    public void setSearchResult(String searchResult) {
+        this.searchResult = searchResult;
+    }
+
     @Getter
     @Setter
-    @Column(nullable = false, columnDefinition = "TEXT") // Store the JSON as a string
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String searchResult;
 
 
+    public String getLayerName() {
+        return layerName;
+    }
 
-
+    public void setLayerName(String layerName) {
+        this.layerName = layerName;
+    }
 }
