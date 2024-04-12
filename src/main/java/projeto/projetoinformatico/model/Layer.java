@@ -7,9 +7,10 @@ import lombok.Setter;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "Layers")
+
+@Table(name = "layers")
 @Data
+@Entity
 public class Layer {
 
     @Id
