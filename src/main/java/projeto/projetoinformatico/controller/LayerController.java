@@ -43,4 +43,21 @@ public class LayerController {
         Layer newLayer = layerService.createLayer(username, layerRequest);
         return ResponseEntity.ok(newLayer);
     }
+    @PutMapping("/layers/{id}")
+    public ResponseEntity<Layer> updateLayer(@PathVariable Long id, @RequestBody LayerRequest layerRequest) {
+        Layer updatedLayer = layerService.updateLayer(id, layerRequest);
+        if (updatedLayer == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updatedLayer);
+    }
+
+    @DeleteMapping("/layers/{id}")
+    public ResponseEntity<Void> deleteLayer(@PathVariable Long id) {
+        boolean deleted = layerService.deleteLayer(id);
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
+    }
 }

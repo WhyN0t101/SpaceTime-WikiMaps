@@ -17,29 +17,28 @@ public class Layer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Getter
-    @Setter
+
     @Column(nullable = false)
     private String username;
 
-    @Getter
-    @Setter
+
     @Column(nullable = false)
     private String layerName;
-    @Getter
-    @Setter
+
     @Column(nullable = false)
     private String description;
 
-    @Getter
-    @Setter
+
     @Column(nullable = false)
     private Date timestamp;
 
-    @Getter
-    @Setter
-    @Column(nullable = false, columnDefinition = "TEXT")
+      @Column(nullable = false, columnDefinition = "TEXT")
     private String query;
+
+    @PrePersist
+    protected void onCreate() {
+        timestamp = new Date();
+    }
 
     public String getUsername() {
         return username;

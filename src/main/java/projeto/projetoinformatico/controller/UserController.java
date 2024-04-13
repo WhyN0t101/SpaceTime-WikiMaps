@@ -1,8 +1,10 @@
 package projeto.projetoinformatico.controller;
 
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import projeto.projetoinformatico.Exceptions.UsersExceptions;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.model.users.Role;
@@ -66,7 +68,6 @@ public class UserController {
             return ResponseEntity.ok(userLayers);
         }
     }
-
     @GetMapping
     public ResponseEntity<String> sayHello(){
         return ResponseEntity.ok("Welcome User");
