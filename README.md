@@ -1,6 +1,20 @@
-# SpaceTime-WikiMaps
 
-# How to create a H2 DB in Intelij
+## Overview
+SpaceTime-WikiMaps is a Java-based project that leverages Apache Jena, Spring Boot, and WikiData Toolkit to retrieve and perform SPARQL queries. Its main purpose is to provide a platform for executing SPARQL queries against WikiData and processing the results.
+
+## Features
+- **SPARQL Query Execution:** Execute SPARQL queries against WikiData using Apache Jena and WikiData Toolkit.
+- **Data Processing:** Retrieve data from WikiData and process it based on user-defined queries.
+- **Integration with Spring Boot:** Seamlessly integrate the project with Spring Boot for easy deployment and management.
+
+## Technologies Used
+- Apache Jena
+- Spring Boot
+- WikiData Toolkit
+
+
+## Getting Started
+To get a local copy up and running, follow these simple steps:
 
 ## Go to the tab Database and Add a new Data Source type H2
 
@@ -21,7 +35,9 @@
 ![image](https://github.com/WhyN0t101/SpaceTime-WikiMaps/assets/100608872/eb909d28-8148-4ac0-a98d-548ab7492c75)
 ![image](https://github.com/WhyN0t101/SpaceTime-WikiMaps/assets/100608872/ae87a03f-97da-4af1-a7eb-5f68e95d943e)
 
-
+### Prerequisites
+- Java JDK
+- Maven
 
 
 
