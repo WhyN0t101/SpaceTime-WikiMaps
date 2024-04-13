@@ -1,10 +1,8 @@
 package projeto.projetoinformatico.controller;
 
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import projeto.projetoinformatico.Exceptions.UsersExceptions;
+import projeto.projetoinformatico.Exceptions.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.model.users.Role;
@@ -23,8 +21,6 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
-        // Additional validation if needed
-        //System.out.println(user);
         User newUser = userService.createUser(user);
         return ResponseEntity.ok(newUser);
     }
@@ -33,43 +29,51 @@ public class UserController {
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         User user = userService.getUserByUsername(username);
         if (user == null) {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("User not found with username: " + username);
         }
         return ResponseEntity.ok(user);
     }
+
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
+        if(users.isEmpty()){
+            throw new NotFoundException("No users with that role assigned");
+        }
         return ResponseEntity.ok(users);
     }
+
     @GetMapping("/users/role/{role}")
     public ResponseEntity<List<User>> getAllUsersByRole(@PathVariable Role role) {
-
         List<User> users = userService.getAllUsersByRole(role);
         return ResponseEntity.ok(users);
     }
+
     @GetMapping("/users/id/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
         if (user == null) {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("User not found with id: " + id);
         }
         return ResponseEntity.ok(user);
     }
+
     @GetMapping("/users/{id}/layers")
     public ResponseEntity<List<Layer>> getUserLayers(@PathVariable Long id) {
-        // Retrieve user layers based on user id
-        List<Layer> userLayers = userService.getUserLayers(id);
+        String username = userService.getUsernameById(id);
+        if (username == null) {
+            throw new NotFoundException("User not found with id: " + id);
+        }
 
-        // Check if user layers exist and return response accordingly
+        List<Layer> userLayers = userService.getUserLayers(username);
         if (userLayers.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            throw new NotFoundException("User layers not found for user with id: " + id);
         } else {
             return ResponseEntity.ok(userLayers);
         }
     }
     @GetMapping
-    public ResponseEntity<String> sayHello(){
+    public ResponseEntity<String> sayHello() {
         return ResponseEntity.ok("Welcome User");
     }
 }

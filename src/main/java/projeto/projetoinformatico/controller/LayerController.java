@@ -4,10 +4,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import projeto.projetoinformatico.Exceptions.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.service.LayerService;
-
 import java.util.List;
 
 @RestController
@@ -30,7 +30,7 @@ public class LayerController {
     public ResponseEntity<Layer> getLayerById(@PathVariable Long id) {
         Layer layer = layerService.getLayerById(id);
         if (layer == null) {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Layer not found with id: " + id);
         }
         return ResponseEntity.ok(layer);
     }
@@ -39,15 +39,15 @@ public class LayerController {
     public ResponseEntity<Layer> createLayer(@RequestBody LayerRequest layerRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-
         Layer newLayer = layerService.createLayer(username, layerRequest);
         return ResponseEntity.ok(newLayer);
     }
+
     @PutMapping("/layers/{id}")
     public ResponseEntity<Layer> updateLayer(@PathVariable Long id, @RequestBody LayerRequest layerRequest) {
         Layer updatedLayer = layerService.updateLayer(id, layerRequest);
         if (updatedLayer == null) {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Layer not found with id: " + id);
         }
         return ResponseEntity.ok(updatedLayer);
     }
@@ -56,8 +56,10 @@ public class LayerController {
     public ResponseEntity<Void> deleteLayer(@PathVariable Long id) {
         boolean deleted = layerService.deleteLayer(id);
         if (!deleted) {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Layer not found with id: " + id);
         }
         return ResponseEntity.noContent().build();
     }
+
+
 }

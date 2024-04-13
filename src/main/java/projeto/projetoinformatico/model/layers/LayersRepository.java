@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface LayersRepository extends JpaRepository<Layer, Long> {
 
+    List<Layer> findByUsername(String username);
+
 }
