@@ -40,36 +40,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                /*.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
-                        authorizationManagerRequestMatcherRegistry.requestMatchers(HttpMethod.DELETE).hasRole("ADMIN")
-                                .requestMatchers("/admin/**").hasAnyRole("ADMIN")
-                                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/login/**").permitAll()
-                                .requestMatchers("/register/**").permitAll()
-                                .anyRequest().authenticated())*/
-                .authorizeHttpRequests(request -> request.requestMatchers("/register")
-                        .permitAll()
-                        .requestMatchers("/api/search").permitAll()
-                        .requestMatchers("/api/search/time").permitAll()
-                        .requestMatchers("/api/sparql").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        //.requestMatchers("/api/admin").hasAnyAuthority(Role.ADMIN.name())
-                        //.requestMatchers("/api").hasAnyAuthority(Role.USER.name())
-                        .requestMatchers("/api/items/{itemId}").permitAll()
-                        .requestMatchers("/api/properties/{propertyId}").permitAll()
-                        .requestMatchers("/api/data/geolocation/{itemId}").permitAll()
-                        .requestMatchers("/api/data/property-values/{item_id}/{property_id}").permitAll()
-                        .requestMatchers("/api/users/{username}").permitAll()
-                        .requestMatchers("/api/users").permitAll()
-                        .requestMatchers("/api/users/role/{role}").permitAll()
-                        .requestMatchers("/api/users/id/{id}").permitAll()
-                        .anyRequest().authenticated()
-                )
-                //.httpBasic(Customizer.withDefaults())
-                .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider()).addFilterBefore(
-                        jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class
-                );
+            .authorizeHttpRequests(request -> request.requestMatchers("/register")
+                    .permitAll()
+                    .requestMatchers("/api/search").permitAll()
+                    .requestMatchers("/api/search/time").permitAll()
+                    .requestMatchers("/api/sparql").permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
+                    //.requestMatchers("/api/admin").hasAnyAuthority(Role.ADMIN.name())
+                    //.requestMatchers("/api").hasAnyAuthority(Role.USER.name())
+                    .requestMatchers("/api/items/{itemId}").permitAll()
+                    .requestMatchers("/api/properties/{propertyId}").permitAll()
+                    .requestMatchers("/api/data/geolocation/{itemId}").permitAll()
+                    .requestMatchers("/api/data/property-values/{item_id}/{property_id}").permitAll()
+                    /*.requestMatchers("/api/users/{username}").permitAll()
+                    .requestMatchers("/api/users").permitAll()
+                    .requestMatchers("/api/users/role/{role}").permitAll()
+                    .requestMatchers("/api/users/id/{id}").permitAll()
+                     */
+                    .anyRequest().authenticated()
+            )
+            //.httpBasic(Customizer.withDefaults())
+            .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider()).addFilterBefore(
+                    jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class
+            );
         return http.build();
     }
 

@@ -20,14 +20,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        // Additional validation if needed
-        //System.out.println(user);
-        User newUser = userService.createUser(user);
-        return ResponseEntity.ok(newUser);
-    }
-
     @GetMapping("/users/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         User user = userService.getUserByUsername(username);
