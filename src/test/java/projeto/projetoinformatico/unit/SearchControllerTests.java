@@ -50,7 +50,7 @@ public class SearchControllerTests {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         SearchResult result = responseEntity.getBody();
         assert result != null;
-        assertEquals(Collections.singletonList(Map.of("key", "value")), result.getResults());
+        assertEquals(Collections.singletonList(Map.of("key", "value")), result.results());
     }
 
 

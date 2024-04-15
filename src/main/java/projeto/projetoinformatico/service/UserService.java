@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.model.layers.Layer;
+import projeto.projetoinformatico.model.layers.LayersRepository;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
@@ -17,14 +18,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-
-public class UserService{
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final LayersRepository layersRepository;
 
+
+    @Autowired
+    public UserService(UserRepository userRepository, LayersRepository layersRepository) {
+        this.userRepository = userRepository;
+        this.layersRepository = layersRepository;
+    }
 
     public UserDetailsService userDetailsService(){
         return new UserDetailsService() {
@@ -33,6 +36,15 @@ public class UserService{
                 return userRepository.findByUsername(username);
             }
         };
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with username: " + username);
+        }
+        return user;
     }
 
 
@@ -65,7 +77,12 @@ public class UserService{
         return optionalUser.orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public List<Layer> getUserLayers(Long id) {
-        return null;
+   public List<Layer> getUserLayers(String username) {
+        return layersRepository.findByUsername(username);
+    }
+
+    public String getUsernameById(Long id) {
+        User user = userRepository.findById(id).orElse(null);
+        return (user != null) ? user.getUsername() : null;
     }
 }
