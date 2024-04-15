@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,6 +27,7 @@ import projeto.projetoinformatico.model.users.Role;
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 @RequiredArgsConstructor
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -51,8 +53,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/search/time").permitAll()
                         .requestMatchers("/api/sparql").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin").hasAnyAuthority(Role.ADMIN.name())
-                        .requestMatchers("/api").hasAnyAuthority(Role.USER.name())
+                        //.requestMatchers("/api/admin").hasAnyAuthority(Role.ADMIN.name())
+                        //.requestMatchers("/api").hasAnyAuthority(Role.USER.name())
                         .requestMatchers("/api/items/{itemId}").permitAll()
                         .requestMatchers("/api/properties/{propertyId}").permitAll()
                         .requestMatchers("/api/data/geolocation/{itemId}").permitAll()

@@ -2,6 +2,7 @@ package projeto.projetoinformatico.controller;
 
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.service.UserService;
@@ -68,6 +69,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<String> sayHello(){
         return ResponseEntity.ok("Welcome User");
     }
