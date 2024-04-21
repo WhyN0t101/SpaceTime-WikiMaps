@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import projeto.projetoinformatico.Exceptions.NotFoundException;
+import projeto.projetoinformatico.Exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.utils.ErrorResponse;
 
 @ControllerAdvice
@@ -19,9 +19,7 @@ public class GlobalLayerExceptionHandler {
         return new ResponseEntity<>(errorResponse, status);
     }
 
-    // Add more exception handlers for other layer-related exceptions here
 
-    // You can also have a generic exception handler for any other unhandled exceptions
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {

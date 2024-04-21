@@ -5,16 +5,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import projeto.projetoinformatico.Exceptions.Exception.NotFoundException;
+import projeto.projetoinformatico.Exceptions.Exception.SparqlQueryExecutionException;
 import projeto.projetoinformatico.utils.ErrorResponse;
+import projeto.projetoinformatico.utils.SparqlQueryException; // Import the SPARQL exception
 
 @ControllerAdvice
-public class GlobalUserExceptionHandler {
+public class GlobalSparqlExceptionHandler {
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler(SparqlQueryException.class)
     @ResponseBody
-    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
+    public ResponseEntity<ErrorResponse> handleSparqlQueryException(SparqlQueryException ex) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR; // Assuming SPARQL exceptions indicate internal server errors
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    @ExceptionHandler(SparqlQueryExecutionException.class)
+    @ResponseBody
+    public ResponseEntity<ErrorResponse> handleSparqlQueryExecutionException(SparqlQueryException ex) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR; // Assuming SPARQL exceptions indicate internal server errors
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
@@ -26,5 +35,6 @@ public class GlobalUserExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, "An unexpected error occurred");
         return new ResponseEntity<>(errorResponse, status);
     }
+
 
 }

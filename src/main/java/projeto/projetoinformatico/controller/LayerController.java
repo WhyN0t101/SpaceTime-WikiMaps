@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import projeto.projetoinformatico.Exceptions.NotFoundException;
+import projeto.projetoinformatico.Exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.service.LayerService;
@@ -46,18 +46,12 @@ public class LayerController {
     @PutMapping("/layers/{id}")
     public ResponseEntity<Layer> updateLayer(@PathVariable Long id, @RequestBody LayerRequest layerRequest) {
         Layer updatedLayer = layerService.updateLayer(id, layerRequest);
-        if (updatedLayer == null) {
-            throw new NotFoundException("Layer not found with id: " + id);
-        }
         return ResponseEntity.ok(updatedLayer);
     }
 
     @DeleteMapping("/layers/{id}")
     public ResponseEntity<Void> deleteLayer(@PathVariable Long id) {
-        boolean deleted = layerService.deleteLayer(id);
-        if (!deleted) {
-            throw new NotFoundException("Layer not found with id: " + id);
-        }
+        layerService.deleteLayer(id);
         return ResponseEntity.noContent().build();
     }
 

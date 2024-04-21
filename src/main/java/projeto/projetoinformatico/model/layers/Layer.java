@@ -72,20 +72,6 @@ public class Layer {
         this.query = searchQuery;
     }
 
-    public String getSearchResult() {
-        return searchResult;
-    }
-
-    public void setSearchResult(String searchResult) {
-        this.searchResult = searchResult;
-    }
-
-    @Getter
-    @Setter
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String searchResult;
-
-
     public String getLayerName() {
         return layerName;
     }

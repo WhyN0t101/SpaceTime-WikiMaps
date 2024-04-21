@@ -1,11 +1,10 @@
 package projeto.projetoinformatico.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import projeto.projetoinformatico.model.SearchResult;
+import projeto.projetoinformatico.Exceptions.Exception.InvalidLayerRequestException;
+import projeto.projetoinformatico.Exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.layers.LayersRepository;
 import projeto.projetoinformatico.requests.LayerRequest;
@@ -18,17 +17,15 @@ import java.util.Optional;
 public class LayerService {
 
     private final LayersRepository layersRepository;
-    private final SearchService searchService;
 
     @Autowired
-    public LayerService(LayersRepository layersRepository, SearchService searchService) {
+    public LayerService(LayersRepository layersRepository) {
         this.layersRepository = layersRepository;
-        this.searchService = searchService;
     }
 
     public Layer createLayer(String username, LayerRequest layerRequest) {
         if (layerRequest == null) {
-            throw new IllegalArgumentException("Layer request cannot be null");
+            throw new InvalidLayerRequestException("Layer request cannot be null");
         }
 
         Layer newLayer = new Layer();
@@ -37,7 +34,7 @@ public class LayerService {
         newLayer.setDescription(layerRequest.getDescription());
         newLayer.setQuery(layerRequest.getQuery());
 
-        return getLayer(layerRequest, newLayer);
+        return saveLayer(newLayer);
     }
 
     public List<Layer> getAllLayers() {
@@ -45,7 +42,8 @@ public class LayerService {
     }
 
     public Layer getLayerById(Long id) {
-        return layersRepository.findById(id).orElse(null);
+        return layersRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Layer not found with id: " + id));
     }
 
     public Layer updateLayer(Long id, LayerRequest layerRequest) {
@@ -54,32 +52,24 @@ public class LayerService {
             Layer existingLayer = optionalLayer.get();
             BeanUtils.copyProperties(layerRequest, existingLayer, "id");
             existingLayer.setTimestamp(new Date());
-            return getLayer(layerRequest, existingLayer);
+            return saveLayer(existingLayer);
+        } else {
+            throw new NotFoundException("Layer not found with id: " + id);
         }
-        return null;
     }
 
-    private Layer getLayer(LayerRequest layerRequest, Layer existingLayer) {
-        SearchResult searchResult = searchService.executeSparqlQuery(layerRequest.getQuery());
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            String searchResultJson = objectMapper.writeValueAsString(searchResult);
-            existingLayer.setSearchResult(searchResultJson);
-        } catch (JsonProcessingException e) {
-            // Handle the exception
-            e.printStackTrace();
-        }
+    private Layer saveLayer(Layer existingLayer) {
         return layersRepository.save(existingLayer);
     }
 
-    public boolean deleteLayer(Long id) {
+    public void deleteLayer(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("Layer ID cannot be null");
         }
         if (layersRepository.existsById(id)) {
             layersRepository.deleteById(id);
-            return true;
+        } else {
+            throw new NotFoundException("Layer not found with id: " + id);
         }
-        return false;
     }
 }

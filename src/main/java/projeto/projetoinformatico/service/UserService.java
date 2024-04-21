@@ -30,12 +30,7 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetailsService userDetailsService(){
-        return new UserDetailsService() {
-            @Override
-            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-                return userRepository.findByUsername(username);
-            }
-        };
+        return userRepository::findByUsername;
     }
 
     @Override
@@ -53,7 +48,7 @@ public class UserService implements UserDetailsService {
     public User getUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+            throw new NotFoundException("User not found with username: " + username);
         }
         return user;
     }
@@ -76,9 +71,14 @@ public class UserService implements UserDetailsService {
         Optional<User> optionalUser = userRepository.findById(id);
         return optionalUser.orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }
+
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-   public List<Layer> getUserLayers(String username) {
-        return layersRepository.findByUsername(username);
+    public List<Layer> getUserLayers(String username) {
+        List<Layer> layers = layersRepository.findByUsername(username);
+        if (layers.isEmpty()) {
+            throw new NotFoundException("User layers not found for user with username: " + username);
+        }
+        return layers;
     }
 
     public String getUsernameById(Long id) {

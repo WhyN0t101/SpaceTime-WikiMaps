@@ -4,7 +4,7 @@ package projeto.projetoinformatico.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import projeto.projetoinformatico.Exceptions.NotFoundException;
+import projeto.projetoinformatico.Exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.model.users.Role;
@@ -49,25 +49,15 @@ public class UserController {
     @GetMapping("/users/id/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
-        if (user == null) {
-            throw new NotFoundException("User not found with id: " + id);
-        }
         return ResponseEntity.ok(user);
     }
 
     @GetMapping("/users/{id}/layers")
     public ResponseEntity<List<Layer>> getUserLayers(@PathVariable Long id) {
         String username = userService.getUsernameById(id);
-        if (username == null) {
-            throw new NotFoundException("User not found with id: " + id);
-        }
-
         List<Layer> userLayers = userService.getUserLayers(username);
-        if (userLayers.isEmpty()) {
-            throw new NotFoundException("User layers not found for user with id: " + id);
-        } else {
-            return ResponseEntity.ok(userLayers);
-        }
+        return ResponseEntity.ok(userLayers);
+
     }
 
     @GetMapping

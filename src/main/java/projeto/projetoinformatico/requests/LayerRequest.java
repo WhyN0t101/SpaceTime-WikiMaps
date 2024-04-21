@@ -1,13 +1,17 @@
 package projeto.projetoinformatico.requests;
 
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.List;
 import java.util.Map;
 
 public class LayerRequest {
+    @NotBlank(message = "Query cannot be blank")
     private String name;
     private String description;
+
+    @NotBlank(message = "Query cannot be blank")
     private String query;
-    private List<Map<String, String>> results;
 
     public String getName() {
         return name;
@@ -33,11 +37,5 @@ public class LayerRequest {
         this.query = query;
     }
 
-    public List<Map<String, String>> getResults() {
-        return results;
-    }
 
-    public void setResults(List<Map<String, String>> results) {
-        this.results = results;
-    }
 }

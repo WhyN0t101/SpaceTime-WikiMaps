@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.Exceptions;
+package projeto.projetoinformatico.Exceptions.Exception;
 
 
 import org.springframework.http.HttpStatus;
