@@ -7,10 +7,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import projeto.projetoinformatico.requests.JwtAuthenticationResponse;
-import projeto.projetoinformatico.requests.RefreshTokenRequest;
-import projeto.projetoinformatico.requests.SignInRequest;
-import projeto.projetoinformatico.requests.SignUpRequest;
+import projeto.projetoinformatico.Exceptions.Exception.InvalidParamsRequestException;
+import projeto.projetoinformatico.requests.*;
 import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
@@ -32,19 +30,40 @@ public class AuthenticationService {
 
 
 
-    public User signup(SignUpRequest signUpRequest){
-        User user = new User();
+    public UserResponse signup(SignUpRequest signUpRequest){
+        // Check if the username is already taken
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            throw new InvalidParamsRequestException("Username already exists");
+        }
 
+        // Check if the email is already taken
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            throw new InvalidParamsRequestException("Email already registered");
+        }
+
+        // Create a new user
+        User user = new User();
         user.setEmail(signUpRequest.getEmail());
         user.setUsername(signUpRequest.getUsername());
         user.setRole(Role.USER);
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
-        return userRepository.save(user);
+        userRepository.save(user);
 
+        // Create a UserResponse object and populate it with user data
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(user.getUsername());
+        userResponse.setRole(user.getRole());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setEnabled(user.isEnabled());
+        // Set other fields as needed
+
+        return userResponse;
     }
 
-    public JwtAuthenticationResponse signin(SignInRequest signInRequest){
+
+    public AuthenticationResponse signin(SignInRequest signInRequest){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 signInRequest.getUsername(), signInRequest.getPassword()));
 
@@ -54,15 +73,26 @@ public class AuthenticationService {
         }
 
         var jwt = jwtService.generateToken(user);
-        var refreshtoken = jwtService.generateRefreshToken(new HashMap<>(), user);
+        var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
 
-        JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
+        // Create an instance of UserResponse
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(user.getUsername());
+        userResponse.setRole(user.getRole());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setEnabled(user.isEnabled());
+        // Set other fields as needed
 
-        jwtAuthenticationResponse.setToken(jwt);
-        jwtAuthenticationResponse.setRefreshToken(refreshtoken);
-        return jwtAuthenticationResponse;
+        // Create an instance of AuthenticationResponse and set the UserResponse
+        AuthenticationResponse response = new AuthenticationResponse();
+        response.setAccessToken(jwt);
+        response.setRefreshToken(refreshToken);
+        response.setUser(userResponse);
 
+        return response;
     }
+
 
     public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
         String userUsername = jwtService.extractUsername(refreshTokenRequest.getToken());
@@ -82,4 +112,13 @@ public class AuthenticationService {
         }
         return null;
     }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
 }

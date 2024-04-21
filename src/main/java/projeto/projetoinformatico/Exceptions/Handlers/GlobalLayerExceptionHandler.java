@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import projeto.projetoinformatico.Exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.Exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.utils.ErrorResponse;
 
@@ -18,7 +19,6 @@ public class GlobalLayerExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value() ,status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
-
 
     @ExceptionHandler(Exception.class)
     @ResponseBody
