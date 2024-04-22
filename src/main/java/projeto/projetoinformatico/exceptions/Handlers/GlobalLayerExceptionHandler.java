@@ -1,13 +1,12 @@
-package projeto.projetoinformatico.Exceptions.Handlers;
+package projeto.projetoinformatico.exceptions.Handlers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import projeto.projetoinformatico.Exceptions.Exception.InvalidParamsRequestException;
-import projeto.projetoinformatico.Exceptions.Exception.NotFoundException;
-import projeto.projetoinformatico.utils.ErrorResponse;
+import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
+import projeto.projetoinformatico.responses.ErrorResponse;
 
 @ControllerAdvice
 public class GlobalLayerExceptionHandler {

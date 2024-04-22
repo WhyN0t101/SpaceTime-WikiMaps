@@ -1,15 +1,17 @@
 package projeto.projetoinformatico.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import projeto.projetoinformatico.Exceptions.Exception.InvalidParamsRequestException;
+import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.requests.*;
+import projeto.projetoinformatico.responses.AuthenticationResponse;
+import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
+import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.AuthenticationService;
 
 @RestController

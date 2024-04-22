@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.Exceptions.Exception;
+package projeto.projetoinformatico.exceptions.Exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

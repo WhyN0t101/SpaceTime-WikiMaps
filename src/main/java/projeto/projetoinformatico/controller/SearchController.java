@@ -8,7 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.service.SearchService;
-import projeto.projetoinformatico.utils.SparqlQueryException;
+import projeto.projetoinformatico.exceptions.Exception.SparqlQueryException;
 import projeto.projetoinformatico.utils.Validation;
 
 import java.util.Collections;

@@ -1,29 +1,28 @@
-package projeto.projetoinformatico.Exceptions.Handlers;
+package projeto.projetoinformatico.exceptions.Handlers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import projeto.projetoinformatico.Exceptions.Exception.SparqlQueryExecutionException;
-import projeto.projetoinformatico.utils.ErrorResponse;
-import projeto.projetoinformatico.utils.SparqlQueryException; // Import the SPARQL exception
+import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
+import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
+import projeto.projetoinformatico.responses.ErrorResponse;
 
 @ControllerAdvice
-public class GlobalSparqlExceptionHandler {
+public class GlobalUserExceptionHandler {
 
-    @ExceptionHandler(SparqlQueryException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseBody
-    public ResponseEntity<ErrorResponse> handleSparqlQueryException(SparqlQueryException ex) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR; // Assuming SPARQL exceptions indicate internal server errors
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
-
-    @ExceptionHandler(SparqlQueryExecutionException.class)
+    @ExceptionHandler(InvalidParamsRequestException.class)
     @ResponseBody
-    public ResponseEntity<ErrorResponse> handleSparqlQueryExecutionException(SparqlQueryException ex) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR; // Assuming SPARQL exceptions indicate internal server errors
+    public ResponseEntity<ErrorResponse> handleInvalidUserParams(NotFoundException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
@@ -35,6 +34,5 @@ public class GlobalSparqlExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, "An unexpected error occurred");
         return new ResponseEntity<>(errorResponse, status);
     }
-
 
 }

@@ -11,7 +11,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
-import projeto.projetoinformatico.utils.SparqlQueryException;
+import projeto.projetoinformatico.exceptions.Exception.SparqlQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

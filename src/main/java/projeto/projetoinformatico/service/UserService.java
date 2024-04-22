@@ -13,9 +13,11 @@ import projeto.projetoinformatico.model.layers.LayersRepository;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
+import projeto.projetoinformatico.responses.UserResponse;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -45,33 +47,39 @@ public class UserService implements UserDetailsService {
 
     @Cacheable(value = "searchCache", key="{#username}")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public User getUserByUsername(String username) {
+    public UserResponse getUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new NotFoundException("User not found with username: " + username);
         }
-        return user;
+        return convertUserToUserResponse(user);
     }
 
     @Cacheable(value = "searchCache")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(this::convertUserToUserResponse)
+                .collect(Collectors.toList());
     }
 
     @Cacheable(value = "searchCache", key = "{ #role}")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public List<User> getAllUsersByRole(Role role) {
-        return userRepository.findAllByRole(role);
+    public List<UserResponse> getAllUsersByRole(Role role) {
+        List<User> users = userRepository.findAllByRole(role);
+        return users.stream()
+                .map(this::convertUserToUserResponse)
+                .collect(Collectors.toList());
     }
 
     @Cacheable(value = "searchCache", key = "{ #id }")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public User getUserById(Long id) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        return optionalUser.orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+        return convertUserToUserResponse(user);
     }
-
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public List<Layer> getUserLayers(String username) {
         List<Layer> layers = layersRepository.findByUsername(username);
@@ -79,6 +87,16 @@ public class UserService implements UserDetailsService {
             throw new NotFoundException("User layers not found for user with username: " + username);
         }
         return layers;
+    }
+    private UserResponse convertUserToUserResponse(User user) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(user.getUsername());
+        userResponse.setRole(user.getRole());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setEnabled(user.isEnabled());
+        // Set other fields as needed
+        return userResponse;
     }
 
     public String getUsernameById(Long id) {
