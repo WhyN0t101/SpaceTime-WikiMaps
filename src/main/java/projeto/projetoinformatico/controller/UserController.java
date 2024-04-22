@@ -6,7 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
+import projeto.projetoinformatico.exceptions.Exception.UserNotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.UserService;
@@ -32,15 +32,11 @@ public class UserController {
     @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
-        if(users.isEmpty()){
-            throw new NotFoundException("No users with that role assigned");
-        }
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/users/role/{role}")
     public ResponseEntity<List<UserResponse>> getAllUsersByRole(@PathVariable Role role) {
-
         List<UserResponse> users = userService.getAllUsersByRole(role);
         return ResponseEntity.ok(users);
     }

@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import projeto.projetoinformatico.exceptions.Exception.UserNotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.layers.LayersRepository;
 import projeto.projetoinformatico.model.users.Role;
@@ -16,7 +17,7 @@ import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.responses.UserResponse;
 
 import java.util.List;
-import java.util.Optional;
+
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +51,7 @@ public class UserService implements UserDetailsService {
     public UserResponse getUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new NotFoundException("User not found with username: " + username);
+            throw new UserNotFoundException("User not found with username: " + username);
         }
         return convertUserToUserResponse(user);
     }
@@ -67,17 +68,25 @@ public class UserService implements UserDetailsService {
     @Cacheable(value = "searchCache", key = "{ #role}")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public List<UserResponse> getAllUsersByRole(Role role) {
+        // Check if the role exists in your system
+        if (!roleExists(role)) {
+            throw new NotFoundException("Role not found: " + role);
+        }
+
+        // Now that we know the role exists, fetch users with that role
         List<User> users = userRepository.findAllByRole(role);
+        if (users.isEmpty()) {
+            throw new NotFoundException("No users found with role: " + role);
+        }
         return users.stream()
                 .map(this::convertUserToUserResponse)
                 .collect(Collectors.toList());
     }
-
     @Cacheable(value = "searchCache", key = "{ #id }")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         return convertUserToUserResponse(user);
     }
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
@@ -102,5 +111,15 @@ public class UserService implements UserDetailsService {
     public String getUsernameById(Long id) {
         User user = userRepository.findById(id).orElse(null);
         return (user != null) ? user.getUsername() : null;
+    }
+    // Helper method to check if the role exists
+    private boolean roleExists(Role role) {
+        // Check if the given role is one of the predefined enum constants
+        for (Role predefinedRole : Role.values()) {
+            if (predefinedRole == role) {
+                return true;
+            }
+        }
+        return false;
     }
 }
