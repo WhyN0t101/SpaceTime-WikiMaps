@@ -19,6 +19,10 @@ public class ErrorResponse {
         this.message = message;
     }
 
+    public ErrorResponse() {
+
+    }
+
     // Getters and setters
     public LocalDateTime getTimestamp() {
         return timestamp;

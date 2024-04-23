@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import projeto.projetoinformatico.exceptions.Exception.JwtExpiredException;
 import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
 import projeto.projetoinformatico.service.UserService;
 
@@ -44,6 +45,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             //UserDetails userDetails = userService.getUserByUsername(username);
             UserDetails userDetails = userService.userDetailsService().loadUserByUsername(username);
 
+            if (jwtServiceImpl.isTokenExpired(jwt)) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("JWT Token is expired.");
+                response.getWriter().flush();
+                return;
+            }
+
             if(jwtServiceImpl.isTokenValid(jwt, userDetails)){
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
@@ -55,6 +63,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 securityContext.setAuthentication(token);
                 SecurityContextHolder.setContext(securityContext);
+            }
+            else{
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("JWT Token is expired.");
+                response.getWriter().flush();
+                return;
+
             }
         }
         filterChain.doFilter(request, response);

@@ -55,6 +55,7 @@ public class LayerController {
         }
         return ResponseEntity.ok(layer);
     }
+
     @GetMapping("/layers/{id}")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getLayerByIdWithParams(
@@ -93,7 +94,7 @@ public class LayerController {
 
     @PutMapping("/layers/{id}")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
-    public ResponseEntity<Layer> updateLayer(@PathVariable Long id, @RequestBody LayerRequest layerRequest) {
+    public ResponseEntity<Layer> updateLayer(@PathVariable Long id,@Valid @RequestBody LayerRequest layerRequest) {
         Layer updatedLayer = layerService.updateLayer(id, layerRequest);
         return ResponseEntity.ok(updatedLayer);
     }
