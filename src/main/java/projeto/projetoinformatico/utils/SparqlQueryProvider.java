@@ -120,5 +120,22 @@ public class SparqlQueryProvider {
                 "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE],en\". }\n" +
                 "}";
     }
+    public String buildFilterQuery(String query, Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime) {
+        return PREFIXES +
+                query +
+                "  SERVICE wikibase:box {\n" +
+                "    ?item wdt:P625 ?where .\n" +
+                "    bd:serviceParam wikibase:cornerSouthWest \"Point(" + lon1 + " " + lat1 + ")\"^^geo:wktLiteral.\n" +
+                "    bd:serviceParam wikibase:cornerNorthEast \"Point(" + lon2 + " " + lat2 + ")\"^^geo:wktLiteral.\n" +
+                "  }\n" +
+                // Optional temporal filter if start and end time are provided
+                (startTime != null && endTime != null ?
+                        "  OPTIONAL {\n" +
+                                "    ?item wdt:P585 ?date .\n" +
+                                "    FILTER(YEAR(?date) >= " + startTime +
+                                " && YEAR(?date) <= " + endTime + ").\n" +
+                                "  }\n" : "");
+    }
+
 
 }
