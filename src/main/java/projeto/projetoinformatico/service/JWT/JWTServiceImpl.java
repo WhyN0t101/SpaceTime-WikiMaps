@@ -1,6 +1,7 @@
 package projeto.projetoinformatico.service.JWT;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -28,9 +29,14 @@ public class JWTServiceImpl {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(getSiginKey()).build().parseClaimsJws(token).getBody();
+        try {
+            return Jwts.parser().setSigningKey(getSiginKey()).build().parseClaimsJws(token).getBody();
+        } catch (JwtException e) {
+            // Log or handle the exception
+            e.printStackTrace();
+            throw new RuntimeException("Error parsing JWT token: " + e.getMessage());
+        }
     }
-
     private Key getSiginKey() {
         byte[] key = Decoders.BASE64.decode("413F4428472B4B6250655368566D5970337336763979244226452948404D6351");
         return Keys.hmacShaKeyFor(key);
@@ -41,13 +47,13 @@ public class JWTServiceImpl {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
     public String generateToken(UserDetails userDetails){
         return Jwts.builder().setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 604800000)) //7 dias
+                .setExpiration(new Date(System.currentTimeMillis() + 1500)) //7 dias
                 .signWith(getSiginKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

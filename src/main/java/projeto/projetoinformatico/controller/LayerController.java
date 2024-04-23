@@ -1,6 +1,7 @@
 package projeto.projetoinformatico.controller;
 
 import com.google.common.util.concurrent.RateLimiter;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,7 +46,7 @@ public class LayerController {
         return ResponseEntity.ok(layers);
     }
 
-    @GetMapping("/layers/{id}")
+    @GetMapping("/layers/id/{id}")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<Layer> getLayerById(@PathVariable Long id) {
         Layer layer = layerService.getLayerById(id);
@@ -54,6 +55,7 @@ public class LayerController {
         }
         return ResponseEntity.ok(layer);
     }
+
     @GetMapping("/layers/{id}")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getLayerByIdWithParams(
@@ -83,7 +85,7 @@ public class LayerController {
 
     @PostMapping("/layers/create")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
-    public ResponseEntity<Layer> createLayer(@RequestBody LayerRequest layerRequest) {
+    public ResponseEntity<Layer> createLayer(@Valid @RequestBody LayerRequest layerRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Layer newLayer = layerService.createLayer(username, layerRequest);
@@ -92,7 +94,7 @@ public class LayerController {
 
     @PutMapping("/layers/{id}")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
-    public ResponseEntity<Layer> updateLayer(@PathVariable Long id, @RequestBody LayerRequest layerRequest) {
+    public ResponseEntity<Layer> updateLayer(@PathVariable Long id,@Valid @RequestBody LayerRequest layerRequest) {
         Layer updatedLayer = layerService.updateLayer(id, layerRequest);
         return ResponseEntity.ok(updatedLayer);
     }
