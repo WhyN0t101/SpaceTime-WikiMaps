@@ -1,7 +1,7 @@
-package projeto.projetoinformatico.requests;
+package projeto.projetoinformatico.responses;
 
 import lombok.Data;
-import projeto.projetoinformatico.model.users.User;
+import projeto.projetoinformatico.responses.UserResponse;
 
 @Data
 public class AuthenticationResponse {

@@ -4,11 +4,12 @@ import com.google.common.util.concurrent.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.service.SearchService;
-import projeto.projetoinformatico.utils.SparqlQueryException;
+import projeto.projetoinformatico.exceptions.Exception.SparqlQueryException;
 import projeto.projetoinformatico.utils.Validation;
 
 import java.util.Collections;
@@ -30,6 +31,7 @@ public class SearchController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> performSearch(
             @RequestParam Double lat1,
             @RequestParam Double lon2,
@@ -52,6 +54,7 @@ public class SearchController {
 
 
     @GetMapping("/search/time")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> performSearchTime(
             @RequestParam Double lat1,
             @RequestParam Double lon2,
@@ -76,6 +79,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/country")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> performSearchCountry(
             @RequestParam String country,
             @RequestParam Long year
@@ -95,6 +99,7 @@ public class SearchController {
     }
 
     @PostMapping("/sparql")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<SearchResult> executeSparqlQuery(@RequestBody String sparqlQuery) {
         if (!rateLimiter.tryAcquire()) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();

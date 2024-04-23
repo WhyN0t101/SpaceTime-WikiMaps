@@ -3,7 +3,7 @@ package projeto.projetoinformatico.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import projeto.projetoinformatico.Exceptions.Exception.SparqlQueryNotFoundException;
+import projeto.projetoinformatico.exceptions.Exception.SparqlQueryNotFoundException;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
 

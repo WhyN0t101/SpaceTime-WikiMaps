@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.requests;
+package projeto.projetoinformatico.responses;
 
 import projeto.projetoinformatico.model.users.Role;
 

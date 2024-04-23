@@ -2,13 +2,15 @@ package projeto.projetoinformatico.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import projeto.projetoinformatico.Exceptions.Exception.InvalidParamsRequestException;
+import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.requests.*;
+import projeto.projetoinformatico.responses.AuthenticationResponse;
+import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
+import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;

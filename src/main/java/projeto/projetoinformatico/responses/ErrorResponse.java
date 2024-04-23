@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.utils;
+package projeto.projetoinformatico.responses;
 
 import org.eclipse.rdf4j.model.vocabulary.CONFIG;
 import org.springframework.http.HttpStatus;
