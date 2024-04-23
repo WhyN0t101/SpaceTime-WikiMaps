@@ -30,6 +30,7 @@ public class UserController {
     }
 
     @GetMapping("/users")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         if(users.isEmpty()){
@@ -39,6 +40,7 @@ public class UserController {
     }
 
     @GetMapping("/users/role/{role}")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<List<User>> getAllUsersByRole(@PathVariable Role role) {
 
         List<User> users = userService.getAllUsersByRole(role);
@@ -46,12 +48,14 @@ public class UserController {
     }
 
     @GetMapping("/users/id/{id}")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping("/users/{id}/layers")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<List<Layer>> getUserLayers(@PathVariable Long id) {
         String username = userService.getUsernameById(id);
         List<Layer> userLayers = userService.getUserLayers(username);
@@ -59,6 +63,7 @@ public class UserController {
 
     }
     @GetMapping("/user")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<User> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String authenticatedUsername = authentication.getName();

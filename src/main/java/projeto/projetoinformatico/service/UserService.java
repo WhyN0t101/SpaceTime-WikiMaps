@@ -44,7 +44,6 @@ public class UserService implements UserDetailsService {
 
 
     @Cacheable(value = "searchCache", key="{#username}")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public User getUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -54,25 +53,21 @@ public class UserService implements UserDetailsService {
     }
 
     @Cacheable(value = "searchCache")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     @Cacheable(value = "searchCache", key = "{ #role}")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public List<User> getAllUsersByRole(Role role) {
         return userRepository.findAllByRole(role);
     }
 
     @Cacheable(value = "searchCache", key = "{ #id }")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public User getUserById(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         return optionalUser.orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }
 
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public List<Layer> getUserLayers(String username) {
         List<Layer> layers = layersRepository.findByUsername(username);
         if (layers.isEmpty()) {
