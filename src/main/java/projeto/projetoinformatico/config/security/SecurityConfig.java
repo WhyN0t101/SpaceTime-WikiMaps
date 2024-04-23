@@ -54,6 +54,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/data/property-values/{item_id}/{property_id}").permitAll()
                     .requestMatchers("/api/layers").permitAll()
                     .requestMatchers("/api/layers/{id}").permitAll()
+                    .requestMatchers("/api/layers/id/{id}").permitAll()
                     .requestMatchers("/api/layers/create").authenticated()
                     .requestMatchers("/api/users/{id}/layers").permitAll()
                     .requestMatchers("/api/user").permitAll()
