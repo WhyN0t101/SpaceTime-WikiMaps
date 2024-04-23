@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class LayerRequest {
-    @NotBlank(message = "Query cannot be blank")
+    @NotBlank(message = "Name cannot be blank")
     private String name;
     private String description;
 

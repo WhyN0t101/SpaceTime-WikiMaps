@@ -1,5 +1,6 @@
 package projeto.projetoinformatico.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,7 +39,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<AuthenticationResponse> signin(@RequestBody SignInRequest signInRequest) {
+    public ResponseEntity<AuthenticationResponse> signin(@Valid @RequestBody SignInRequest signInRequest) {
         AuthenticationResponse response = authenticationService.signin(signInRequest);
         return ResponseEntity.ok(response);
     }
