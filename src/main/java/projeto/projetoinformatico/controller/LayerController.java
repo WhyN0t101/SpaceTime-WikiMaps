@@ -55,6 +55,7 @@ public class LayerController {
         return ResponseEntity.ok(layer);
     }
     @GetMapping("/layers/{id}")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getLayerByIdWithParams(
             @PathVariable Long id,
             @RequestParam Double lat1,
