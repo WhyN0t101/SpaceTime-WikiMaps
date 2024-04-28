@@ -2,6 +2,7 @@ package projeto.projetoinformatico.service;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.exceptions.Exception.InvalidLayerRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
@@ -43,6 +44,8 @@ public class LayerService {
 
         return saveLayer(newLayer);
     }
+
+    //@Cacheable(value = "searchCache", key = "{ #id,#lat1, #lat2, #lon1, #lon2, #start, #end}")
     public SearchResult getLayerByIdWithParams(Long id, Double lat1, Double lon1, Double lat2, Double lon2, Long start, Long end) {
         Layer layer = getLayerById(id); // Retrieve layer by ID
         String query = layer.getQuery(); // Get the SPARQL query from the layer
