@@ -122,11 +122,11 @@ public class UserService implements UserDetailsService {
     }
 
     public List<UserResponse> getUsersByNameAndRole(String name, Role role) {
-        // Find users by name containing the provided fragment and role
-        List<User> users = userRepository.findByUsernameContainingIgnoreCaseAndRole(name, role);
+        // Find users by name starting with the provided fragment and role
+        List<User> users = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, role);
 
         if (users.isEmpty()) {
-            throw new NotFoundException("No users found with name containing: " + name + " and role: " + role);
+            throw new NotFoundException("No users found with name starting with: " + name + " and role: " + role);
         }
 
         // Convert found users to UserResponse objects
@@ -136,11 +136,11 @@ public class UserService implements UserDetailsService {
     }
 
     public List<UserResponse> getUserContainingUsername(String name) {
-        // Find users by username containing the provided fragment
-        List<User> users = userRepository.findByUsernameContainingIgnoreCase(name);
+        // Find users by username starting with the provided fragment
+        List<User> users = userRepository.findByUsernameStartingWithIgnoreCase(name);
 
         if (users.isEmpty()) {
-            throw new NotFoundException("No users found with name containing: " + name);
+            throw new NotFoundException("No users found with name starting with: " + name);
         }
 
         // Convert found users to UserResponse objects
