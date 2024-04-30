@@ -87,4 +87,9 @@ public class LayerService {
             throw new NotFoundException("Layer not found with id: " + id);
         }
     }
+
+    public List<Layer> findByKeywords(String query) {
+        String lowercaseQuery = query.toLowerCase();
+        return layersRepository.findByKeywords(lowercaseQuery);
+    }
 }

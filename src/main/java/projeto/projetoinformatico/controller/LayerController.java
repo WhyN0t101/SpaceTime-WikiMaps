@@ -105,5 +105,10 @@ public class LayerController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/layers/search")
+    public List<Layer> searchLayers(@RequestParam("query") String query) {
+        // Query the database layers where name or description contains the keywords
+        return layerService.findByKeywords(query);
+    }
 
 }
