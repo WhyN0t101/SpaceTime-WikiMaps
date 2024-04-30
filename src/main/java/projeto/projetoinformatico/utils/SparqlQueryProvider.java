@@ -121,21 +121,35 @@ public class SparqlQueryProvider {
                 "}";
     }
     public String buildFilterQuery(String query, Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime) {
-        return PREFIXES +
-                query +
-                "  SERVICE wikibase:box {\n" +
-                "    ?item wdt:P625 ?where .\n" +
-                "    bd:serviceParam wikibase:cornerSouthWest \"Point(" + lon1 + " " + lat1 + ")\"^^geo:wktLiteral.\n" +
-                "    bd:serviceParam wikibase:cornerNorthEast \"Point(" + lon2 + " " + lat2 + ")\"^^geo:wktLiteral.\n" +
-                "  }\n" +
-                // Optional temporal filter if start and end time are provided
-                (startTime != null && endTime != null ?
-                        "  OPTIONAL {\n" +
-                                "    ?item wdt:P585 ?date .\n" +
-                                "    FILTER(YEAR(?date) >= " + startTime +
-                                " && YEAR(?date) <= " + endTime + ").\n" +
-                                "  }\n" : "");
+        String filterClause = generateFilterClause(lat1, lon1, lat2, lon2, startTime, endTime);
+        int index = query.indexOf("{");
+        if (index != -1) {
+            String prefix = query.substring(0, index + 1);
+            String suffix = query.substring(index + 1);
+            // Insert the ?where before the WHERE{} clause
+            suffix = suffix.replaceFirst("WHERE\\s*\\{", "?where WHERE {\n ");
+            return prefix + filterClause + suffix;
+        }
+        return query;
     }
+
+
+    private String generateFilterClause(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("  SERVICE wikibase:box {\n");
+        sb.append("    ?item wdt:P625 ?where .\n");
+        sb.append("    bd:serviceParam wikibase:cornerSouthWest \"Point(").append(lon1).append(" ").append(lat1).append(")\"^^geo:wktLiteral.\n");
+        sb.append("    bd:serviceParam wikibase:cornerNorthEast \"Point(").append(lon2).append(" ").append(lat2).append(")\"^^geo:wktLiteral.\n");
+        sb.append("  }\n");
+        if (startTime != null && endTime != null) {
+            sb.append("  OPTIONAL {\n");
+            sb.append("    ?item wdt:P585 ?date .\n");
+            sb.append("    FILTER(YEAR(?date) >= ").append(startTime).append(" && YEAR(?date) <= ").append(endTime).append(").\n");
+            sb.append("  }\n");
+        }
+        return sb.toString();
+    }
+
 
 
 }
