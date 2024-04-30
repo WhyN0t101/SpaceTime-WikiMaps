@@ -120,4 +120,33 @@ public class UserService implements UserDetailsService {
         }
         return false;
     }
+
+    public List<UserResponse> getUsersByNameAndRole(String name, Role role) {
+        // Find users by name containing the provided fragment and role
+        List<User> users = userRepository.findByUsernameContainingIgnoreCaseAndRole(name, role);
+
+        if (users.isEmpty()) {
+            throw new NotFoundException("No users found with name containing: " + name + " and role: " + role);
+        }
+
+        // Convert found users to UserResponse objects
+        return users.stream()
+                .map(this::convertUserToUserResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserResponse> getUserContainingUsername(String name) {
+        // Find users by username containing the provided fragment
+        List<User> users = userRepository.findByUsernameContainingIgnoreCase(name);
+
+        if (users.isEmpty()) {
+            throw new NotFoundException("No users found with name containing: " + name);
+        }
+
+        // Convert found users to UserResponse objects
+        return users.stream()
+                .map(this::convertUserToUserResponse)
+                .collect(Collectors.toList());
+    }
+
 }

@@ -6,13 +6,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import projeto.projetoinformatico.exceptions.Exception.UserNotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.model.users.Role;
-import projeto.projetoinformatico.model.users.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -33,8 +32,24 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users")
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = userService.getAllUsers();
+    public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(required = false) String name,
+                                                          @RequestParam(required = false) Role role) {
+        List<UserResponse> users;
+
+        if (name != null && role != null) {
+            // Filter users by name and role
+            users = userService.getUsersByNameAndRole(name, role);
+        } else if (name != null) {
+            // Filter users by name only
+            users = userService.getUserContainingUsername(name);
+        } else if (role != null) {
+            // Filter users by role only
+            users = userService.getAllUsersByRole(role);
+        } else {
+            // No filtering, return all users
+            users = userService.getAllUsers();
+        }
+
         return ResponseEntity.ok(users);
     }
 
