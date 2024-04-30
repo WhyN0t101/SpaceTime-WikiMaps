@@ -40,7 +40,6 @@ public class LayerController {
     }
 
     @GetMapping("/layers")
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<List<Layer>> getAllLayers() {
         List<Layer> layers = layerService.getAllLayers();
         return ResponseEntity.ok(layers);
