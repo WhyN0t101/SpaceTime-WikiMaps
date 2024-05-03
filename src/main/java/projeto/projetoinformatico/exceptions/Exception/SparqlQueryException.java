@@ -3,9 +3,9 @@ package projeto.projetoinformatico.exceptions.Exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class SparqlQueryException extends RuntimeException {
-    public SparqlQueryException(String message, Throwable cause) {
-        super(message, cause);
+    public SparqlQueryException(String message) {
+        super(message);
     }
 }

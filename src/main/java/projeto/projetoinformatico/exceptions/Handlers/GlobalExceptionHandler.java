@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import projeto.projetoinformatico.exceptions.Exception.*;
 import projeto.projetoinformatico.responses.ErrorResponse;
@@ -47,11 +48,19 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
-
+    /*
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseBody
+    public ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, "The requested resource was not found");
+        return new ResponseEntity<>(errorResponse, status);
+    }
+    */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        HttpStatus status = HttpStatus.BAD_REQUEST; // Assuming SignUPRequest exceptions indicate internal server errors
+        HttpStatus status = HttpStatus.BAD_REQUEST;
 
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
@@ -65,13 +74,10 @@ public class GlobalExceptionHandler {
             errorMessage += " " + entry.getValue() + ";";
         }
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", errorMessage);
-        //return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-
-        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, response.put("message", errorMessage));
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, errorMessage);
         return new ResponseEntity<>(errorResponse, status);
     }
+
 
     @ExceptionHandler(Exception.class)
     @ResponseBody

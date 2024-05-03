@@ -88,7 +88,7 @@ public class SearchService {
             return new SearchResult(results);
         } catch (InterruptedException | ExecutionException e) {
             logger.error("Error executing SPARQL query: " + sparqlQuery, e);
-            throw new SparqlQueryException("Error executing SPARQL query", e);
+            throw new SparqlQueryException("Error executing SPARQL query");
         }
     }
 
@@ -101,7 +101,7 @@ public class SearchService {
             return executeSparqlQuery(sparqlQuery);
         } catch (IOException e) {
             logger.error("Error parsing JSON: " + e.getMessage());
-            throw new SparqlQueryException("Error parsing JSON", e);
+            throw new SparqlQueryException("Error parsing JSON");
         }
     }
 

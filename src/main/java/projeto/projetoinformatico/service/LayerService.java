@@ -49,9 +49,20 @@ public class LayerService {
     public SearchResult getLayerByIdWithParams(Long id, Double lat1, Double lon1, Double lat2, Double lon2, Long start, Long end) {
         Layer layer = getLayerById(id); // Retrieve layer by ID
         String query = layer.getQuery(); // Get the SPARQL query from the layer
-        String filterQuery = sparqlQueryProvider.buildFilterQuery(query, lat1, lon1, lat2, lon2, start, end); // Build the filtered query
+
+        // Validate the SPARQL query format
+        if (!isSparqlQueryValid(query)) {
+            throw new InvalidLayerRequestException("Invalid SPARQL query format");
+        }
+
+        // Build the filtered query
+        String filterQuery = sparqlQueryProvider.buildFilterQuery(query, lat1, lon1, lat2, lon2, start, end);
+
+        // Execute the filtered query
         return searchService.executeSparqlQuery(filterQuery);
     }
+
+
     public List<Layer> getAllLayers() {
         return layersRepository.findAll();
     }
@@ -92,4 +103,26 @@ public class LayerService {
         String lowercaseQuery = query.toLowerCase();
         return layersRepository.findByKeywords(lowercaseQuery);
     }
+
+    public boolean isSparqlQueryValid(String query) {
+        // Verifica se a consulta começa com o formato esperado
+        if (!query.startsWith("SELECT DISTINCT ?item ?itemLabel ?coordinates WHERE {")) {
+            return false;
+        }
+
+        // Verifica se a consulta contém a parte do serviço wikibase:label
+        if (!query.contains("SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\". }")) {
+            return false;
+        }
+        // Verifica se a consulta contém a parte do SELECT DISTINCT ?item
+        if (!query.contains("SELECT DISTINCT ?item ?coordinates WHERE {")) {
+            return false;
+        }
+        // Verifica se a consulta contém uma propriedade com geolocalização
+        if (!query.contains("wdt:P625")) {
+            return false;
+        }
+        return true;
+    }
+
 }

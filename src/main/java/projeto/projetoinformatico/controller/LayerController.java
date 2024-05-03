@@ -78,7 +78,7 @@ public class LayerController {
         } catch (SparqlQueryException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new SearchResult(Collections.emptyList()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new SparqlQueryException("Invalid Sparql Query");
         }
     }
 
