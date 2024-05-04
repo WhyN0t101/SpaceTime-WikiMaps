@@ -18,13 +18,6 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseBody
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
-        return new ResponseEntity<>(errorResponse, status);
-    }
     @ExceptionHandler(NotFoundException.class)
     @ResponseBody
     public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {

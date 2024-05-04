@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
+import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.requests.*;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
@@ -71,7 +72,7 @@ public class AuthenticationService {
 
         var user = userRepository.findByUsername(signInRequest.getUsername());
         if (user == null){
-            throw new IllegalArgumentException("User not found");
+            throw new NotFoundException("User not found");
         }
 
         var jwt = jwtService.generateToken(user);
@@ -101,7 +102,7 @@ public class AuthenticationService {
 
         User user = userRepository.findByUsername(userUsername);
         if (user == null){
-            throw new IllegalArgumentException("User not found");
+            throw new NotFoundException("User not found");
         }
         if(jwtService.isTokenValid(refreshTokenRequest.getToken(), user)){
             var jwt = jwtService.generateToken(user);

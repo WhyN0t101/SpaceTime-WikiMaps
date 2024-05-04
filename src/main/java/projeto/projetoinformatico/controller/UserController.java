@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.UserService;
@@ -33,18 +34,34 @@ public class UserController {
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(required = false) String name,
-                                                          @RequestParam(required = false) Role role) {
+                                                          @RequestParam(required = false) String role) {
+
+        // Check if the role parameter is provided and valid
+        if (role != null) {
+            try {
+                Role roleEnum = Role.valueOf(role.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new NotFoundException("Role not found: " + role);
+            }
+        }
+
+        // If the role is valid, convert it to enum
+        Role userRole = null;
+        if (role != null) {
+            userRole = Role.valueOf(role.toUpperCase());
+        }
+
         List<UserResponse> users;
 
-        if (name != null && role != null) {
+        if (name != null && userRole != null) {
             // Filter users by name and role
-            users = userService.getUsersByNameAndRole(name, role);
+            users = userService.getUsersByNameAndRole(name, userRole);
         } else if (name != null) {
             // Filter users by name only
             users = userService.getUserContainingUsername(name);
-        } else if (role != null) {
+        } else if (userRole != null) {
             // Filter users by role only
-            users = userService.getAllUsersByRole(role);
+            users = userService.getAllUsersByRole(userRole);
         } else {
             // No filtering, return all users
             users = userService.getAllUsers();
@@ -53,12 +70,21 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+
+
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/role/{role}")
-    public ResponseEntity<List<UserResponse>> getAllUsersByRole(@PathVariable Role role) {
-        List<UserResponse> users = userService.getAllUsersByRole(role);
+    public ResponseEntity<List<UserResponse>> getAllUsersByRole(@PathVariable String role) {
+        try {
+            Role roleEnum = Role.valueOf(role.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Role not found" + role);
+        }
+        List<UserResponse> users = userService.getAllUsersByRole(Role.valueOf(role.toUpperCase()));
         return ResponseEntity.ok(users);
     }
+
+
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/id/{id}")
