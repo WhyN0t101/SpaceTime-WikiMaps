@@ -18,4 +18,6 @@ public interface LayersRepository extends JpaRepository<Layer, Long> {
     @Query("SELECT l FROM Layer l WHERE lower(l.layerName) LIKE %:query% OR lower(l.description) LIKE %:query%")
     List<Layer> findByKeywords(@Param("query") String query);
 
+    boolean existsByLayerName(String layerName);
+
 }

@@ -25,6 +25,13 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseBody
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
+        return new ResponseEntity<>(errorResponse, status);
+    }
 
     @ExceptionHandler(InvalidParamsRequestException.class)
     @ResponseBody
@@ -33,10 +40,17 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
+    @ExceptionHandler(InvalidLayerRequestException.class)
+    @ResponseBody
+    public ResponseEntity<ErrorResponse> handleInvalidLayerRequest(InvalidLayerRequestException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
+        return new ResponseEntity<>(errorResponse, status);
+    }
     @ExceptionHandler(SparqlQueryException.class)
     @ResponseBody
     public ResponseEntity<ErrorResponse> handleSparqlQueryException(SparqlQueryException ex) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR; // Assuming SPARQL exceptions indicate internal server errors
+        HttpStatus status = HttpStatus.BAD_REQUEST; // Assuming SPARQL exceptions indicate internal server errors
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
@@ -48,15 +62,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
-    /*
-    @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseBody
-    public ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoHandlerFoundException ex) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, "The requested resource was not found");
-        return new ResponseEntity<>(errorResponse, status);
-    }
-    */
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
