@@ -29,7 +29,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
@@ -39,18 +40,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
         jwt = authHeader.substring(7);
+        if (jwtServiceImpl.isTokenExpired(jwt)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("JWT Token is expired.");
+            response.getWriter().flush();
+            return;
+        }
         username=jwtServiceImpl.extractUsername(jwt);
         if(StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null){
             //UserDetails userDetails = userService.getUserByUsername(username);
             UserDetails userDetails = userService.userDetailsService().loadUserByUsername(username);
 
-            if (jwtServiceImpl.isTokenExpired(jwt)) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write("JWT Token is expired.");
-                response.getWriter().flush();
-                return;
-            }
+
 
             if(jwtServiceImpl.isTokenValid(jwt, userDetails)){
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();

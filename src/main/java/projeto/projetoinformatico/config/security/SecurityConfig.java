@@ -17,11 +17,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import projeto.projetoinformatico.config.jwt.JwtAuthenticationFilter;
+import projeto.projetoinformatico.exceptions.JWTAuthenticationEntryPoint;
 import projeto.projetoinformatico.service.UserService;
-import projeto.projetoinformatico.model.users.Role;
 
 @Configuration
 @EnableWebSecurity
@@ -98,4 +99,11 @@ public class SecurityConfig {
         throws Exception {
         return config.getAuthenticationManager();
     }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new JWTAuthenticationEntryPoint();
+    }
+
+
 }

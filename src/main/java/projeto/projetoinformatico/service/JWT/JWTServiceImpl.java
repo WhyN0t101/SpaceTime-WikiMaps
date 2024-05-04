@@ -6,8 +6,12 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.SneakyThrows;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import projeto.projetoinformatico.exceptions.Exception.JwtExpiredException;
 
 import java.security.Key;
 import java.util.Date;
@@ -19,7 +23,8 @@ public class JWTServiceImpl {
 
 
 
-    public String extractUsername(String token){
+    public String extractUsername(String token)
+            throws JwtException{
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -33,10 +38,12 @@ public class JWTServiceImpl {
             return Jwts.parser().setSigningKey(getSiginKey()).build().parseClaimsJws(token).getBody();
         } catch (JwtException e) {
             // Log or handle the exception
-            e.printStackTrace();
-            throw new RuntimeException("Error parsing JWT token: " + e.getMessage());
+            //e.printStackTrace();
+
+            throw new JwtExpiredException(e.getLocalizedMessage());
         }
     }
+
     private Key getSiginKey() {
         byte[] key = Decoders.BASE64.decode("413F4428472B4B6250655368566D5970337336763979244226452948404D6351");
         return Keys.hmacShaKeyFor(key);
@@ -53,7 +60,7 @@ public class JWTServiceImpl {
     public String generateToken(UserDetails userDetails){
         return Jwts.builder().setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 604800000)) //7 dias
+                .setExpiration(new Date(System.currentTimeMillis() + 100)) //7 dias
                 .signWith(getSiginKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

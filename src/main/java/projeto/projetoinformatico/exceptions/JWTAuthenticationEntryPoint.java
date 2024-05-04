@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.exceptions.Exception;
+package projeto.projetoinformatico.exceptions;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

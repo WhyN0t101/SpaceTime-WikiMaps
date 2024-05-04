@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
+import projeto.projetoinformatico.exceptions.Exception.JwtExpiredException;
 import projeto.projetoinformatico.requests.*;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
@@ -36,7 +37,7 @@ public class AuthenticationController {
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @PostMapping("/refresh")
-    public ResponseEntity<JwtAuthenticationResponse> refresh(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+    public ResponseEntity<JwtAuthenticationResponse> refresh(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) throws JwtExpiredException {
         return ResponseEntity.ok(authenticationService.refreshToken(refreshTokenRequest));
     }
 
