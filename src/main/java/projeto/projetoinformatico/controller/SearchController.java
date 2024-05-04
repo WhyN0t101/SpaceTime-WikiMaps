@@ -99,7 +99,7 @@ public class SearchController {
     }
 
     @PostMapping("/sparql")
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
+    //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<SearchResult> executeSparqlQuery(@RequestBody String sparqlQuery) {
         if (!rateLimiter.tryAcquire()) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();

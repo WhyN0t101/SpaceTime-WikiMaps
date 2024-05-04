@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import projeto.projetoinformatico.exceptions.Exception.*;
 import projeto.projetoinformatico.responses.ErrorResponse;
@@ -18,9 +19,9 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseBody
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
@@ -33,10 +34,17 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
+    @ExceptionHandler(InvalidLayerRequestException.class)
+    @ResponseBody
+    public ResponseEntity<ErrorResponse> handleInvalidLayerRequest(InvalidLayerRequestException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
+        return new ResponseEntity<>(errorResponse, status);
+    }
     @ExceptionHandler(SparqlQueryException.class)
     @ResponseBody
     public ResponseEntity<ErrorResponse> handleSparqlQueryException(SparqlQueryException ex) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR; // Assuming SPARQL exceptions indicate internal server errors
+        HttpStatus status = HttpStatus.BAD_REQUEST; // Assuming SPARQL exceptions indicate internal server errors
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
@@ -52,7 +60,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        HttpStatus status = HttpStatus.BAD_REQUEST; // Assuming SignUPRequest exceptions indicate internal server errors
+        HttpStatus status = HttpStatus.BAD_REQUEST;
 
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
@@ -66,13 +74,10 @@ public class GlobalExceptionHandler {
             errorMessage += " " + entry.getValue() + ";";
         }
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", errorMessage);
-        //return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-
-        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, response.put("message", errorMessage));
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, errorMessage);
         return new ResponseEntity<>(errorResponse, status);
     }
+
 
     @ExceptionHandler(Exception.class)
     @ResponseBody

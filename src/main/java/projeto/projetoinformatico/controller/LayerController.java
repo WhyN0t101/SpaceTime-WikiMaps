@@ -40,7 +40,6 @@ public class LayerController {
     }
 
     @GetMapping("/layers")
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<List<Layer>> getAllLayers() {
         List<Layer> layers = layerService.getAllLayers();
         return ResponseEntity.ok(layers);
@@ -57,7 +56,7 @@ public class LayerController {
     }
 
     @GetMapping("/layers/{id}")
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
+    //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getLayerResultsByIdWithParams(
             @PathVariable Long id,
             @RequestParam Double lat1,
@@ -79,7 +78,7 @@ public class LayerController {
         } catch (SparqlQueryException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new SearchResult(Collections.emptyList()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new SparqlQueryException("Invalid Sparql Query");
         }
     }
 
@@ -106,5 +105,10 @@ public class LayerController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/layers/search")
+    public List<Layer> searchLayers(@RequestParam("query") String query) {
+        // Query the database layers where name or description contains the keywords
+        return layerService.findByKeywords(query);
+    }
 
 }
