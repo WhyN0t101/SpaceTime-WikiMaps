@@ -1,5 +1,6 @@
 package projeto.projetoinformatico.exceptions.Handlers;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -92,6 +93,13 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, "JWT Token is expired. Please log in again.");
         return new ResponseEntity<>(errorResponse, status);
     }
+
+
+    /*@ExceptionHandler(JwtExpiredException.class)
+    public void handleJwtForbiddenException(JwtExpiredException e, HttpServletResponse response) {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        // You can log the exception or handle it in any other way if needed
+    }*/
 
 
 }

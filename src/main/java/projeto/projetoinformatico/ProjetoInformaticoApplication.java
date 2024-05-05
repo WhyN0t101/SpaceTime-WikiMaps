@@ -11,11 +11,13 @@ import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 
+import java.util.List;
+
 @SpringBootApplication
 @EnableCaching
 @EntityScan(basePackages = {"projeto.projetoinformatico.model.users", "projeto.projetoinformatico.model.layers"})
 //@EnableJpaRepositories(basePackages = "projeto.projetoinformatico.model")
-public class ProjetoInformaticoApplication implements CommandLineRunner {
+public class ProjetoInformaticoApplication {
 
     @Autowired
     private UserRepository userRepository;
@@ -24,18 +26,4 @@ public class ProjetoInformaticoApplication implements CommandLineRunner {
         SpringApplication.run(ProjetoInformaticoApplication.class, args);
     }
 
-    public void run(String... args){
-        User adminAccount = userRepository.findByRole(Role.ADMIN);
-        if(adminAccount == null){
-            User user = new User();
-
-            user.setEmail("admin@mail.com");
-            user.setUsername("Admin");
-            user.setRole(Role.ADMIN);
-            user.setPassword(new BCryptPasswordEncoder().encode("admin"));
-
-            userRepository.save(user);
-
-        }
-    }
 }

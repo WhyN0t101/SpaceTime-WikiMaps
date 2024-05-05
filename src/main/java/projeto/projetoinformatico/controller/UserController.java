@@ -12,7 +12,6 @@ import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.model.users.Role;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -44,7 +43,6 @@ public class UserController {
                 throw new NotFoundException("Role not found: " + role);
             }
         }
-
         // If the role is valid, convert it to enum
         Role userRole = null;
         if (role != null) {
@@ -108,6 +106,25 @@ public class UserController {
         String authenticatedUsername = authentication.getName();
         UserResponse user = userService.getUserByUsername(authenticatedUsername);
         return ResponseEntity.ok(user);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/users/{username}/role")
+    public ResponseEntity<UserResponse> updateUserRole(@PathVariable String username, @RequestParam String role) {
+        UserResponse user = userService.getUserByUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found with username: " + username);
+        }
+
+        try {
+            // Convert the role string to Role enum
+            Role roleEnum = Role.valueOf(role.toUpperCase());
+            // Update the user's role
+            UserResponse updatedUser = userService.updateUser(username, roleEnum);
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Role not found: " + role);
+        }
     }
 
     @GetMapping

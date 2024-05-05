@@ -29,49 +29,56 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
-
 
         if(StringUtils.isEmpty(authHeader) || !org.apache.commons.lang3.StringUtils.startsWith(authHeader, "Bearer ")){
             filterChain.doFilter(request, response);
             return;
         }
-        jwt = authHeader.substring(7);
-        username=jwtServiceImpl.extractUsername(jwt);
-        if(StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = userService.userDetailsService().loadUserByUsername(username);
 
+        jwt = authHeader.substring(7);
+
+        try {
             if (jwtServiceImpl.isTokenExpired(jwt)) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.getWriter().write("JWT Token is expired.");
                 response.getWriter().flush();
                 return;
             }
+            username = jwtServiceImpl.extractUsername(jwt);
+            if(StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null){
+                UserDetails userDetails = userService.userDetailsService().loadUserByUsername(username);
 
-            if(jwtServiceImpl.isTokenValid(jwt, userDetails)){
-                SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+                if(jwtServiceImpl.isTokenValid(jwt, userDetails)){
+                    SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
-                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
+                    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
 
-                token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                securityContext.setAuthentication(token);
-                SecurityContextHolder.setContext(securityContext);
+                    securityContext.setAuthentication(token);
+                    SecurityContextHolder.setContext(securityContext);
+                }
+                else{
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("JWT Token is invalid.");
+                    response.getWriter().flush();
+                    return;
+                }
             }
-            else{
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write("JWT Token is expired.");
-                response.getWriter().flush();
-                return;
-
-            }
+            filterChain.doFilter(request, response);
+        } catch (JwtExpiredException e) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("JWT Token is expired.");
+            response.getWriter().flush();
+            //throw new JWTException n funciona
         }
-        filterChain.doFilter(request, response);
-
     }
+
 }

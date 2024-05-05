@@ -119,4 +119,18 @@ public class UserService implements UserDetailsService {
         return userResponse;
     }
 
+    public UserResponse updateUser(String username, Role role) {
+        // Retrieve the user entity from the database based on the username
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found with username: " + username);
+        }
+
+        // Update the user's role directly
+        user.setRole(role);
+
+       // Save the updated user entity
+        userRepository.save(user);
+        return convertUserToUserResponse(user);
+    }
 }
