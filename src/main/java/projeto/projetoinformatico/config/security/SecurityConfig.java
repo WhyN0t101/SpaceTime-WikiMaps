@@ -1,5 +1,6 @@
 package projeto.projetoinformatico.config.security;
 
+import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +36,7 @@ public class SecurityConfig {
     private final UserService userService;
 
 
+
     @Value("${spring.security.debug:false}")
     boolean securityDebug;
 
@@ -68,11 +70,14 @@ public class SecurityConfig {
             )*/
             //.httpBasic(Customizer.withDefaults())
             .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(customizer -> customizer.authenticationEntryPoint(authenticationEntryPoint()))
             .authenticationProvider(authenticationProvider()).addFilterBefore(
                     jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class
             );
         return http.build();
     }
+
+
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
