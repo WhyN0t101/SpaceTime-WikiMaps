@@ -58,14 +58,19 @@ public class UserService implements UserDetailsService {
     }
 
     @Cacheable(value = "searchCache", key = "#role")
-    public List<UserResponse> getAllUsersByRole(Role role) {
-        List<User> users = userRepository.findAllByRole(role);
-        if (users.isEmpty()) {
-            throw new NotFoundException("No users found with role: " + role);
+    public List<UserResponse> getAllUsersByRole(String role) {
+        try {
+            Role roleEnum = Role.valueOf(role.toUpperCase());
+            List<User> users = userRepository.findAllByRole(roleEnum);
+            if (users.isEmpty()) {
+                throw new NotFoundException("No users found with role: " + role);
+            }
+            return users.stream()
+                    .map(this::convertUserToUserResponse)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Role not found: " + role);
         }
-        return users.stream()
-                .map(this::convertUserToUserResponse)
-                .collect(Collectors.toList());
     }
 
     @Cacheable(value = "searchCache", key = "#id")
@@ -88,15 +93,23 @@ public class UserService implements UserDetailsService {
         return (user != null) ? user.getUsername() : null;
     }
 
-    public List<UserResponse> getUsersByNameAndRole(String name, Role role) {
-        List<User> users = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, role);
-        if (users.isEmpty()) {
-            throw new NotFoundException("No users found with name starting with: " + name + " and role: " + role);
+    public List<UserResponse> getUsersByNameAndRole(String name, String role) {
+        try {
+            Role roleEnum = Role.valueOf(role.toUpperCase());
+            List<User> users = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, roleEnum);
+            if (users.isEmpty()) {
+                throw new NotFoundException("No users found with name starting with: " + name + " and role: " + role);
+            }
+            return users.stream()
+                    .map(this::convertUserToUserResponse)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Role not found: " + role);
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Role cannot be null");
         }
-        return users.stream()
-                .map(this::convertUserToUserResponse)
-                .collect(Collectors.toList());
     }
+
 
     public List<UserResponse> getUserContainingUsername(String name) {
         List<User> users = userRepository.findByUsernameStartingWithIgnoreCase(name);
@@ -117,6 +130,21 @@ public class UserService implements UserDetailsService {
         userResponse.setEnabled(user.isEnabled());
         // Set other fields as needed
         return userResponse;
+    }
+    public UserResponse updateUserRole(String username, String role) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found with username: " + username);
+        }
+
+        try {
+            Role roleEnum = Role.valueOf(role.toUpperCase());
+            user.setRole(roleEnum);
+            userRepository.save(user);
+            return convertUserToUserResponse(user);
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Role not found: " + role);
+        }
     }
 
 }

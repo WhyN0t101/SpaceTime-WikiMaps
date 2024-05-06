@@ -46,7 +46,7 @@ public class LayerController {
     }
 
     @GetMapping("/layers/id/{id}")
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
+    //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<Layer> getLayerById(@PathVariable Long id) {
         Layer layer = layerService.getLayerById(id);
         if (layer == null) {
@@ -82,7 +82,7 @@ public class LayerController {
         }
     }
 
-    @PostMapping("/layers/create")
+    @PostMapping("/layers")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<Layer> createLayer(@Valid @RequestBody LayerRequest layerRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

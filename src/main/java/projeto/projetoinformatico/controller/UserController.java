@@ -12,7 +12,6 @@ import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.model.users.Role;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -36,32 +35,16 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(required = false) String name,
                                                           @RequestParam(required = false) String role) {
 
-        // Check if the role parameter is provided and valid
-        if (role != null) {
-            try {
-                Role roleEnum = Role.valueOf(role.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new NotFoundException("Role not found: " + role);
-            }
-        }
-
-        // If the role is valid, convert it to enum
-        Role userRole = null;
-        if (role != null) {
-            userRole = Role.valueOf(role.toUpperCase());
-        }
-
         List<UserResponse> users;
-
-        if (name != null && userRole != null) {
+        if (name != null && role != null) {
             // Filter users by name and role
-            users = userService.getUsersByNameAndRole(name, userRole);
+            users = userService.getUsersByNameAndRole(name, role);
         } else if (name != null) {
             // Filter users by name only
             users = userService.getUserContainingUsername(name);
-        } else if (userRole != null) {
+        } else if (role != null) {
             // Filter users by role only
-            users = userService.getAllUsersByRole(userRole);
+            users = userService.getAllUsersByRole(role);
         } else {
             // No filtering, return all users
             users = userService.getAllUsers();
@@ -75,12 +58,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/role/{role}")
     public ResponseEntity<List<UserResponse>> getAllUsersByRole(@PathVariable String role) {
-        try {
-            Role roleEnum = Role.valueOf(role.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Role not found" + role);
-        }
-        List<UserResponse> users = userService.getAllUsersByRole(Role.valueOf(role.toUpperCase()));
+        List<UserResponse> users = userService.getAllUsersByRole(role);
         return ResponseEntity.ok(users);
     }
 
@@ -108,6 +86,13 @@ public class UserController {
         String authenticatedUsername = authentication.getName();
         UserResponse user = userService.getUserByUsername(authenticatedUsername);
         return ResponseEntity.ok(user);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/users/{username}/role")
+    public ResponseEntity<UserResponse> updateUserRole(@PathVariable String username, @RequestParam String role) {
+        UserResponse updatedUser = userService.updateUserRole(username, role);
+        return ResponseEntity.ok(updatedUser);
     }
 
     @GetMapping

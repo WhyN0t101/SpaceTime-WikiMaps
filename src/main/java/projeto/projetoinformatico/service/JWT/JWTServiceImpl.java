@@ -60,13 +60,13 @@ public class JWTServiceImpl {
     public String generateToken(UserDetails userDetails){
         return Jwts.builder().setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 100)) //7 dias
+                .setExpiration(new Date(System.currentTimeMillis() + 604800000)) //7 dias
                 .signWith(getSiginKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String  generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-            return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
+        return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 604800000))//refresh de 7 dias
                 .signWith(getSiginKey(), SignatureAlgorithm.HS256)

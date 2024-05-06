@@ -94,6 +94,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, status);
     }
 
+
     /*@ExceptionHandler(JwtExpiredException.class)
     public void handleJwtForbiddenException(JwtExpiredException e, HttpServletResponse response) {
         response.setStatus(HttpStatus.FORBIDDEN.value());
