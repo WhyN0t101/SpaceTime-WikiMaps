@@ -23,17 +23,17 @@ public class JWTServiceImpl {
 
 
 
-    public String extractUsername(String token)
+    public static String extractUsername(String token)
             throws JwtException{
         return extractClaim(token, Claims::getSubject);
     }
 
-    private <T> T extractClaim(String token, Function<Claims, T> claimsResolvers){
+    private static <T> T extractClaim(String token, Function<Claims, T> claimsResolvers){
         final Claims claims = extractAllClaims(token);
         return claimsResolvers.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    private static Claims extractAllClaims(String token) {
         try {
             return Jwts.parser().setSigningKey(getSiginKey()).build().parseClaimsJws(token).getBody();
         } catch (JwtException e) {
@@ -44,28 +44,28 @@ public class JWTServiceImpl {
         }
     }
 
-    private Key getSiginKey() {
+    private static Key getSiginKey() {
         byte[] key = Decoders.BASE64.decode("413F4428472B4B6250655368566D5970337336763979244226452948404D6351");
         return Keys.hmacShaKeyFor(key);
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails){
+    public static boolean isTokenValid(String token, UserDetails userDetails){
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    public boolean isTokenExpired(String token) {
+    public static boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
-    public String generateToken(UserDetails userDetails){
+    public static String generateToken(UserDetails userDetails){
         return Jwts.builder().setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 604800000)) //7 dias
+                .setExpiration(new Date(System.currentTimeMillis() + 100)) //7 dias
                 .signWith(getSiginKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String  generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public static String  generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 604800000))//refresh de 7 dias

@@ -16,7 +16,7 @@ import projeto.projetoinformatico.responses.ErrorResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
+//@ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
