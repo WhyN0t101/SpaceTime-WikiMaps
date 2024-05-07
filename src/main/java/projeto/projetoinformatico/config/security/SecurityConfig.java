@@ -47,7 +47,9 @@ public class SecurityConfig {
             .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(request -> request.requestMatchers("/register")
                     .permitAll()
-                    .requestMatchers("/api/auth/**").permitAll())
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .anyRequest().authenticated()
+            )
                     /*
                     .requestMatchers("/api/search").permitAll()
                     .requestMatchers("/api/search/time").permitAll()
@@ -69,7 +71,6 @@ public class SecurityConfig {
                     .requestMatchers("/api/users/role/{role}").permitAll()
                     .requestMatchers("/api/users/id/{id}").permitAll()
 
-                    .anyRequest().authenticated()
             )*/
             //.httpBasic(Customizer.withDefaults())
             .exceptionHandling(customizer -> customizer.authenticationEntryPoint(authenticationEntryPoint()))

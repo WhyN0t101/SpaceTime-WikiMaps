@@ -29,7 +29,7 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
-    private final JWTServiceImpl jwtService;
+    //private final JWTServiceImpl jwtService;
 
 
 
@@ -75,8 +75,8 @@ public class AuthenticationService {
             throw new NotFoundException("User not found");
         }
 
-        var jwt = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
+        var jwt = JWTServiceImpl.generateToken(user);
+        var refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
 
         // Create an instance of UserResponse
         UserResponse userResponse = new UserResponse();
@@ -98,14 +98,14 @@ public class AuthenticationService {
 
 
     public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
-        String userUsername = jwtService.extractUsername(refreshTokenRequest.getToken());
+        String userUsername = JWTServiceImpl.extractUsername(refreshTokenRequest.getToken());
 
         User user = userRepository.findByUsername(userUsername);
         if (user == null){
             throw new NotFoundException("User not found");
         }
-        if(jwtService.isTokenValid(refreshTokenRequest.getToken(), user)){
-            var jwt = jwtService.generateToken(user);
+        if(JWTServiceImpl.isTokenValid(refreshTokenRequest.getToken(), user)){
+            var jwt = JWTServiceImpl.generateToken(user);
 
             JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
 
