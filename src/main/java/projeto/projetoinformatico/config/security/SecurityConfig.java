@@ -2,6 +2,7 @@ package projeto.projetoinformatico.config.security;
 
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,12 +29,12 @@ import projeto.projetoinformatico.service.UserService;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
-@RequiredArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final UserService userService;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private UserService userService;
 
 
 
@@ -43,12 +44,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            /*.authorizeHttpRequests(request -> request.requestMatchers("/register")
+            .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(request -> request.requestMatchers("/register")
                     .permitAll()
+                    .requestMatchers("/api/auth/**").permitAll())
+                    /*
                     .requestMatchers("/api/search").permitAll()
                     .requestMatchers("/api/search/time").permitAll()
                     .requestMatchers("/api/sparql").permitAll()
-                    .requestMatchers("/api/auth/**").permitAll()
                     //.requestMatchers("/api/admin").hasAnyAuthority(Role.ADMIN.name())
                     //.requestMatchers("/api").hasAnyAuthority(Role.USER.name())
                     .requestMatchers("/api/items/{itemId}").permitAll()
@@ -69,10 +72,9 @@ public class SecurityConfig {
                     .anyRequest().authenticated()
             )*/
             //.httpBasic(Customizer.withDefaults())
-            .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(customizer -> customizer.authenticationEntryPoint(authenticationEntryPoint()))
-            .authenticationProvider(authenticationProvider()).addFilterBefore(
-                    jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class
+            //.authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class
             );
         return http.build();
     }
@@ -108,6 +110,11 @@ public class SecurityConfig {
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return new JWTAuthenticationEntryPoint();
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter();
     }
 
 

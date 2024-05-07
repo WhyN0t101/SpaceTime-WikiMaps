@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,11 +21,10 @@ import projeto.projetoinformatico.service.UserService;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JWTServiceImpl jwtServiceImpl;
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
 
 
@@ -44,17 +44,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
 
         try {
-            if (jwtServiceImpl.isTokenExpired(jwt)) {
+            if (JWTServiceImpl.isTokenExpired(jwt)) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.getWriter().write("JWT Token is expired.");
                 response.getWriter().flush();
                 return;
             }
-            username = jwtServiceImpl.extractUsername(jwt);
+            username = JWTServiceImpl.extractUsername(jwt);
             if(StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null){
                 UserDetails userDetails = userService.userDetailsService().loadUserByUsername(username);
 
-                if(jwtServiceImpl.isTokenValid(jwt, userDetails)){
+                if(JWTServiceImpl.isTokenValid(jwt, userDetails)){
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
                     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
@@ -75,10 +75,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (JwtExpiredException e) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            /*response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("JWT Token is expired.");
             response.getWriter().flush();
-            //throw new JWTException n funciona
+
+             */
+            throw new JwtExpiredException("JWT Token is expired");
         }
     }
 
