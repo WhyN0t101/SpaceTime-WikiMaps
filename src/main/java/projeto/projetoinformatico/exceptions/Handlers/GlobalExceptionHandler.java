@@ -1,6 +1,5 @@
 package projeto.projetoinformatico.exceptions.Handlers;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -8,8 +7,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import projeto.projetoinformatico.exceptions.Exception.*;
 import projeto.projetoinformatico.responses.ErrorResponse;
 
@@ -39,9 +36,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("The requested resource is not found.");
     }*/
 
-    @ExceptionHandler(InvalidLayerRequestException.class)
+    @ExceptionHandler(InvalidRequestException.class)
     @ResponseBody
-    public ResponseEntity<ErrorResponse> handleInvalidLayerRequest(InvalidLayerRequestException ex) {
+    public ResponseEntity<ErrorResponse> handleInvalidRequest(InvalidRequestException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);

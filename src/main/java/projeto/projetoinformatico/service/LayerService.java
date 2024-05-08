@@ -3,7 +3,7 @@ package projeto.projetoinformatico.service;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import projeto.projetoinformatico.exceptions.Exception.InvalidLayerRequestException;
+import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.model.layers.Layer;
@@ -70,7 +70,7 @@ public class LayerService {
 
     public void deleteLayer(Long id) {
         if (id == null) {
-            throw new InvalidLayerRequestException("Layer ID cannot be null");
+            throw new InvalidRequestException("Layer ID cannot be null");
         }
         if (layersRepository.existsById(id)) {
             layersRepository.deleteById(id);
@@ -95,18 +95,18 @@ public class LayerService {
 
     private void validateSparqlQuery(String query) {
         if (isSparqlQueryValid(query)) {
-            throw new InvalidLayerRequestException("Invalid SPARQL query format");
+            throw new InvalidRequestException("Invalid SPARQL query format");
         }
     }
     private void validateLayerRequest(LayerRequest layerRequest) {
         if (layerRequest == null || isSparqlQueryValid(layerRequest.getQuery())) {
-            throw new InvalidLayerRequestException("Invalid layer request");
+            throw new InvalidRequestException("Invalid layer request");
         }
     }
 
     private void checkDuplicateLayerName(String name) {
         if (layersRepository.existsByLayerName(name)) {
-            throw new InvalidLayerRequestException("Layer name already exists: " + name);
+            throw new InvalidRequestException("Layer name already exists: " + name);
         }
     }
 

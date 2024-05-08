@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import projeto.projetoinformatico.model.users.User;
 
 import java.util.Date;
 
@@ -45,5 +46,6 @@ public class RoleUpgrade {
     @PrePersist
     protected void onCreate() {
         timestamp = new Date();
+        status = RoleStatus.PENDING;
     }
 }
