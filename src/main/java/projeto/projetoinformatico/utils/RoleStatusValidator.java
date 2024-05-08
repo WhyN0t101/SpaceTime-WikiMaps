@@ -2,25 +2,25 @@ package projeto.projetoinformatico.utils;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
 
-public class RoleStatusValidator implements ConstraintValidator<ValidRoleStatus, RoleStatus> {
+public class RoleStatusValidator implements ConstraintValidator<ValidRoleStatus, String> {
 
     @Override
     public void initialize(ValidRoleStatus constraintAnnotation) {
     }
 
     @Override
-    public boolean isValid(RoleStatus status, ConstraintValidatorContext context) {
-        if (status == null) {
-            return false;
+    public boolean isValid(String status, ConstraintValidatorContext context) {
+        if (status == null || status.isBlank()) {
+            return false; // Empty or null strings are considered invalid
         }
-        for (RoleStatus validStatus : RoleStatus.values()) {
-            if (validStatus.equals(status)) {
-                return true;
+        // Check if the provided status string matches any of the enum values
+        for (RoleStatus enumValue : RoleStatus.values()) {
+            if (enumValue.name().equalsIgnoreCase(status)) {
+                return true; // Match found, status is valid
             }
         }
-        throw new InvalidRequestException("Invalid RoleStatus: " + status);
+        return false; // No matching enum value found, status is invalid
     }
 }

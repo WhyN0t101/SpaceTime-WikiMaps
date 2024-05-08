@@ -72,13 +72,14 @@ public class UpgradeService {
         RoleUpgrade roleUpgrade = optionalRequest.get();
 
         // Update the status and message of the upgrade request
-        RoleStatus newStatus = request.getStatus();
+        RoleStatus statusEnum = RoleStatus.valueOf(request.getStatus().toUpperCase());
+
         String message = request.getMessage();
-        roleUpgrade.setStatus(newStatus);
+        roleUpgrade.setStatus(statusEnum);
         roleUpgrade.setMessage(message);
 
         // If the request is accepted, update the user's role
-        if (newStatus == RoleStatus.ACCEPTED) {
+        if (statusEnum == RoleStatus.ACCEPTED) {
             String username = roleUpgrade.getUsername();
             User user = userRepository.findByUsername(username);
             if (user == null) {

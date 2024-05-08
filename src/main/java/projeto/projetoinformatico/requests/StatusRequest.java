@@ -6,14 +6,14 @@ import projeto.projetoinformatico.utils.ValidRoleStatus;
 
 public class StatusRequest {
     @ValidRoleStatus(message = "Status is invalid")
-    private RoleStatus status;
+    private String status;
     private String message;
 
-    public RoleStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(RoleStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
