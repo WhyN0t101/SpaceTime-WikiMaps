@@ -16,7 +16,7 @@ import projeto.projetoinformatico.responses.ErrorResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-//@ControllerAdvice
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
@@ -34,6 +34,11 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
+   /* @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<String> handleNotFoundException(NoHandlerFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("The requested resource is not found.");
+    }*/
+
     @ExceptionHandler(InvalidLayerRequestException.class)
     @ResponseBody
     public ResponseEntity<ErrorResponse> handleInvalidLayerRequest(InvalidLayerRequestException ex) {
