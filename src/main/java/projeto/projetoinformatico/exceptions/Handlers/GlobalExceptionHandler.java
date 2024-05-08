@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import projeto.projetoinformatico.exceptions.Exception.*;
 import projeto.projetoinformatico.responses.ErrorResponse;
 
@@ -31,10 +32,6 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
-   /* @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<String> handleNotFoundException(NoHandlerFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("The requested resource is not found.");
-    }*/
 
     @ExceptionHandler(InvalidRequestException.class)
     @ResponseBody

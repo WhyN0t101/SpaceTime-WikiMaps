@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
+import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.requests.StatusRequest;
 import projeto.projetoinformatico.requests.UpgradeRequest;
 import projeto.projetoinformatico.responses.UserResponse;
@@ -42,7 +43,6 @@ public class UpgradeController {
 
         return ResponseEntity.ok(requests);
     }
-    // Endpoint for users to make an upgrade request
     @PostMapping("/request")
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<RoleUpgrade> requestUpgrade(@Valid @RequestBody UpgradeRequest upgradeRequest) {
@@ -52,11 +52,10 @@ public class UpgradeController {
         return ResponseEntity.ok(request);
     }
 
-    // Endpoint for admin to accept/decline upgrade requests
-    @PutMapping("/process-request/{requestId}")
+    @PutMapping("/request/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<RoleUpgrade> processUpgradeRequest(@Valid @RequestBody StatusRequest statusRequest, @PathVariable Long requestId) {
-        RoleUpgrade request = upgradeService.handleRequest(statusRequest, requestId);
+    public ResponseEntity<RoleUpgrade> processUpgradeRequest(@PathVariable Long id, @Valid @RequestBody StatusRequest statusRequest) {
+        RoleUpgrade request = upgradeService.handleRequest(statusRequest, id);
         return ResponseEntity.ok(request);
     }
 }

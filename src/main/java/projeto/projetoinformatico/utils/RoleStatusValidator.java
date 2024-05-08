@@ -2,13 +2,13 @@ package projeto.projetoinformatico.utils;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
 
 public class RoleStatusValidator implements ConstraintValidator<ValidRoleStatus, RoleStatus> {
 
     @Override
     public void initialize(ValidRoleStatus constraintAnnotation) {
-        // No initialization needed
     }
 
     @Override
@@ -21,7 +21,6 @@ public class RoleStatusValidator implements ConstraintValidator<ValidRoleStatus,
                 return true;
             }
         }
-        return false;
+        throw new InvalidRequestException("Invalid RoleStatus: " + status);
     }
-
 }
