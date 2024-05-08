@@ -41,4 +41,9 @@ public class roleUpgrade {
     @Getter
     @Setter
     private String message;
+
+    @PrePersist
+    protected void onCreate() {
+        timestamp = new Date();
+    }
 }

@@ -32,7 +32,7 @@ public class Layer {
     @Column(nullable = false)
     private Date timestamp;
 
-      @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String query;
 
     @PrePersist
