@@ -1,6 +1,6 @@
 package projeto.projetoinformatico.model.roleUpgrade;
 
-public enum roleStatus {
+public enum RoleStatus {
     PENDING,
     ACCEPTED,
     DECLINED

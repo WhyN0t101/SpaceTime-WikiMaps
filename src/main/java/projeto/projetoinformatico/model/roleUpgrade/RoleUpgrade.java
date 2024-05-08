@@ -10,7 +10,7 @@ import java.util.Date;
 @Entity
 @Table(name = "upgrade")
 @Data
-public class roleUpgrade {
+public class RoleUpgrade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +35,7 @@ public class roleUpgrade {
     @Enumerated(EnumType.STRING)
     @Getter
     @Setter
-    private roleStatus status;
+    private RoleStatus status;
 
     @Column
     @Getter

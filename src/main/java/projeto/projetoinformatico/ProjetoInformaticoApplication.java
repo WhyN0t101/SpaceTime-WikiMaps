@@ -15,7 +15,7 @@ import java.util.List;
 
 @SpringBootApplication
 @EnableCaching
-@EntityScan(basePackages = {"projeto.projetoinformatico.model.users", "projeto.projetoinformatico.model.layers"})
+@EntityScan(basePackages = {"projeto.projetoinformatico.model.users", "projeto.projetoinformatico.model.layers", "projeto.projetoinformatico.model.roleUpgrade"})
 //@EnableJpaRepositories(basePackages = "projeto.projetoinformatico.model")
 public class ProjetoInformaticoApplication {
 
