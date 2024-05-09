@@ -1,6 +1,9 @@
 package projeto.projetoinformatico.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
+import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
@@ -10,6 +13,7 @@ import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.StatusRequest;
+import projeto.projetoinformatico.utils.ModelMapperUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,7 +31,7 @@ public class UpgradeService {
         this.userRepository = userRepository;
     }
 
-    public RoleUpgrade requestUpgrade(String username, String reason) {
+    public RoleUpgradeDTO requestUpgrade(String username, String reason) {
         // Check if the user has a pending or accepted request
         Optional<RoleUpgrade> existingRequest = roleUpgradeRepository.findFirstByUsernameAndStatusInOrderByTimestampDesc(username,
                 List.of(RoleStatus.PENDING, RoleStatus.ACCEPTED));
@@ -53,14 +57,14 @@ public class UpgradeService {
         RoleUpgrade request = new RoleUpgrade();
         request.setReason(reason);
         request.setUsername(username);
-        return saveRequest(request);
+        return convertUpgradeToDTO(saveRequest(request));
     }
 
     private RoleUpgrade saveRequest(RoleUpgrade request) {
         return roleUpgradeRepository.save(request);
     }
 
-    public RoleUpgrade handleRequest(StatusRequest request, Long id) {
+    public RoleUpgradeDTO  handleRequest(StatusRequest request, Long id) {
         // Retrieve the requested upgrade by ID
         Optional<RoleUpgrade> optionalRequest = roleUpgradeRepository.findById(id);
 
@@ -91,18 +95,20 @@ public class UpgradeService {
         }
 
         // Save the updated upgrade request
-        return roleUpgradeRepository.save(roleUpgrade);
+        return convertUpgradeToDTO(roleUpgradeRepository.save(roleUpgrade));
     }
 
 
-    public List<RoleUpgrade> getByStatus(String status) {
+    public List<RoleUpgradeDTO> getByStatus(String status) {
         try {
             RoleStatus statusEnum = RoleStatus.valueOf(status.toUpperCase());
             List<RoleUpgrade> requests = roleUpgradeRepository.findByStatus(statusEnum);
             if (requests.isEmpty()) {
                 throw new NotFoundException("No requests found with status " + status );
             }
-            return new ArrayList<>(requests);
+            return requests.stream()
+                    .map(this::convertUpgradeToDTO)
+                    .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new NotFoundException("Status not found: " + status);
         } catch (NullPointerException e) {
@@ -110,7 +116,15 @@ public class UpgradeService {
         }
     }
 
-    public List<RoleUpgrade> getAllRequests() {
-        return roleUpgradeRepository.findAll();
+    public List<RoleUpgradeDTO> getAllRequests() {
+        return roleUpgradeRepository.findAll().stream()
+                .map(this::convertUpgradeToDTO)
+                .collect(Collectors.toList());
     }
+    private RoleUpgradeDTO convertUpgradeToDTO(RoleUpgrade upgrade) {
+        ModelMapper modelMapper = new ModelMapper();
+        ModelMapperUtils mapperUtils = new ModelMapperUtils(modelMapper);
+        return mapperUtils.roleUpgradeToDTO(upgrade, RoleUpgradeDTO.class);
+    }
+
 }

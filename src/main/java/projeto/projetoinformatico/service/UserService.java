@@ -1,18 +1,20 @@
 package projeto.projetoinformatico.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.layers.LayersRepository;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
-import projeto.projetoinformatico.responses.UserResponse;
+import projeto.projetoinformatico.utils.ModelMapperUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,24 +43,24 @@ public class UserService implements UserDetailsService {
     }
 
     @Cacheable(value = "searchCache", key = "#username")
-    public UserResponse getUserByUsername(String username) {
+    public UserDTO getUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new NotFoundException("User not found with username: " + username);
         }
-        return convertUserToUserResponse(user);
+        return convertUserToDTO(user);
     }
 
     @Cacheable(value = "searchCache")
-    public List<UserResponse> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream()
-                .map(this::convertUserToUserResponse)
+                .map(this::convertUserToDTO)
                 .collect(Collectors.toList());
     }
 
     @Cacheable(value = "searchCache", key = "#role")
-    public List<UserResponse> getAllUsersByRole(String role) {
+    public List<UserDTO> getAllUsersByRole(String role) {
         try {
             Role roleEnum = Role.valueOf(role.toUpperCase());
             List<User> users = userRepository.findAllByRole(roleEnum);
@@ -66,7 +68,7 @@ public class UserService implements UserDetailsService {
                 throw new NotFoundException("No users found with role: " + role);
             }
             return users.stream()
-                    .map(this::convertUserToUserResponse)
+                    .map(this::convertUserToDTO)
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new NotFoundException("Role not found: " + role);
@@ -74,10 +76,10 @@ public class UserService implements UserDetailsService {
     }
 
     @Cacheable(value = "searchCache", key = "#id")
-    public UserResponse getUserById(Long id) {
+    public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
-        return convertUserToUserResponse(user);
+        return convertUserToDTO(user);
     }
 
     public List<Layer> getUserLayers(String username) {
@@ -93,7 +95,7 @@ public class UserService implements UserDetailsService {
         return (user != null) ? user.getUsername() : null;
     }
 
-    public List<UserResponse> getUsersByNameAndRole(String name, String role) {
+    public List<UserDTO> getUsersByNameAndRole(String name, String role) {
         try {
             Role roleEnum = Role.valueOf(role.toUpperCase());
             List<User> users = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, roleEnum);
@@ -101,7 +103,7 @@ public class UserService implements UserDetailsService {
                 throw new NotFoundException("No users found with name starting with: " + name + " and role: " + role);
             }
             return users.stream()
-                    .map(this::convertUserToUserResponse)
+                    .map(this::convertUserToDTO)
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new NotFoundException("Role not found: " + role);
@@ -111,27 +113,18 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public List<UserResponse> getUserContainingUsername(String name) {
+    public List<UserDTO> getUserContainingUsername(String name) {
         List<User> users = userRepository.findByUsernameStartingWithIgnoreCase(name);
         if (users.isEmpty()) {
             throw new NotFoundException("No users found with name starting with: " + name);
         }
         return users.stream()
-                .map(this::convertUserToUserResponse)
+                .map(this::convertUserToDTO)
                 .collect(Collectors.toList());
     }
 
-    private UserResponse convertUserToUserResponse(User user) {
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getId());
-        userResponse.setUsername(user.getUsername());
-        userResponse.setRole(user.getRole());
-        userResponse.setEmail(user.getEmail());
-        userResponse.setEnabled(user.isEnabled());
-        // Set other fields as needed
-        return userResponse;
-    }
-    public UserResponse updateUserRole(String username, String role) {
+
+    public UserDTO updateUserRole(String username, String role) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new NotFoundException("User not found with username: " + username);
@@ -141,10 +134,14 @@ public class UserService implements UserDetailsService {
             Role roleEnum = Role.valueOf(role.toUpperCase());
             user.setRole(roleEnum);
             userRepository.save(user);
-            return convertUserToUserResponse(user);
+            return convertUserToDTO(user);
         } catch (IllegalArgumentException e) {
             throw new NotFoundException("Role not found: " + role);
         }
     }
-
+    private UserDTO convertUserToDTO(User user) {
+        ModelMapper modelMapper = new ModelMapper();
+        ModelMapperUtils mapperUtils = new ModelMapperUtils(modelMapper);
+        return mapperUtils.userToDTO(user, UserDTO.class);
+    }
 }

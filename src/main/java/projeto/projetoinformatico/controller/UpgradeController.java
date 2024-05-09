@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
 import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.requests.StatusRequest;
@@ -30,9 +31,9 @@ public class UpgradeController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/requests")
-    public ResponseEntity<List<RoleUpgrade>> getAllRequestsByStatus(@RequestParam(required = false) String status) {
+    public ResponseEntity<List<RoleUpgradeDTO>> getAllRequestsByStatus(@RequestParam(required = false) String status) {
 
-        List<RoleUpgrade> requests;
+        List<RoleUpgradeDTO> requests;
         if (status != null) {
             // Filter users by name and role
             requests = upgradeService.getByStatus(status);
@@ -45,17 +46,17 @@ public class UpgradeController {
     }
     @PostMapping("/request")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<RoleUpgrade> requestUpgrade(@Valid @RequestBody UpgradeRequest upgradeRequest) {
+    public ResponseEntity<RoleUpgradeDTO> requestUpgrade(@Valid @RequestBody UpgradeRequest upgradeRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-       RoleUpgrade request =  upgradeService.requestUpgrade(username,upgradeRequest.getMessage());
+        RoleUpgradeDTO request =  upgradeService.requestUpgrade(username,upgradeRequest.getMessage());
         return ResponseEntity.ok(request);
     }
 
     @PutMapping("/request/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<RoleUpgrade> processUpgradeRequest(@PathVariable Long id, @Valid @RequestBody StatusRequest statusRequest) {
-        RoleUpgrade request = upgradeService.handleRequest(statusRequest, id);
+    public ResponseEntity<RoleUpgradeDTO> processUpgradeRequest(@PathVariable Long id, @Valid @RequestBody StatusRequest statusRequest) {
+        RoleUpgradeDTO request = upgradeService.handleRequest(statusRequest, id);
         return ResponseEntity.ok(request);
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.responses.UserResponse;
@@ -25,17 +26,17 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/{username}")
-    public ResponseEntity<UserResponse> getUserByUsername(@PathVariable String username) {
-        UserResponse user = userService.getUserByUsername(username);
+    public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
+        UserDTO user = userService.getUserByUsername(username);
         return ResponseEntity.ok(user);
     }
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users")
-    public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(required = false) String name,
+    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam(required = false) String name,
                                                           @RequestParam(required = false) String role) {
 
-        List<UserResponse> users;
+        List<UserDTO> users;
         if (name != null && role != null) {
             // Filter users by name and role
             users = userService.getUsersByNameAndRole(name, role);
@@ -57,8 +58,8 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/role/{role}")
-    public ResponseEntity<List<UserResponse>> getAllUsersByRole(@PathVariable String role) {
-        List<UserResponse> users = userService.getAllUsersByRole(role);
+    public ResponseEntity<List<UserDTO>> getAllUsersByRole(@PathVariable String role) {
+        List<UserDTO> users = userService.getAllUsersByRole(role);
         return ResponseEntity.ok(users);
     }
 
@@ -66,8 +67,8 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/id/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        UserResponse user = userService.getUserById(id);
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        UserDTO user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
@@ -81,17 +82,17 @@ public class UserController {
     }
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/user")
-    public ResponseEntity<UserResponse> getAuthenticatedUser() {
+    public ResponseEntity<UserDTO> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String authenticatedUsername = authentication.getName();
-        UserResponse user = userService.getUserByUsername(authenticatedUsername);
+        UserDTO user = userService.getUserByUsername(authenticatedUsername);
         return ResponseEntity.ok(user);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/users/{username}/role")
-    public ResponseEntity<UserResponse> updateUserRole(@PathVariable String username, @RequestParam String role) {
-        UserResponse updatedUser = userService.updateUserRole(username, role);
+    public ResponseEntity<UserDTO> updateUserRole(@PathVariable String username, @RequestParam String role) {
+        UserDTO updatedUser = userService.updateUserRole(username, role);
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -100,4 +101,5 @@ public class UserController {
     public ResponseEntity<String> sayHello(){
         return ResponseEntity.ok("Welcome User");
     }
+
 }
