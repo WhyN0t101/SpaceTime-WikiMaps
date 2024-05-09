@@ -5,11 +5,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.LayerDTO;
+import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.layers.LayersRepository;
+import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
 import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
@@ -24,14 +26,17 @@ public class LayerService {
     private final LayersRepository layersRepository;
     private final SparqlQueryProvider sparqlQueryProvider;
     private final SearchService searchService;
-    private final ModelMapperUtils modelMapperUtils;
+
+    private final ModelMapper modelMapper;
+    private final ModelMapperUtils mapperUtils;
 
     @Autowired
-    public LayerService(LayersRepository layersRepository, SparqlQueryProvider sparqlQueryProvider, SearchService searchService,ModelMapperUtils modelMapperUtils) {
+    public LayerService(LayersRepository layersRepository, SparqlQueryProvider sparqlQueryProvider, SearchService searchService,ModelMapper modelMapper, ModelMapperUtils mapperUtils) {
         this.layersRepository = layersRepository;
         this.sparqlQueryProvider = sparqlQueryProvider;
         this.searchService = searchService;
-        this.modelMapperUtils = modelMapperUtils;
+        this.modelMapper = modelMapper;
+        this.mapperUtils = mapperUtils;
 
     }
 
@@ -126,8 +131,6 @@ public class LayerService {
         }
     }
     private LayerDTO convertLayerToDTO(Layer layer) {
-        ModelMapper modelMapper = new ModelMapper();
-        ModelMapperUtils mapperUtils = new ModelMapperUtils(modelMapper);
         return mapperUtils.layerToDTO(layer, LayerDTO.class);
     }
 

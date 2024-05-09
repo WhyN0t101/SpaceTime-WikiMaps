@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.controller;
+package projeto.projetoinformatico.exceptions.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

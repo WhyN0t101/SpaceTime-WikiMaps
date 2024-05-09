@@ -1,19 +1,15 @@
-package projeto.projetoinformatico.controller;
+package projeto.projetoinformatico.exceptions.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
-import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
-import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.requests.StatusRequest;
 import projeto.projetoinformatico.requests.UpgradeRequest;
-import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.UpgradeService;
 
 import java.util.List;
@@ -32,7 +28,6 @@ public class UpgradeController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/requests")
     public ResponseEntity<List<RoleUpgradeDTO>> getAllRequestsByStatus(@RequestParam(required = false) String status) {
-
         List<RoleUpgradeDTO> requests;
         if (status != null) {
             // Filter users by name and role
@@ -41,7 +36,6 @@ public class UpgradeController {
             // No filtering, return all users
             requests = upgradeService.getAllRequests();
         }
-
         return ResponseEntity.ok(requests);
     }
     @PostMapping("/request")
@@ -52,7 +46,6 @@ public class UpgradeController {
         RoleUpgradeDTO request =  upgradeService.requestUpgrade(username,upgradeRequest.getMessage());
         return ResponseEntity.ok(request);
     }
-
     @PutMapping("/request/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<RoleUpgradeDTO> processUpgradeRequest(@PathVariable Long id, @Valid @RequestBody StatusRequest statusRequest) {

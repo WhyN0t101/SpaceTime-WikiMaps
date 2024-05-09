@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.controller;
+package projeto.projetoinformatico.exceptions.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

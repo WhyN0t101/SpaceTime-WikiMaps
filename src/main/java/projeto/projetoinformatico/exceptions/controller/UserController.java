@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.controller;
+package projeto.projetoinformatico.exceptions.controller;
 
 
 import org.springframework.http.ResponseEntity;
@@ -35,7 +35,6 @@ public class UserController {
     @GetMapping("/users")
     public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam(required = false) String name,
                                                           @RequestParam(required = false) String role) {
-
         List<UserDTO> users;
         if (name != null && role != null) {
             // Filter users by name and role
@@ -50,11 +49,8 @@ public class UserController {
             // No filtering, return all users
             users = userService.getAllUsers();
         }
-
         return ResponseEntity.ok(users);
     }
-
-
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/role/{role}")
@@ -62,8 +58,6 @@ public class UserController {
         List<UserDTO> users = userService.getAllUsersByRole(role);
         return ResponseEntity.ok(users);
     }
-
-
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/id/{id}")

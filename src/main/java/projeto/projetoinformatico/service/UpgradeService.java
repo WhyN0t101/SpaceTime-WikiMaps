@@ -1,6 +1,7 @@
 package projeto.projetoinformatico.service;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
@@ -26,9 +27,15 @@ public class UpgradeService {
 
     private final RoleUpgradeRepository roleUpgradeRepository;
     private final UserRepository userRepository;
-    public UpgradeService(RoleUpgradeRepository roleUpgradeRepository,UserRepository userRepository) {
+    private final ModelMapper modelMapper;
+    private final ModelMapperUtils mapperUtils;
+
+    @Autowired
+    public UpgradeService(RoleUpgradeRepository roleUpgradeRepository, UserRepository userRepository, ModelMapper modelMapper, ModelMapperUtils mapperUtils) {
         this.roleUpgradeRepository = roleUpgradeRepository;
         this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
+        this.mapperUtils = mapperUtils;
     }
 
     public RoleUpgradeDTO requestUpgrade(String username, String reason) {
@@ -122,9 +129,8 @@ public class UpgradeService {
                 .collect(Collectors.toList());
     }
     private RoleUpgradeDTO convertUpgradeToDTO(RoleUpgrade upgrade) {
-        ModelMapper modelMapper = new ModelMapper();
-        ModelMapperUtils mapperUtils = new ModelMapperUtils(modelMapper);
         return mapperUtils.roleUpgradeToDTO(upgrade, RoleUpgradeDTO.class);
     }
+
 
 }

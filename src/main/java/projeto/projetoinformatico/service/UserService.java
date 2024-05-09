@@ -24,11 +24,16 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final LayersRepository layersRepository;
+    private final ModelMapper modelMapper;
+    private final ModelMapperUtils mapperUtils;
+
 
     @Autowired
-    public UserService(UserRepository userRepository, LayersRepository layersRepository) {
+    public UserService(UserRepository userRepository, LayersRepository layersRepository,ModelMapper modelMapper, ModelMapperUtils mapperUtils) {
         this.userRepository = userRepository;
         this.layersRepository = layersRepository;
+        this.modelMapper = modelMapper;
+        this.mapperUtils = mapperUtils;
     }
     public UserDetailsService userDetailsService(){
         return userRepository::findByUsername;
@@ -140,8 +145,6 @@ public class UserService implements UserDetailsService {
         }
     }
     private UserDTO convertUserToDTO(User user) {
-        ModelMapper modelMapper = new ModelMapper();
-        ModelMapperUtils mapperUtils = new ModelMapperUtils(modelMapper);
         return mapperUtils.userToDTO(user, UserDTO.class);
     }
 }

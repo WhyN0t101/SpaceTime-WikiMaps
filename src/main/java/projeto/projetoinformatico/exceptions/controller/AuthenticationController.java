@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.controller;
+package projeto.projetoinformatico.exceptions.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

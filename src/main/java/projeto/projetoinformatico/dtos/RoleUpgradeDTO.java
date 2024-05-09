@@ -30,21 +30,6 @@ public class RoleUpgradeDTO {
         this.username = username;
     }
 
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public RoleStatus getStatus() {
         return status;

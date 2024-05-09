@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.controller;
+package projeto.projetoinformatico.exceptions.controller;
 
 import com.google.common.util.concurrent.RateLimiter;
 import jakarta.validation.Valid;
