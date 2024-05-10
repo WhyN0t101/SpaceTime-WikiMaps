@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.exceptions.controller;
+package projeto.projetoinformatico.controllers;
 
 import com.google.common.util.concurrent.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;

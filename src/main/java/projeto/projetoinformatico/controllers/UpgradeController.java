@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.exceptions.controller;
+package projeto.projetoinformatico.controllers;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

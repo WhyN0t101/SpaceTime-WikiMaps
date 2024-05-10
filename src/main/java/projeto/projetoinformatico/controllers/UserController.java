@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.exceptions.controller;
+package projeto.projetoinformatico.controllers;
 
 
 import org.springframework.http.ResponseEntity;
@@ -7,11 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.UserDTO;
-import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
-import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.UserService;
-import projeto.projetoinformatico.model.users.Role;
 
 import java.util.List;
 
