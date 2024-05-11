@@ -27,7 +27,7 @@ To get a local copy up and running, follow these simple steps:
 ## Assign the class user to the Data source.
 ![image](https://github.com/WhyN0t101/SpaceTime-WikiMaps/assets/100608872/5424f536-44bd-498c-8bf4-be3109f18dde)
 
-## Define the Data source to the DB creted.
+## Define the Data source to the DB created.
 ![image](https://github.com/WhyN0t101/SpaceTime-WikiMaps/assets/100608872/8a2044bf-62f6-47c7-881c-579038ddb847)
 
 ## Run the App to create the DB tables.
