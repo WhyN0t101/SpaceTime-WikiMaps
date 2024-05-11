@@ -13,4 +13,6 @@ public interface RoleUpgradeRepository extends JpaRepository<RoleUpgrade, Long> 
     Optional<RoleUpgrade> findFirstByUsernameOrderByTimestampDesc(String username);
 
     List<RoleUpgrade> findByStatus(RoleStatus statusEnum);
+
+    RoleUpgrade findByUsername(String username);
 }

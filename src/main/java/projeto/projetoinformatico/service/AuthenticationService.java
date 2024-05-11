@@ -2,6 +2,7 @@ package projeto.projetoinformatico.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,7 @@ public class AuthenticationService {
 
 
 
+    @CacheEvict(value = "userCache")
     public UserResponse signup(SignUpRequest signUpRequest){
         // Check if the username is already taken
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {

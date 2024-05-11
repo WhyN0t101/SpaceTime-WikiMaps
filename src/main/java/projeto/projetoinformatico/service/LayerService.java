@@ -3,6 +3,8 @@ package projeto.projetoinformatico.service;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
@@ -40,6 +42,8 @@ public class LayerService {
 
     }
 
+
+    @CacheEvict(value = "layerCache", allEntries = true)
     public LayerDTO createLayer(String username, LayerRequest layerRequest) {
         validateLayerRequest(layerRequest);
         checkDuplicateLayerName(layerRequest.getName());
@@ -60,6 +64,8 @@ public class LayerService {
         return searchService.executeSparqlQuery(filterQuery);
     }
 
+
+    @Cacheable(value = "layerCache")
     public List<LayerDTO> getAllLayers() {
         List<Layer> layers = layersRepository.findAll();
         return layers.stream()
@@ -67,12 +73,14 @@ public class LayerService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "layerCache", key = "#id")
     public LayerDTO getLayerById(Long id) {
         Layer layer = layersRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Layer not found with id: " + id));
         return convertLayerToDTO(layer);
     }
 
+    @CacheEvict(value = "layerCache", key = "#id")
     public LayerDTO updateLayer(Long id, LayerRequest layerRequest) {
         Layer existingLayer = layersRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Layer not found with id: " + id));;
@@ -84,6 +92,7 @@ public class LayerService {
         return convertLayerToDTO(newLayer);
     }
 
+    @CacheEvict(value = "layerCache", key = "#id")
     public void deleteLayer(Long id) {
         if (id == null) {
             throw new InvalidRequestException("Layer ID cannot be null");
@@ -108,9 +117,9 @@ public class LayerService {
     }
 
     private boolean isSparqlQueryValid(String query) {
-        return !query.startsWith("SELECT DISTINCT ?item ?itemLabel ?coordinates WHERE {")
-                || !query.contains("SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\". }")
-                || !query.contains("SELECT DISTINCT ?item ?coordinates WHERE {")
+        return !query.startsWith("SELECT DISTINCT ?item ?itemLabel ?description ?coordinates ?image ?itemSchemaLabel WHERE {\n")
+                || !query.contains("SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\". }\n")
+                || !query.contains("SELECT DISTINCT ?item ?itemLabel ?coordinates ?itemSchemaLabel WHERE {")
                 || !query.contains("wdt:P625");
     }
 

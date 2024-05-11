@@ -2,6 +2,8 @@ package projeto.projetoinformatico.service;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
@@ -38,6 +40,7 @@ public class UpgradeService {
         this.mapperUtils = mapperUtils;
     }
 
+    @CacheEvict(value = "requestCache", allEntries = true)
     public RoleUpgradeDTO requestUpgrade(String username, String reason) {
         // Check if the user has a pending or accepted request
         Optional<RoleUpgrade> existingRequest = roleUpgradeRepository.findFirstByUsernameAndStatusInOrderByTimestampDesc(username,
@@ -71,6 +74,8 @@ public class UpgradeService {
         return roleUpgradeRepository.save(request);
     }
 
+
+    @CacheEvict(value = "requestCache", allEntries = true)
     public RoleUpgradeDTO  handleRequest(StatusRequest request, Long id) {
         // Retrieve the requested upgrade by ID
         Optional<RoleUpgrade> optionalRequest = roleUpgradeRepository.findById(id);
@@ -105,7 +110,7 @@ public class UpgradeService {
         return convertUpgradeToDTO(roleUpgradeRepository.save(roleUpgrade));
     }
 
-
+    @Cacheable(value = "requestCache", key = "#status")
     public List<RoleUpgradeDTO> getByStatus(String status) {
         try {
             RoleStatus statusEnum = RoleStatus.valueOf(status.toUpperCase());
@@ -123,6 +128,8 @@ public class UpgradeService {
         }
     }
 
+
+    @Cacheable(value = "requestCache")
     public List<RoleUpgradeDTO> getAllRequests() {
         return roleUpgradeRepository.findAll().stream()
                 .map(this::convertUpgradeToDTO)

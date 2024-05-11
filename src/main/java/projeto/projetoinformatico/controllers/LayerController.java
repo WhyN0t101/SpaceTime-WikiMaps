@@ -79,7 +79,7 @@ public class LayerController {
     }
 
     @PostMapping("/layers")
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN')or hasAuthority('USER')")
     public ResponseEntity<LayerDTO> createLayer(@Valid @RequestBody LayerRequest layerRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -103,7 +103,6 @@ public class LayerController {
 
     @GetMapping("/layers/search")
     public List<LayerDTO> searchLayers(@RequestParam("query") String query) {
-        // Query the database layers where name or description contains the keywords
         return layerService.findByKeywords(query);
     }
 

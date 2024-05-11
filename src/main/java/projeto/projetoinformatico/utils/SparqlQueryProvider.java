@@ -81,10 +81,11 @@ public class SparqlQueryProvider {
                "LIMIT 1000";
    }
 
-   
+
     public String buildItemQuery(String entityId) {
         return PREFIXES +
-                "SELECT DISTINCT ?property ?value WHERE { wd:" + entityId + " ?property ?value. }";
+                "SELECT DISTINCT ?property ?value WHERE { wd:" + entityId + " ?property ?value. " +
+                "FILTER(LANG(?value) = 'en')}";
     }
 
 
