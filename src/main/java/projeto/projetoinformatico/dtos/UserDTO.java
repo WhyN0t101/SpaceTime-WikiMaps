@@ -14,6 +14,7 @@ public class UserDTO {
     private String email;
     private String role; // Changed to String
     private RoleUpgradeDTO roleUpgrade;
+    private String password; // Add password field
 
     public void setRoleUpgrade(RoleUpgrade roleUpgrade) {
         if (roleUpgrade != null) {
