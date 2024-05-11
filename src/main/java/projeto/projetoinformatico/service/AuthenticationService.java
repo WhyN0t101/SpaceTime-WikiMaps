@@ -7,16 +7,17 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.requests.*;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
-import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
+import projeto.projetoinformatico.utils.ModelMapperUtils;
 
 import java.util.HashMap;
 
@@ -31,11 +32,12 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     //private final JWTServiceImpl jwtService;
+    private final ModelMapperUtils mapperUtils;
 
 
 
     @CacheEvict(value = "userCache")
-    public UserResponse signup(SignUpRequest signUpRequest){
+    public UserDTO signup(SignUpRequest signUpRequest){
         // Check if the username is already taken
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new InvalidParamsRequestException("Username already exists");
@@ -55,16 +57,8 @@ public class AuthenticationService {
 
         userRepository.save(user);
 
-        // Create a UserResponse object and populate it with user data
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getId());
-        userResponse.setUsername(user.getUsername());
-        userResponse.setRole(user.getRole());
-        userResponse.setEmail(user.getEmail());
-        userResponse.setEnabled(user.isEnabled());
-        // Set other fields as needed
 
-        return userResponse;
+        return convertUserToDTO(user);
     }
 
 
@@ -80,20 +74,11 @@ public class AuthenticationService {
         var jwt = JWTServiceImpl.generateToken(user);
         var refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
 
-        // Create an instance of UserResponse
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getId());
-        userResponse.setUsername(user.getUsername());
-        userResponse.setRole(user.getRole());
-        userResponse.setEmail(user.getEmail());
-        userResponse.setEnabled(user.isEnabled());
-        // Set other fields as needed
-
         // Create an instance of AuthenticationResponse and set the UserResponse
         AuthenticationResponse response = new AuthenticationResponse();
         response.setAccessToken(jwt);
         response.setRefreshToken(refreshToken);
-        response.setUser(userResponse);
+        response.setUser(convertUserToDTO(user));
 
         return response;
     }
@@ -124,6 +109,9 @@ public class AuthenticationService {
 
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+    private UserDTO convertUserToDTO(User user) {
+        return mapperUtils.userToDTO(user, UserDTO.class);
     }
 
 }

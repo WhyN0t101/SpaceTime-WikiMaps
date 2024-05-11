@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.JwtExpiredException;
 import projeto.projetoinformatico.requests.*;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
-import projeto.projetoinformatico.responses.UserResponse;
 import projeto.projetoinformatico.service.AuthenticationService;
 
 @RestController
@@ -23,7 +23,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<UserResponse> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<UserDTO> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
         // Check if the username already exists
         return ResponseEntity.ok(authenticationService.signup(signUpRequest));
     }
