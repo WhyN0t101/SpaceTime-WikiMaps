@@ -15,4 +15,8 @@ public interface RoleUpgradeRepository extends JpaRepository<RoleUpgrade, Long> 
     List<RoleUpgrade> findByStatus(RoleStatus statusEnum);
 
     RoleUpgrade findByUsername(String username);
+
+    List<RoleUpgrade> findByUsernameStartingWithIgnoreCaseAndStatus(String username, RoleStatus status);
+
+    List<RoleUpgrade> findByUsernameStartingWithIgnoreCase(String username);
 }
