@@ -1,6 +1,7 @@
 package projeto.projetoinformatico.model.users;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 import lombok.Getter;

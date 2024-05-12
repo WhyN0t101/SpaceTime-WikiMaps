@@ -104,7 +104,6 @@ public class LayerController {
     }
 
     @GetMapping("/layers/search")
-    @PreAuthorize("isAuthenticated() or !isAuthenticated()")
     public List<LayerDTO> searchLayers(@RequestParam("query") String query) {
         return layerService.findByKeywords(query);
     }
