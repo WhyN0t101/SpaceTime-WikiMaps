@@ -1,7 +1,8 @@
-package projeto.projetoinformatico.utils;
+package projeto.projetoinformatico.constraints.Validators;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import projeto.projetoinformatico.constraints.ValidRoleStatus;
 import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
 
 public class RoleStatusValidator implements ConstraintValidator<ValidRoleStatus, String> {

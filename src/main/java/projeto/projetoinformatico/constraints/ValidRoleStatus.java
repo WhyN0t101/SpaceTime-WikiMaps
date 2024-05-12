@@ -1,8 +1,8 @@
-package projeto.projetoinformatico.utils;
+package projeto.projetoinformatico.constraints;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import projeto.projetoinformatico.utils.RoleStatusValidator;
+import projeto.projetoinformatico.constraints.Validators.RoleStatusValidator;
 
 import java.lang.annotation.*;
 

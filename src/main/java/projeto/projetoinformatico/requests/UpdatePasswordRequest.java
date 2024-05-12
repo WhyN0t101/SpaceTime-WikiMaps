@@ -3,6 +3,7 @@ package projeto.projetoinformatico.requests;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import projeto.projetoinformatico.constraints.ChangePassword;
 
 @Data
 public class UpdatePasswordRequest {
