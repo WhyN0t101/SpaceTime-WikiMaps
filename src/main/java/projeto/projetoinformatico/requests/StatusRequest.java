@@ -1,8 +1,6 @@
 package projeto.projetoinformatico.requests;
 
-import jakarta.validation.constraints.NotBlank;
-import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
-import projeto.projetoinformatico.utils.ValidRoleStatus;
+import projeto.projetoinformatico.constraints.ValidRoleStatus;
 
 public class StatusRequest {
     @ValidRoleStatus(message = "Status is invalid")
