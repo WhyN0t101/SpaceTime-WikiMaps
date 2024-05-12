@@ -63,8 +63,6 @@ public class UserService implements UserDetailsService {
         RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUsername(username);
         if (roleUpgrade != null) {
             RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
-            // Populate RoleUpgradeDTO from RoleUpgrade entity
-            // You can use a similar approach as shown in the previous response
             userDTO.setRoleUpgrade(roleUpgrade);
         }
         return userDTO;

@@ -40,7 +40,7 @@ public class UpgradeService {
         this.mapperUtils = mapperUtils;
     }
 
-    @CacheEvict(value = "requestCache", allEntries = true)
+    @CacheEvict(value = {"userCache", "requestCache"}, allEntries = true)
     public RoleUpgradeDTO requestUpgrade(String username, String reason) {
         // Check if the user has a pending or accepted request
         Optional<RoleUpgrade> existingRequest = roleUpgradeRepository.findFirstByUsernameAndStatusInOrderByTimestampDesc(username,
@@ -75,7 +75,7 @@ public class UpgradeService {
     }
 
 
-    @CacheEvict(value = "requestCache", allEntries = true)
+    @CacheEvict(value = {"userCache", "requestCache"}, allEntries = true)
     public RoleUpgradeDTO  handleRequest(StatusRequest request, Long id) {
         // Retrieve the requested upgrade by ID
         Optional<RoleUpgrade> optionalRequest = roleUpgradeRepository.findById(id);
@@ -140,4 +140,31 @@ public class UpgradeService {
     }
 
 
+    public List<RoleUpgradeDTO> getRequestsByNameAndStatus(String username, String status) {
+        try {
+            RoleStatus roleEnum = RoleStatus.valueOf(status.toUpperCase());
+
+            List<RoleUpgrade> users = roleUpgradeRepository.findByUsernameStartingWithIgnoreCaseAndStatus(username, roleEnum);
+            if (users.isEmpty()) {
+                throw new NotFoundException("No requests found with name starting with: " + username + " and status: " + status);
+            }
+            return users.stream()
+                    .map(this::convertUpgradeToDTO)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Status not found: " + status);
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+    }
+
+    public List<RoleUpgradeDTO> getRequestsContainingUsername(String username) {
+        List<RoleUpgrade> requests = roleUpgradeRepository.findByUsernameStartingWithIgnoreCase(username);
+        if (requests.isEmpty()) {
+            throw new NotFoundException("No users found with name starting with: " + username);
+        }
+        return requests.stream()
+                .map(this::convertUpgradeToDTO)
+                .collect(Collectors.toList());
+    }
 }

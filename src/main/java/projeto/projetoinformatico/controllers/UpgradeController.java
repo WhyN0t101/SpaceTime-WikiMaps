@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
+import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.requests.StatusRequest;
 import projeto.projetoinformatico.requests.UpgradeRequest;
 import projeto.projetoinformatico.service.UpgradeService;
@@ -27,15 +28,19 @@ public class UpgradeController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/requests")
-    public ResponseEntity<List<RoleUpgradeDTO>> getAllRequestsByStatus(@RequestParam(required = false) String status) {
+    public ResponseEntity<List<RoleUpgradeDTO>> getAllRequestsByStatus(@RequestParam(required = false) String status, @RequestParam(required = false) String username) {
+
         List<RoleUpgradeDTO> requests;
-        if (status != null) {
-            // Filter users by name and role
+        if (status != null && username != null) {
+            requests = upgradeService.getRequestsByNameAndStatus(username, status);
+        } else if (username != null) {
+            requests = upgradeService.getRequestsContainingUsername(username);
+        } else if (status != null) {
             requests = upgradeService.getByStatus(status);
         } else {
-            // No filtering, return all users
             requests = upgradeService.getAllRequests();
         }
+
         return ResponseEntity.ok(requests);
     }
     @PostMapping("/request")

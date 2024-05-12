@@ -7,9 +7,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
+import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
+import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
 import projeto.projetoinformatico.requests.*;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
@@ -31,7 +34,7 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
-    //private final JWTServiceImpl jwtService;
+    private final RoleUpgradeRepository roleUpgradeRepository;
     private final ModelMapperUtils mapperUtils;
 
 
@@ -78,7 +81,13 @@ public class AuthenticationService {
         AuthenticationResponse response = new AuthenticationResponse();
         response.setAccessToken(jwt);
         response.setRefreshToken(refreshToken);
-        response.setUser(convertUserToDTO(user));
+        UserDTO userDTO = convertUserToDTO(user);
+        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUsername(user.getUsername());
+        if (roleUpgrade != null) {
+            RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
+            userDTO.setRoleUpgrade(roleUpgrade);
+        }
+        response.setUser(userDTO);
 
         return response;
     }
