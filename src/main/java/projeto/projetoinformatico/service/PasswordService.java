@@ -20,9 +20,6 @@ public class PasswordService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    private UserDTO convertUserToDTO(User user) {
-        return mapperUtils.userToDTO(user, UserDTO.class);
-    }
 
     public UserDTO updatePassword(UserDTO user, String newPassword) {
         user.setPassword(passwordEncoder.encode(newPassword));

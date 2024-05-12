@@ -48,6 +48,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(request -> request.requestMatchers("/register")
                     .permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/layers").permitAll()
+                    .requestMatchers("/api/layers/id/{id}").permitAll()
+                    .requestMatchers("/api/layers/{id}").permitAll()
+                    .requestMatchers("/api/layers/search").permitAll()
+                    .requestMatchers("/api/sparql").permitAll()
                     .anyRequest().authenticated()
             )
                     /*

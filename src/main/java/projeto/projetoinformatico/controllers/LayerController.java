@@ -36,6 +36,7 @@ public class LayerController {
     }
 
     @GetMapping("/layers")
+    //@PreAuthorize("permitAll()")
     public ResponseEntity<List<LayerDTO>> getAllLayers() {
         List<LayerDTO> layers = layerService.getAllLayers();
         return ResponseEntity.ok(layers);
@@ -43,6 +44,7 @@ public class LayerController {
 
     @GetMapping("/layers/id/{id}")
     //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
+    //@PreAuthorize("permitAll()")
     public ResponseEntity<LayerDTO> getLayerById(@PathVariable Long id) {
         LayerDTO layer = layerService.getLayerById(id);
         if (layer == null) {
