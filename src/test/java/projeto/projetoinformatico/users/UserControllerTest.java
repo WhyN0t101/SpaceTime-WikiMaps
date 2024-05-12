@@ -90,7 +90,6 @@ public class UserControllerTest {
     }
 
 
-
     @Test
     public void testGetAllUsersByRole_Success() {
         // Mock dependencies
@@ -107,6 +106,27 @@ public class UserControllerTest {
         // Assert the response
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(userDTOS, response.getBody());
+    }
+
+
+    @Test
+    public void testGetAllUsersByRole_Error() {
+        // Mock dependencies
+        UserService userService = Mockito.mock(UserService.class);
+        UserController userController = new UserController(userService);
+
+        // Mock behavior of userService.getAllUsersByRole to throw NotFoundException for both scenarios
+        when(userService.getAllUsersByRole("nonExistent")).thenThrow(new NotFoundException("Role not found: nonExistent"));
+        when(userService.getAllUsersByRole("emptyRole")).thenThrow(new NotFoundException("No users found with role: emptyRole"));
+
+        // Call the endpoint and assert that it throws NotFoundException for both scenarios
+        assertThrows(NotFoundException.class, () -> {
+            userController.getAllUsersByRole("nonExistent");
+        });
+
+        assertThrows(NotFoundException.class, () -> {
+            userController.getAllUsersByRole("emptyRole");
+        });
     }
 
     @Test
