@@ -147,6 +147,21 @@ public class UserControllerTest {
         assertEquals(userDTO, response.getBody());
     }
 
+    @Test
+    public void testGetUserById_UserNotFound() {
+        // Mock dependencies
+        UserService userService = Mockito.mock(UserService.class);
+        UserController userController = new UserController(userService);
+
+        // Mock behavior of userService.getUserById to throw NotFoundException
+        when(userService.getUserById(1000L)).thenThrow(new NotFoundException("User not found with id: 1000"));
+
+        // Call the endpoint and assert that it throws NotFoundException
+        assertThrows(NotFoundException.class, () -> {
+            userController.getUserById(1000L);
+        });
+    }
+
     @Test//Falha
     public void testGetUserLayers_Success() {
         // Mock dependencies
