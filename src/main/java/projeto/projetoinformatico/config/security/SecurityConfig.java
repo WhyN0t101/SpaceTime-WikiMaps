@@ -28,8 +28,7 @@ import projeto.projetoinformatico.service.UserService;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
 public class SecurityConfig {
 
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -45,8 +44,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(request -> request.requestMatchers("/register")
-                    .permitAll()
+            .authorizeHttpRequests(request -> request
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/layers").permitAll()
                     .requestMatchers("/api/layers/id/{id}").permitAll()
