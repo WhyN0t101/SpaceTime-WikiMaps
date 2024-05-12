@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.UserDTO;
+import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.requests.UpdatePasswordRequest;
 import projeto.projetoinformatico.service.PasswordService;
@@ -29,6 +30,9 @@ public class PasswordController {
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<UserDTO> updatePassword(@PathVariable Long userId, @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
         UserDTO user = userService.getUserById(userId);
+        if(!passwordService.validatePassword(user,updatePasswordRequest.getOldPassword())){
+            throw new InvalidParamsRequestException("Old password does not match");
+        }
         UserDTO updatedUser = passwordService.updatePassword(user, updatePasswordRequest.getNewPassword());
         return ResponseEntity.ok(updatedUser);
     }

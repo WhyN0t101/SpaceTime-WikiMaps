@@ -27,4 +27,9 @@ public class PasswordService {
         userRepository.save(convUser);
         return user;
     }
+
+    public boolean validatePassword(UserDTO userDto, String oldPassword){
+        User user = mapperUtils.dtoToUser(userDto);
+        return passwordEncoder.matches(oldPassword, user.getPassword());
+    }
 }

@@ -6,7 +6,10 @@ import lombok.Data;
 
 @Data
 public class UpdatePasswordRequest {
-    @NotBlank(message = "Password cannot be blank")
+    @NotBlank(message = "New Password cannot be blank")
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String newPassword;
+
+    @NotBlank(message = "Old Password cannot be blank")
+    private String oldPassword;
 }
