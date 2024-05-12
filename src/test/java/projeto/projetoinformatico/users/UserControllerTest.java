@@ -187,6 +187,21 @@ public class UserControllerTest {
         assertEquals(layers, response.getBody());
     }
 
+    @Test//Falha getUsernameById returns null
+    public void testGetUserLayers_UserLayersNotFound() {
+        // Mock dependencies
+        UserService userService = Mockito.mock(UserService.class);
+        UserController userController = new UserController(userService);
+
+        // Mock behavior of userService.getUserLayers to throw NotFoundException
+        when(userService.getUserLayers("Admin")).thenThrow(new NotFoundException("User layers not found for user with username: Admin"));
+
+        // Call the endpoint and assert that it throws NotFoundException
+        assertThrows(NotFoundException.class, () -> {
+            userController.getUserLayers(1L);
+        });
+    }
+
 
     @Test
     public void testGetAuthenticatedUser_Success() {
