@@ -14,6 +14,7 @@ import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.service.UserService;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,6 +71,25 @@ public class UserControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(userDTOs, response.getBody());
     }
+
+    @Test
+    public void testGetAllUsers_EmptyList() {
+        // Mock dependencies
+        UserService userService = Mockito.mock(UserService.class);
+        UserController userController = new UserController(userService);
+
+        // Mock behavior of userService.getAllUsers to return an empty list
+        when(userService.getAllUsers()).thenReturn(Collections.emptyList());
+
+        // Call the endpoint
+        ResponseEntity<List<UserDTO>> response = userController.getAllUsers(null, null);
+
+        // Assert the response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(0, response.getBody().size());
+    }
+
+
 
     @Test
     public void testGetAllUsersByRole_Success() {
