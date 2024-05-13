@@ -102,7 +102,7 @@ public class UserController {
         } else if (alterRequest.getEmail() != null) {
             response = userService.updateUserEmail(username, alterRequest.getEmail());
         }
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(resta);
     }
 
     @GetMapping
