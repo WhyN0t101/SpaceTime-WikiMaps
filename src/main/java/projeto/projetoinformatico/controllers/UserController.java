@@ -90,7 +90,7 @@ public class UserController {
     }
 
     //@PreAuthorize("hasAuthority('ADMIN')")
-    @PutMapping("/user/alter")
+    @PutMapping("/user")
     public ResponseEntity<AuthenticationResponse> updateUserRole(AlterRequest alterRequest,
                                                                  Authentication authentication) {
         String username = authentication.getName();
