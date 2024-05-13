@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.model.layers.Layer;
+import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.service.UserService;
 
 import java.util.List;
@@ -85,6 +86,23 @@ public class UserController {
     public ResponseEntity<UserDTO> updateUserRole(@PathVariable String username, @RequestParam String role) {
         UserDTO updatedUser = userService.updateUserRole(username, role);
         return ResponseEntity.ok(updatedUser);
+    }
+
+    //@PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/user/alter")
+    public ResponseEntity<AuthenticationResponse> updateUserRole(@RequestParam(required = false) String newUsername,
+                                                  @RequestParam(required = false) String newEmail,
+                                                  Authentication authentication) {
+        String username = authentication.getName();
+        AuthenticationResponse response = null;
+        if (newUsername != null && newEmail != null) {
+            response = userService.updateUserUsernameEmail(username, newUsername, newEmail);
+        } else if (newUsername != null) {
+            response = userService.updateUserUsername(username, newUsername);
+        } else if (newEmail != null) {
+            response = userService.updateUserEmail(username, newEmail);
+        }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
