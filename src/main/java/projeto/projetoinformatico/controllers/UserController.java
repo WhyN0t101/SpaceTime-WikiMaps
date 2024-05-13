@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.model.layers.Layer;
+import projeto.projetoinformatico.requests.AlterRequest;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.service.UserService;
 
@@ -90,17 +91,16 @@ public class UserController {
 
     //@PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/user/alter")
-    public ResponseEntity<AuthenticationResponse> updateUserRole(@RequestParam(required = false) String newUsername,
-                                                  @RequestParam(required = false) String newEmail,
-                                                  Authentication authentication) {
+    public ResponseEntity<AuthenticationResponse> updateUserRole(AlterRequest alterRequest,
+                                                                 Authentication authentication) {
         String username = authentication.getName();
         AuthenticationResponse response = null;
-        if (newUsername != null && newEmail != null) {
-            response = userService.updateUserUsernameEmail(username, newUsername, newEmail);
-        } else if (newUsername != null) {
-            response = userService.updateUserUsername(username, newUsername);
-        } else if (newEmail != null) {
-            response = userService.updateUserEmail(username, newEmail);
+        if (alterRequest.getUsername() != null && alterRequest.getEmail() != null) {
+            response = userService.updateUserUsernameEmail(username, alterRequest.getUsername(), alterRequest.getEmail());
+        } else if (alterRequest.getUsername() != null) {
+            response = userService.updateUserUsername(username, alterRequest.getUsername());
+        } else if (alterRequest.getEmail() != null) {
+            response = userService.updateUserEmail(username, alterRequest.getEmail());
         }
         return ResponseEntity.ok(response);
     }
