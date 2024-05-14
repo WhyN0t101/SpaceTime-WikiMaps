@@ -1,6 +1,7 @@
 package projeto.projetoinformatico.controllers;
 
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -91,7 +92,7 @@ public class UserController {
 
     //@PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/user")
-    public ResponseEntity<AuthenticationResponse> updateUserRole(@RequestBody AlterRequest alterRequest,
+    public ResponseEntity<AuthenticationResponse> updateUserRole(@Valid @RequestBody AlterRequest alterRequest,
                                                                  Authentication authentication) {
         String username = authentication.getName();
         AuthenticationResponse response = null;
