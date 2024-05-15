@@ -67,7 +67,7 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}/layers")
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
+    //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<List<Layer>> getUserLayers(@PathVariable Long id) {
         String username = userService.getUsernameById(id);
         List<Layer> userLayers = userService.getUserLayers(username);
