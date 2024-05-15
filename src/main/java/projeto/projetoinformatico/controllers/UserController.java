@@ -1,6 +1,7 @@
 package projeto.projetoinformatico.controllers;
 
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -8,6 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.model.layers.Layer;
+import projeto.projetoinformatico.requests.AlterRequest;
+import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.service.UserService;
 
 import java.util.List;
@@ -85,6 +88,22 @@ public class UserController {
     public ResponseEntity<UserDTO> updateUserRole(@PathVariable String username, @RequestParam String role) {
         UserDTO updatedUser = userService.updateUserRole(username, role);
         return ResponseEntity.ok(updatedUser);
+    }
+
+    //@PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/user")
+    public ResponseEntity<AuthenticationResponse> updateUserRole(@Valid @RequestBody AlterRequest alterRequest,
+                                                                 Authentication authentication) {
+        String username = authentication.getName();
+        AuthenticationResponse response = null;
+        if (alterRequest.getUsername() != null && alterRequest.getEmail() != null) {
+            response = userService.updateUserUsernameEmail(username, alterRequest.getUsername(), alterRequest.getEmail());
+        } else if (alterRequest.getUsername() != null) {
+            response = userService.updateUserUsername(username, alterRequest.getUsername());
+        } else if (alterRequest.getEmail() != null) {
+            response = userService.updateUserEmail(username, alterRequest.getEmail());
+        }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping

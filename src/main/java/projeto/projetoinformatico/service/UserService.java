@@ -18,8 +18,11 @@ import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
+import projeto.projetoinformatico.responses.AuthenticationResponse;
+import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -170,7 +173,71 @@ public class UserService implements UserDetailsService {
             throw new NotFoundException("Role not found: " + role);
         }
     }
+
+    //@CacheEvict(value = "userCache", key = "#username")
+    public AuthenticationResponse updateUserUsernameEmail(String username, String newUsername, String newEmail) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found with username: " + username);
+        }
+        try {
+            user.setUsername(newUsername);
+            user.setEmail(newEmail);
+            var jwt = JWTServiceImpl.generateToken(user);
+            var refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
+            AuthenticationResponse response = new AuthenticationResponse();
+            response.setAccessToken(jwt);
+            response.setRefreshToken(refreshToken);
+            UserDTO userDTO = convertUserToDTO(user);
+            userRepository.save(user);
+            response.setUser(userDTO);
+            return response;
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Error altering email and username");
+        }
+    }
+
+    public AuthenticationResponse updateUserUsername(String username, String newUsername) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found with username: " + username);
+        }
+        try {
+            user.setUsername(newUsername);
+            var jwt = JWTServiceImpl.generateToken(user);
+            var refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
+            AuthenticationResponse response = new AuthenticationResponse();
+            response.setAccessToken(jwt);
+            response.setRefreshToken(refreshToken);
+            UserDTO userDTO = convertUserToDTO(user);
+            userRepository.save(user);
+            response.setUser(userDTO);
+            return response;
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Error altering username");
+        }
+    }
+
+    public AuthenticationResponse updateUserEmail(String username, String newEmail) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found with username: " + username);
+        }
+        try {
+            user.setEmail(newEmail);
+            userRepository.save(user);
+            AuthenticationResponse response = new AuthenticationResponse();
+            UserDTO userDTO = convertUserToDTO(user);
+            response.setUser(userDTO);
+            return response;
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Error altering email");
+        }
+    }
+
     private UserDTO convertUserToDTO(User user) {
         return mapperUtils.userToDTO(user, UserDTO.class);
     }
+
+
 }
