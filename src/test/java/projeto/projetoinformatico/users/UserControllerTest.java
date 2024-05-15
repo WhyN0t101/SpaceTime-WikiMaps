@@ -194,11 +194,11 @@ public class UserControllerTest {
         UserController userController = new UserController(userService);
 
         // Mock behavior of userService.getUserLayers to throw NotFoundException
-        when(userService.getUserLayers("Admin")).thenThrow(new NotFoundException("User layers not found for user with username: Admin"));
+        when(userService.getUserLayers("Teste4")).thenThrow(new NotFoundException("User layers not found for user with username: Admin"));
 
         // Call the endpoint and assert that it throws NotFoundException
         assertThrows(NotFoundException.class, () -> {
-            userController.getUserLayers(1L);
+            userController.getUserLayers(4L);
         });
     }
 
