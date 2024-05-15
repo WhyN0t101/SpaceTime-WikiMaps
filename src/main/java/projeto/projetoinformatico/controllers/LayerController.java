@@ -81,7 +81,7 @@ public class LayerController {
     }
 
     @PostMapping("/layers")
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN')or hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN')")
     public ResponseEntity<LayerDTO> createLayer(@Valid @RequestBody LayerRequest layerRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
