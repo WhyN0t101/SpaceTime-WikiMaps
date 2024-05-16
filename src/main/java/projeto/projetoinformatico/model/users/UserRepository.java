@@ -10,7 +10,6 @@ import java.util.List;
 public interface UserRepository  extends JpaRepository<User,Long> {
     User findByUsername(String userName);
 
-    User findByRole(Role role);
     @NotNull
     List<User> findAll();
 
@@ -24,4 +23,6 @@ public interface UserRepository  extends JpaRepository<User,Long> {
     List<User> findByUsernameStartingWithIgnoreCase(String name);
 
     List<User> findByUsernameStartingWithIgnoreCaseAndRole(String name, Role role);
+
+    User findUserById(Long id);
 }

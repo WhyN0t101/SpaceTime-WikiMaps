@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import projeto.projetoinformatico.model.users.User;
 
 import java.util.Date;
 
@@ -18,8 +19,9 @@ public class Layer {
     private Long id;
 
 
-    @Column(nullable = false)
-    private String username;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
 
     @Column(nullable = false)
@@ -40,13 +42,7 @@ public class Layer {
         timestamp = new Date();
     }
 
-    public String getUsername() {
-        return username;
-    }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public String getDescription() {
         return description;

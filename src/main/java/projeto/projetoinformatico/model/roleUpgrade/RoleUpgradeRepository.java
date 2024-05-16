@@ -2,21 +2,30 @@ package projeto.projetoinformatico.model.roleUpgrade;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
+import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
+import projeto.projetoinformatico.model.users.User;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface RoleUpgradeRepository extends JpaRepository<RoleUpgrade, Long> {
-    Optional<RoleUpgrade> findFirstByUsernameAndStatusInOrderByTimestampDesc(String username, List<RoleStatus> pending);
-
-    Optional<RoleUpgrade> findFirstByUsernameOrderByTimestampDesc(String username);
 
     List<RoleUpgrade> findByStatus(RoleStatus statusEnum);
 
-    RoleUpgrade findByUsername(String username);
+    // Corrected method name
+    RoleUpgrade findByUserId(Long id);
 
-    List<RoleUpgrade> findByUsernameStartingWithIgnoreCaseAndStatus(String username, RoleStatus status);
+    // Corrected method name
+    Optional<RoleUpgrade> findFirstByUserOrderByTimestampDesc(User user);
 
-    List<RoleUpgrade> findByUsernameStartingWithIgnoreCase(String username);
+
+    List<RoleUpgrade> findByUserUsernameContainingIgnoreCase(String username);
+
+    List<RoleUpgrade> findByUserUsernameContainingIgnoreCaseAndStatus(String username, RoleStatus roleEnum);
+
+    Optional<RoleUpgrade> findFirstByUserIdAndStatusInOrderByTimestampDesc(Long id, List<RoleStatus> pending);
+
+    List<RoleUpgrade> findALlByUserId(Long userId);
 }

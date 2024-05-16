@@ -82,7 +82,7 @@ public class AuthenticationService {
         response.setAccessToken(jwt);
         response.setRefreshToken(refreshToken);
         UserDTO userDTO = convertUserToDTO(user);
-        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUsername(user.getUsername());
+        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUserId(user.getId());
         if (roleUpgrade != null) {
             RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
             userDTO.setRoleUpgrade(roleUpgrade);
@@ -90,6 +90,7 @@ public class AuthenticationService {
         response.setUser(userDTO);
 
         return response;
+
     }
 
 

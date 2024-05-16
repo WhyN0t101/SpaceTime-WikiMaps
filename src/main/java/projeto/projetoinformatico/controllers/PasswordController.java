@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.model.users.User;
+import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.UpdatePasswordRequest;
 import projeto.projetoinformatico.service.PasswordService;
 import projeto.projetoinformatico.service.UserService;
@@ -17,13 +18,13 @@ import projeto.projetoinformatico.service.UserService;
 @RequestMapping("/api")
 public class PasswordController {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final PasswordService passwordService;
 
 
-    public PasswordController(UserService userService, PasswordEncoder passwordEncoder, PasswordService passwordService) {
-        this.userService = userService;
+    public PasswordController(PasswordService passwordService, UserRepository userRepository) {
         this.passwordService = passwordService;
+        this.userRepository = userRepository;
     }
 
 
@@ -32,7 +33,7 @@ public class PasswordController {
     public ResponseEntity<UserDTO> updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest,
                                                   Authentication authentication) {
         String username = authentication.getName();
-        UserDTO user = userService.getUserByUsername(username);
+        User user = userRepository.findByUsername(username);
         if(!passwordService.validatePassword(user,updatePasswordRequest.getOldPassword())){
             throw new InvalidParamsRequestException("Old password does not match");
         }

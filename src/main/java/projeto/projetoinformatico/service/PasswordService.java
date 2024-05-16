@@ -2,7 +2,9 @@ package projeto.projetoinformatico.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
+import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
@@ -21,15 +23,18 @@ public class PasswordService {
     }
 
 
-    public UserDTO updatePassword(UserDTO user, String newPassword) {
+    public UserDTO updatePassword(User user, String newPassword) {
         user.setPassword(passwordEncoder.encode(newPassword));
-        User convUser = mapperUtils.dtoToUser(user);
-        userRepository.save(convUser);
-        return user;
+        UserDTO convUser = convertUserToDTO(user);
+        userRepository.save(user);
+        return convUser;
     }
 
-    public boolean validatePassword(UserDTO userDto, String oldPassword){
-        User user = mapperUtils.dtoToUser(userDto);
+    public boolean validatePassword(User user, String oldPassword){
         return passwordEncoder.matches(oldPassword, user.getPassword());
     }
+    private UserDTO convertUserToDTO(User user) {
+        return mapperUtils.userToDTO(user, UserDTO.class);
+    }
+
 }

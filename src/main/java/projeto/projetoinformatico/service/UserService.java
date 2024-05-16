@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
@@ -24,6 +25,7 @@ import projeto.projetoinformatico.utils.ModelMapperUtils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,11 +65,6 @@ public class UserService implements UserDetailsService {
             throw new NotFoundException("User not found with username: " + username);
         }
         UserDTO userDTO = convertUserToDTO(user);
-        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUsername(username);
-        if (roleUpgrade != null) {
-            RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
-            userDTO.setRoleUpgrade(roleUpgrade);
-        }
         return userDTO;
     }
 
@@ -102,33 +99,22 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
         UserDTO userDTO = convertUserToDTO(user);
 
-        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUsername(user.getUsername());
-        if (roleUpgrade != null) {
-            RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
-            // Populate RoleUpgradeDTO from RoleUpgrade entity
-            // You can use a similar approach as shown in the previous response
-            userDTO.setRoleUpgrade(roleUpgrade);
-        }
+
         return userDTO;
     }
 
-    @Cacheable(value = "layerCache", key = "#username")
-    public List<Layer> getUserLayers(String username) {
-        List<Layer> layers = layersRepository.findByUsername(username);
+    @Cacheable(value = "layerCache", key = "#id")
+    public List<LayerDTO> getUserLayers(Long id) {
+        List<Layer> layers = layersRepository.findLayersByUserId(id);
         if (layers.isEmpty()) {
-            throw new NotFoundException("User layers not found for user with username: " + username);
+            throw new NotFoundException("User layers not found for user with id: " + id);
         }
-        return layers;
+        return layers.stream()
+                .map(this::convertLayerToDTO)
+                .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "userCache", key = "#id")
-    public String getUsernameById(Long id) {
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null) {
-            throw new NotFoundException("User not found with id: " + id);
-        }
-        return user.getUsername();
-    }
+    @Cacheable(value = "userCache", key = "#name")
     public List<UserDTO> getUsersByNameAndRole(String name, String role) {
         try {
             Role roleEnum = Role.valueOf(role.toUpperCase());
@@ -147,6 +133,7 @@ public class UserService implements UserDetailsService {
     }
 
 
+    @Cacheable(value = "userCache", key = "#name")
     public List<UserDTO> getUserContainingUsername(String name) {
         List<User> users = userRepository.findByUsernameStartingWithIgnoreCase(name);
         if (users.isEmpty()) {
@@ -157,11 +144,11 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
-    @CacheEvict(value = "userCache", key = "#username")
-    public UserDTO updateUserRole(String username, String role) {
-        User user = userRepository.findByUsername(username);
+    @CacheEvict(value = "userCache", key = "#id")
+    public UserDTO updateUserRole(Long id, String role) {
+        User user = userRepository.findUserById(id);
         if (user == null) {
-            throw new NotFoundException("User not found with username: " + username);
+            throw new NotFoundException("User not found with id: " + id);
         }
 
         try {
@@ -174,7 +161,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    //@CacheEvict(value = "userCache", key = "#username")
+    @CacheEvict(value = "userCache", key = "#newUsername")
     public AuthenticationResponse updateUserUsernameEmail(String username, String newUsername, String newEmail) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -197,6 +184,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    @CacheEvict(value = "userCache", key = "#newUsername")
     public AuthenticationResponse updateUserUsername(String username, String newUsername) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -218,6 +206,8 @@ public class UserService implements UserDetailsService {
         }
     }
 
+
+    @CacheEvict(value = "userCache", key = "#newEmail")
     public AuthenticationResponse updateUserEmail(String username, String newEmail) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -236,8 +226,48 @@ public class UserService implements UserDetailsService {
     }
 
     private UserDTO convertUserToDTO(User user) {
-        return mapperUtils.userToDTO(user, UserDTO.class);
+        UserDTO dto = mapperUtils.userToDTO(user, UserDTO.class);
+        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUserId(user.getId());
+        if (roleUpgrade != null) {
+            RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
+            // Populate RoleUpgradeDTO from RoleUpgrade entity
+            // You can use a similar approach as shown in the previous response
+            dto.setRoleUpgrade(roleUpgrade);
+        }
+        return dto;
+    }
+    private LayerDTO convertLayerToDTO(Layer layer) {
+        return mapperUtils.layerToDTO(layer, LayerDTO.class);
     }
 
 
+
+    @CacheEvict(value = "userCache", key = "#userId")
+    public void deleteUser(Long userId) {
+        // Find the user by ID
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+
+        // Delete associated layers
+        deleteLayersByUserId(userId);
+        // Delete associated role upgrade requests
+        deleteRoleUpgradeRequestsByUserId(userId);
+
+        // Delete the user
+        userRepository.delete(user);
+    }
+
+    private void deleteLayersByUserId(Long userId) {
+        List<Layer> layers = layersRepository.findLayersByUserId(userId);
+        if (!layers.isEmpty()) {
+            layersRepository.deleteAll(layers);
+        }
+    }
+
+    private void deleteRoleUpgradeRequestsByUserId(Long userId) {
+        List<RoleUpgrade> roleUpgradeRequests = roleUpgradeRepository.findALlByUserId(userId);
+        if (!roleUpgradeRequests.isEmpty()) {
+            roleUpgradeRepository.deleteAll(roleUpgradeRequests);
+        }
+    }
 }
