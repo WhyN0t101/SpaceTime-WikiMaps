@@ -124,9 +124,11 @@ public class UserService implements UserDetailsService {
     @Cacheable(value = "userCache", key = "#id")
     public String getUsernameById(Long id) {
         User user = userRepository.findById(id).orElse(null);
-        return (user != null) ? user.getUsername() : null;
+        if (user == null) {
+            throw new NotFoundException("User not found with id: " + id);
+        }
+        return user.getUsername();
     }
-
     public List<UserDTO> getUsersByNameAndRole(String name, String role) {
         try {
             Role roleEnum = Role.valueOf(role.toUpperCase());
