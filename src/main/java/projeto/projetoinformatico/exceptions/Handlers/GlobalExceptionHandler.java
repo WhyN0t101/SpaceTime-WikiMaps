@@ -93,6 +93,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, status);
     }
 
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPassword(InvalidRequestException ex) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
 
     /*@ExceptionHandler(JwtExpiredException.class)
     public void handleJwtForbiddenException(JwtExpiredException e, HttpServletResponse response) {
