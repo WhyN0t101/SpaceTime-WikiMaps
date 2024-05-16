@@ -21,7 +21,7 @@ public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
         //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Authentication failed");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write("Unauthorized: " + authException.getMessage());
-        response.getWriter().write("Unauthorized: " + authException.getMessage());
+        //response.getWriter().write("Unauthorized: " + authException.getMessage());
     }
 
 /*

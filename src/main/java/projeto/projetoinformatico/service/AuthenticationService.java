@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
+import projeto.projetoinformatico.exceptions.Exception.InvalidPasswordException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
@@ -72,6 +73,10 @@ public class AuthenticationService {
         var user = userRepository.findByUsername(signInRequest.getUsername());
         if (user == null){
             throw new NotFoundException("User not found");
+        }
+        boolean valid = !passwordEncoder.matches(signInRequest.getPassword(), user.getPassword());
+        if (!valid){
+            throw new InvalidPasswordException("Invalid Password");
         }
 
         var jwt = JWTServiceImpl.generateToken(user);
