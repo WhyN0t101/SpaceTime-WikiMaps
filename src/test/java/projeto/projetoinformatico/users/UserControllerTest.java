@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import projeto.projetoinformatico.controllers.UserController;
+import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
@@ -162,46 +163,45 @@ public class UserControllerTest {
         });
     }
 
-    @Test//Falha
+    @Test
     public void testGetUserLayers_Success() {
         // Mock dependencies
         UserService userService = Mockito.mock(UserService.class);
         UserController userController = new UserController(userService);
 
         //MockLayers
-        List<Layer> layers = Arrays.asList(new Layer(), new Layer());
+        List<LayerDTO> layers = Arrays.asList(new LayerDTO(), new LayerDTO());
         String username = "Admin";
         Long userId = 1L;
 
 
         // Set up mock behavior
-        when(userService.getUserLayers(username)).thenReturn(layers); // Replace "Admin" with the expected username
+        when(userService.getUserLayers(1L)).thenReturn(layers); // Replace "Admin" with the expected username
         // Alternatively, you can use ArgumentMatchers.any() to match any string argument
         // when(userService.getUserLayers(ArgumentMatchers.any())).thenReturn(layers);
 
         // Call the endpoint
-        ResponseEntity<List<Layer>> response = userController.getUserLayers(userId);
+        ResponseEntity<List<LayerDTO>> response = userController.getUserLayers(userId);
 
         // Assert the response
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(layers, response.getBody());
     }
 
-    @Test//Falha getUsernameById returns null
+    @Test
     public void testGetUserLayers_UserLayersNotFound() {
         // Mock dependencies
         UserService userService = Mockito.mock(UserService.class);
         UserController userController = new UserController(userService);
 
         // Mock behavior of userService.getUserLayers to throw NotFoundException
-        when(userService.getUserLayers("Teste4")).thenThrow(new NotFoundException("User layers not found for user with username: Admin"));
+        when(userService.getUserLayers(1L)).thenThrow(new NotFoundException("User layers not found for user with with id: 1"));
 
         // Call the endpoint and assert that it throws NotFoundException
         assertThrows(NotFoundException.class, () -> {
-            userController.getUserLayers(4L);
+            userController.getUserLayers(1L);
         });
     }
-
 
     @Test
     public void testGetAuthenticatedUser_Success() {
