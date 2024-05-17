@@ -60,7 +60,7 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
+   //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/id/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         UserDTO user = userService.getUserById(id);
@@ -90,7 +90,6 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    //@PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/user")
     public ResponseEntity<AuthenticationResponse> updateUserRole(@Valid @RequestBody AlterRequest alterRequest,
                                                                  Authentication authentication) {
@@ -107,8 +106,18 @@ public class UserController {
     }
     @DeleteMapping("/users/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> deleteLayer(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUserById(@PathVariable Long id) {
         userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/user")
+    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
+    public ResponseEntity<Void> deleteUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String authenticatedUsername = authentication.getName();
+        Long userId = userService.getUserByUsername(authenticatedUsername).getId();
+        userService.deleteOwnUser(userId);
         return ResponseEntity.noContent().build();
     }
     @GetMapping

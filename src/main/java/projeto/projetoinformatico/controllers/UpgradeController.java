@@ -26,8 +26,8 @@ public class UpgradeController {
         this.upgradeService = upgradeService;
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/requests")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<RoleUpgradeDTO>> getAllRequestsByStatus(@RequestParam(required = false) String status, @RequestParam(required = false) String username) {
 
         List<RoleUpgradeDTO> requests;
