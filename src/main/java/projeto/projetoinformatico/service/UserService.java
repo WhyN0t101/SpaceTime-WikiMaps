@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
+import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
@@ -140,6 +141,13 @@ public class UserService implements UserDetailsService {
     @CacheEvict(value = "userCache", key = "#newUsername")
     public AuthenticationResponse updateUserUsernameEmail(String username, String newUsername, String newEmail) {
         User user = findUserByUsername(username);
+        if (userRepository.existsByUsername(newUsername)) {
+            throw new InvalidParamsRequestException("Username already exists");
+        }
+        // Check if the email is already taken
+        if (userRepository.existsByEmail(newEmail)) {
+            throw new InvalidParamsRequestException("Email already registered");
+        }
         user.setUsername(newUsername);
         user.setEmail(newEmail);
         return generateAuthenticationResponse(user);
@@ -148,6 +156,9 @@ public class UserService implements UserDetailsService {
     @CacheEvict(value = "userCache", key = "#newUsername")
     public AuthenticationResponse updateUserUsername(String username, String newUsername) {
         User user = findUserByUsername(username);
+        if (userRepository.existsByUsername(newUsername)){
+            throw new InvalidParamsRequestException("Username already exists");
+        }
         user.setUsername(newUsername);
         return generateAuthenticationResponse(user);
     }
@@ -155,6 +166,10 @@ public class UserService implements UserDetailsService {
     @CacheEvict(value = "userCache", key = "#newEmail")
     public AuthenticationResponse updateUserEmail(String username, String newEmail) {
         User user = findUserByUsername(username);
+        // Check if the email is already taken
+        if (userRepository.existsByEmail(newEmail)) {
+            throw new InvalidParamsRequestException("Email already registered");
+        }
         user.setEmail(newEmail);
         userRepository.save(user);
         AuthenticationResponse response = new AuthenticationResponse();
