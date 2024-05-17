@@ -92,9 +92,8 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, "JWT Token is expired. Please log in again.");
         return new ResponseEntity<>(errorResponse, status);
     }
-
     @ExceptionHandler(InvalidPasswordException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidPassword(InvalidRequestException ex) {
+    public ResponseEntity<ErrorResponse> handleInvalidPassword(InvalidPasswordException ex) {
         HttpStatus status = HttpStatus.FORBIDDEN;
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);

@@ -74,10 +74,10 @@ public class AuthenticationService {
         if (user == null){
             throw new NotFoundException("User not found");
         }
-        boolean valid = !passwordEncoder.matches(signInRequest.getPassword(), user.getPassword());
+       /* boolean valid = !passwordEncoder.matches(signInRequest.getPassword(), user.getPassword());
         if (!valid){
             throw new InvalidPasswordException("Invalid Password");
-        }
+        }*/
 
         var jwt = JWTServiceImpl.generateToken(user);
         var refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
@@ -89,7 +89,6 @@ public class AuthenticationService {
         UserDTO userDTO = convertUserToDTO(user);
         RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUserId(user.getId());
         if (roleUpgrade != null) {
-            RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
             userDTO.setRoleUpgrade(roleUpgrade);
         }
         response.setUser(userDTO);
