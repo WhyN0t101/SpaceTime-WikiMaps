@@ -75,7 +75,6 @@ public class AuthenticationControllerTest {
         assertEquals(mockResponse, response.getBody());
     }
 
-    /*
     @Test
     public void testRefreshToken_Success() {
         // Mock dependencies
@@ -111,6 +110,6 @@ public class AuthenticationControllerTest {
         assertEquals(mockResponse, response.getBody());
     }
 
-     */
+
 
 }
