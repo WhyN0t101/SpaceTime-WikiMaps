@@ -7,6 +7,9 @@ import projeto.projetoinformatico.exceptions.Exception.SparqlQueryNotFoundExcept
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class ResourceService {
 
@@ -49,5 +52,15 @@ public class ResourceService {
             throw new SparqlQueryNotFoundException("SPARQL query returned no results");
         }
         return result;
+    }
+
+    public List<SearchResult> getImages(List<String> itemIds) {
+        List<SearchResult> results = new ArrayList<>();
+        for (String itemId : itemIds) {
+            String sparqlQuery = sparqlQueryProvider.buildImageQuery(itemId);
+            SearchResult result = executeSparqlQuery(sparqlQuery);
+            results.add(result);
+        }
+        return results;
     }
 }

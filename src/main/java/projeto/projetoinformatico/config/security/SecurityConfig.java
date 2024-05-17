@@ -52,7 +52,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/layers/search").permitAll()
                     .requestMatchers("/api/sparql").permitAll()
                     .requestMatchers("/api/users/{id}/layers").permitAll()
-                    .requestMatchers("/api/users/{id}").permitAll()
+                    .requestMatchers("/api/users/id/{id}").permitAll()
                     .anyRequest().authenticated()
             )
                     /*

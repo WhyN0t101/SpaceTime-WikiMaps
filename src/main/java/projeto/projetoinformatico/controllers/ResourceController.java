@@ -8,6 +8,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.service.ResourceService;
+
+import java.util.List;
+
 @Validated
 @RestController
 @RequestMapping("/api")

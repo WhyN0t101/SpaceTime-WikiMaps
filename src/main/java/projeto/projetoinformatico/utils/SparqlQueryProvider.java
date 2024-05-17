@@ -155,4 +155,10 @@ public class SparqlQueryProvider {
         return sb.toString();
     }
 
+    public String buildImageQuery(String itemId) {
+        return PREFIXES +
+                "SELECT ?image WHERE { " +
+                "  wd:" + itemId + " wdt:P18 ?image. " +
+                "}";
+    }
 }
