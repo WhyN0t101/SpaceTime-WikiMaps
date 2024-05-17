@@ -66,7 +66,6 @@ public class UpgradeService {
         RoleUpgrade request = new RoleUpgrade();
         request.setUser(user);
         request.setReason(reason);
-
         saveRequest(request);
         return convertUpgradeToDTO(request);
     }

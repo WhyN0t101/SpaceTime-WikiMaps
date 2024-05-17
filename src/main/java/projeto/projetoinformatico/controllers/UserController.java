@@ -61,7 +61,7 @@ public class UserController {
     }
 
    //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
-    @GetMapping("/users/id/{id}")
+    @GetMapping("/users/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         UserDTO user = userService.getUserById(id);
         return ResponseEntity.ok(user);

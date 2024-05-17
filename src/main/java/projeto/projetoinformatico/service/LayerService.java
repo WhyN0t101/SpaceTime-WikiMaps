@@ -88,6 +88,8 @@ public class LayerService {
 
     @CacheEvict(value = "layerCache", key = "#id")
     public LayerDTO updateLayer(Long id, LayerRequest layerRequest) {
+        validateLayerRequest(layerRequest);
+        checkDuplicateLayerName(layerRequest.getName());
         Layer existingLayer = layersRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Layer not found with id: " + id));;
 
@@ -132,7 +134,7 @@ public class LayerService {
 
     private void validateSparqlQuery(String query) {
         if (isSparqlQueryValid(query)) {
-            throw new InvalidRequestException("Invalid SPARQL query format");
+            throw new InvalidRequestException("Invalid SPARQL query");
         }
     }
     private void validateLayerRequest(LayerRequest layerRequest) {
