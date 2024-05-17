@@ -4,6 +4,8 @@ package projeto.projetoinformatico.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 
+import javax.naming.AuthenticationException;
 import java.util.HashMap;
 
 @Service
@@ -66,19 +69,28 @@ public class AuthenticationService {
     }
 
 
-    public AuthenticationResponse signin(SignInRequest signInRequest){
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                signInRequest.getUsername(), signInRequest.getPassword()));
+    public AuthenticationResponse signin(SignInRequest signInRequest) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    signInRequest.getUsername(), signInRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            throw new InvalidPasswordException("Invalid Password");
+        }
 
+        // Retrieve the user by username
         var user = userRepository.findByUsername(signInRequest.getUsername());
-        if (user == null){
+        if (user == null) {
             throw new NotFoundException("User not found");
         }
-       /* boolean valid = !passwordEncoder.matches(signInRequest.getPassword(), user.getPassword());
-        if (!valid){
-            throw new InvalidPasswordException("Invalid Password");
-        }*/
 
+        // Validate the provided password against the stored hashed password
+        boolean valid = passwordEncoder.matches(signInRequest.getPassword(), user.getPassword());
+        // Throw exception if the password is invalid
+        if (!valid) {
+            throw new InvalidPasswordException("Invalid Password");
+        }
+
+        // Generate JWT tokens
         var jwt = JWTServiceImpl.generateToken(user);
         var refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
 
@@ -94,8 +106,8 @@ public class AuthenticationService {
         response.setUser(userDTO);
 
         return response;
-
     }
+
 
 
     public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
