@@ -14,13 +14,12 @@ public class UserDTO {
     private String email;
     private String role; // Changed to String
     private RoleUpgradeDTO roleUpgrade;
-    private String password; // Add password field
 
     public void setRoleUpgrade(RoleUpgrade roleUpgrade) {
         if (roleUpgrade != null) {
             this.roleUpgrade = new RoleUpgradeDTO();
             this.roleUpgrade.setId(roleUpgrade.getId());
-            this.roleUpgrade.setUsername(roleUpgrade.getUsername());
+            this.roleUpgrade.setUsername(roleUpgrade.getUser().getUsername());
             this.roleUpgrade.setReason(roleUpgrade.getReason());
             this.roleUpgrade.setTimestamp(roleUpgrade.getTimestamp());
             this.roleUpgrade.setStatus(roleUpgrade.getStatus());

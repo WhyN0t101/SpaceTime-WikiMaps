@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.requests.AlterRequest;
@@ -68,9 +69,8 @@ public class UserController {
 
     @GetMapping("/users/{id}/layers")
     //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
-    public ResponseEntity<List<Layer>> getUserLayers(@PathVariable Long id) {
-        String username = userService.getUsernameById(id);
-        List<Layer> userLayers = userService.getUserLayers(username);
+    public ResponseEntity<List<LayerDTO>> getUserLayers(@PathVariable Long id) {
+        List<LayerDTO> userLayers = userService.getUserLayers(id);
         return ResponseEntity.ok(userLayers);
 
     }
@@ -84,9 +84,9 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PutMapping("/users/{username}/role")
-    public ResponseEntity<UserDTO> updateUserRole(@PathVariable String username, @RequestParam String role) {
-        UserDTO updatedUser = userService.updateUserRole(username, role);
+    @PutMapping("/users/{id}/role")
+    public ResponseEntity<UserDTO> updateUserRole(@PathVariable Long id, @RequestParam String role) {
+        UserDTO updatedUser = userService.updateUserRole(id, role);
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -105,7 +105,12 @@ public class UserController {
         }
         return ResponseEntity.ok(response);
     }
-
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> deleteLayer(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
     @GetMapping
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<String> sayHello(){

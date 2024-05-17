@@ -1,14 +1,13 @@
 package projeto.projetoinformatico.service;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
-import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
+import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
@@ -18,7 +17,6 @@ import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.StatusRequest;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -29,21 +27,20 @@ public class UpgradeService {
 
     private final RoleUpgradeRepository roleUpgradeRepository;
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
     private final ModelMapperUtils mapperUtils;
 
     @Autowired
-    public UpgradeService(RoleUpgradeRepository roleUpgradeRepository, UserRepository userRepository, ModelMapper modelMapper, ModelMapperUtils mapperUtils) {
+    public UpgradeService(RoleUpgradeRepository roleUpgradeRepository, UserRepository userRepository, ModelMapperUtils mapperUtils) {
         this.roleUpgradeRepository = roleUpgradeRepository;
         this.userRepository = userRepository;
-        this.modelMapper = modelMapper;
         this.mapperUtils = mapperUtils;
     }
 
     @CacheEvict(value = {"userCache", "requestCache"}, allEntries = true)
     public RoleUpgradeDTO requestUpgrade(String username, String reason) {
+        User user = userRepository.findByUsername(username);
         // Check if the user has a pending or accepted request
-        Optional<RoleUpgrade> existingRequest = roleUpgradeRepository.findFirstByUsernameAndStatusInOrderByTimestampDesc(username,
+        Optional<RoleUpgrade> existingRequest = roleUpgradeRepository.findFirstByUserIdAndStatusInOrderByTimestampDesc(user.getId(),
                 List.of(RoleStatus.PENDING, RoleStatus.ACCEPTED));
 
         if (existingRequest.isPresent()) {
@@ -52,7 +49,7 @@ public class UpgradeService {
         }
 
         // Check if the user made a request in the last 7 days
-        Optional<RoleUpgrade> lastRequest = roleUpgradeRepository.findFirstByUsernameOrderByTimestampDesc(username);
+        Optional<RoleUpgrade> lastRequest = roleUpgradeRepository.findFirstByUserOrderByTimestampDesc(user);
         if (lastRequest.isPresent()) {
             Date currentDate = new Date();
             Date lastRequestDate = lastRequest.get().getTimestamp();
@@ -65,13 +62,18 @@ public class UpgradeService {
         }
         // Create a new upgrade request
         RoleUpgrade request = new RoleUpgrade();
+        request.setUser(user); // Set the user for the upgrade request
         request.setReason(reason);
-        request.setUsername(username);
-        return convertUpgradeToDTO(saveRequest(request));
+        RoleUpgradeDTO upgradeDTO = convertUpgradeToDTO(request);
+        upgradeDTO.setUsername(username); // Set the username in the DTO
+        saveRequest(request);
+        return upgradeDTO;
     }
 
-    private RoleUpgrade saveRequest(RoleUpgrade request) {
-        return roleUpgradeRepository.save(request);
+
+
+    private void saveRequest(RoleUpgrade request) {
+        roleUpgradeRepository.save(request);
     }
 
 
@@ -93,10 +95,10 @@ public class UpgradeService {
         String message = request.getMessage();
         roleUpgrade.setStatus(statusEnum);
         roleUpgrade.setMessage(message);
+        String username = roleUpgrade.getUser().getUsername();
 
         // If the request is accepted, update the user's role
         if (statusEnum == RoleStatus.ACCEPTED) {
-            String username = roleUpgrade.getUsername();
             User user = userRepository.findByUsername(username);
             if (user == null) {
                 throw new NotFoundException("User not found");
@@ -105,9 +107,11 @@ public class UpgradeService {
             // Save the updated user back to the database
             userRepository.save(user);
         }
-
+        roleUpgradeRepository.save(roleUpgrade);
+        RoleUpgradeDTO upgradeDTO = convertUpgradeToDTO(roleUpgrade);
+        upgradeDTO.setUsername(username);
         // Save the updated upgrade request
-        return convertUpgradeToDTO(roleUpgradeRepository.save(roleUpgrade));
+        return upgradeDTO;
     }
 
     @Cacheable(value = "requestCache", key = "#status")
@@ -131,20 +135,16 @@ public class UpgradeService {
 
     @Cacheable(value = "requestCache")
     public List<RoleUpgradeDTO> getAllRequests() {
-        return roleUpgradeRepository.findAll().stream()
+        List<RoleUpgrade> requests = roleUpgradeRepository.findAll();
+        return requests.stream()
                 .map(this::convertUpgradeToDTO)
                 .collect(Collectors.toList());
     }
-    private RoleUpgradeDTO convertUpgradeToDTO(RoleUpgrade upgrade) {
-        return mapperUtils.roleUpgradeToDTO(upgrade, RoleUpgradeDTO.class);
-    }
-
 
     public List<RoleUpgradeDTO> getRequestsByNameAndStatus(String username, String status) {
         try {
             RoleStatus roleEnum = RoleStatus.valueOf(status.toUpperCase());
-
-            List<RoleUpgrade> users = roleUpgradeRepository.findByUsernameStartingWithIgnoreCaseAndStatus(username, roleEnum);
+            List<RoleUpgrade> users = roleUpgradeRepository.findByUserUsernameContainingIgnoreCaseAndStatus(username, roleEnum);
             if (users.isEmpty()) {
                 throw new NotFoundException("No requests found with name starting with: " + username + " and status: " + status);
             }
@@ -159,12 +159,23 @@ public class UpgradeService {
     }
 
     public List<RoleUpgradeDTO> getRequestsContainingUsername(String username) {
-        List<RoleUpgrade> requests = roleUpgradeRepository.findByUsernameStartingWithIgnoreCase(username);
+        List<RoleUpgrade> requests = roleUpgradeRepository.findByUserUsernameContainingIgnoreCase(username);
+
         if (requests.isEmpty()) {
-            throw new NotFoundException("No users found with name starting with: " + username);
+            throw new NotFoundException("No users found with name containing: " + username);
         }
+
         return requests.stream()
                 .map(this::convertUpgradeToDTO)
                 .collect(Collectors.toList());
     }
+
+    private RoleUpgradeDTO convertUpgradeToDTO(RoleUpgrade upgrade) {
+        RoleUpgradeDTO dto = mapperUtils.roleUpgradeToDTO(upgrade, RoleUpgradeDTO.class);
+        dto.setUsername(upgrade.getUser().getUsername()); // Set the username in the DTO
+        return dto;
+    }
+
+
+
 }

@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import projeto.projetoinformatico.constraints.ChangePassword;
 import projeto.projetoinformatico.dtos.UserDTO;
+import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.requests.UpdatePasswordRequest;
 import projeto.projetoinformatico.service.PasswordService;
 
@@ -14,10 +15,10 @@ public class ChangePasswordValidator implements ConstraintValidator<ChangePasswo
     private PasswordService passwordService;
 
     // Add a field to store the current user information
-    private UserDTO currentUser;
+    private User currentUser;
 
     // Setter method to set the current user
-    public void setCurrentUser(UserDTO currentUser) {
+    public void setCurrentUser(User currentUser) {
         this.currentUser = currentUser;
     }
 

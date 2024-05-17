@@ -14,5 +14,4 @@ public class RoleUpgradeDTO {
     private RoleStatus status;
     private String message;
 
-
 }

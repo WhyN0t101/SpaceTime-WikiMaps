@@ -8,12 +8,15 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
+import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.layers.LayersRepository;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
+import projeto.projetoinformatico.model.users.User;
+import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
@@ -29,15 +32,15 @@ public class LayerService {
     private final SparqlQueryProvider sparqlQueryProvider;
     private final SearchService searchService;
 
-    private final ModelMapper modelMapper;
     private final ModelMapperUtils mapperUtils;
+    private final UserRepository userRepository;
 
     @Autowired
-    public LayerService(LayersRepository layersRepository, SparqlQueryProvider sparqlQueryProvider, SearchService searchService,ModelMapper modelMapper, ModelMapperUtils mapperUtils) {
+    public LayerService(LayersRepository layersRepository, SparqlQueryProvider sparqlQueryProvider, SearchService searchService, ModelMapperUtils mapperUtils,UserRepository userRepository) {
         this.layersRepository = layersRepository;
         this.sparqlQueryProvider = sparqlQueryProvider;
+        this.userRepository = userRepository;
         this.searchService = searchService;
-        this.modelMapper = modelMapper;
         this.mapperUtils = mapperUtils;
 
     }
@@ -45,15 +48,18 @@ public class LayerService {
 
     @CacheEvict(value = "layerCache", allEntries = true)
     public LayerDTO createLayer(String username, LayerRequest layerRequest) {
+        User user = userRepository.findByUsername(username);
         validateLayerRequest(layerRequest);
         checkDuplicateLayerName(layerRequest.getName());
         Layer newLayer = new Layer();
-        newLayer.setUsername(username);
+        newLayer.setUser(user);
         newLayer.setLayerName(layerRequest.getName());
         newLayer.setDescription(layerRequest.getDescription());
         newLayer.setQuery(layerRequest.getQuery());
         Layer savedLayer = saveLayer(newLayer);
-        return convertLayerToDTO(savedLayer);
+        LayerDTO savedLayerDTO = convertLayerToDTO(savedLayer);
+        savedLayerDTO.setUser(user);
+        return savedLayerDTO;
     }
 
     public SearchResult getLayerByIdWithParams(Long id, Double lat1, Double lon1, Double lat2, Double lon2, Long start, Long end) {
@@ -88,7 +94,7 @@ public class LayerService {
         BeanUtils.copyProperties(layerRequest, existingLayer, "id");
         existingLayer.setTimestamp(new Date());
         Layer newLayer = saveLayer(existingLayer);
-
+        newLayer.setLayerName(layerRequest.getName());
         return convertLayerToDTO(newLayer);
     }
 
@@ -103,6 +109,7 @@ public class LayerService {
             throw new NotFoundException("Layer not found with id: " + id);
         }
     }
+
 
     private Layer saveLayer(Layer layer) {
         return layersRepository.save(layer);
@@ -142,5 +149,4 @@ public class LayerService {
     private LayerDTO convertLayerToDTO(Layer layer) {
         return mapperUtils.layerToDTO(layer, LayerDTO.class);
     }
-
 }
