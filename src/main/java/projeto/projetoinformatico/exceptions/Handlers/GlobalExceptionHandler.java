@@ -7,7 +7,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import projeto.projetoinformatico.exceptions.Exception.*;
 import projeto.projetoinformatico.responses.ErrorResponse;
 

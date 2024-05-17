@@ -25,7 +25,6 @@ import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 
-import javax.naming.AuthenticationException;
 import java.util.HashMap;
 
 @Service
@@ -76,7 +75,6 @@ public class AuthenticationService {
         } catch (BadCredentialsException e) {
             throw new InvalidPasswordException("Invalid Password");
         }
-
         // Retrieve the user by username
         var user = userRepository.findByUsername(signInRequest.getUsername());
         if (user == null) {
