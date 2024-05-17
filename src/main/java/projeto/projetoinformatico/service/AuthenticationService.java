@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
-import projeto.projetoinformatico.exceptions.Handlers.InvalidPasswordHandler;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
