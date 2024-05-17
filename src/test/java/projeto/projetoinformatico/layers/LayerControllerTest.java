@@ -6,14 +6,19 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import projeto.projetoinformatico.controllers.LayerController;
 import projeto.projetoinformatico.controllers.UserController;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
+import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.exceptions.Exception.SparqlQueryException;
 import projeto.projetoinformatico.model.SearchResult;
+import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.service.LayerService;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.utils.Validation;
@@ -151,5 +156,203 @@ public class LayerControllerTest {
         } catch (SparqlQueryException e) {
             assertEquals("Invalid Sparql Query", e.getMessage());
         }
+    }
+
+    @Test
+    public void testCreateLayer_Success() {
+        // Mock SecurityContext and Authentication
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Mock authentication behavior
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("testUser");
+
+        // Prepare the LayerRequest
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Test Layer");
+        layerRequest.setDescription("Test Description");
+        layerRequest.setSparqlQuery("SELECT * WHERE { ?s ?p ?o }");
+
+        // Prepare the LayerDTO
+        LayerDTO layerDTO = new LayerDTO();
+        layerDTO.setLayerName("Test Layer");
+        layerDTO.setDescription("Test Description");
+        layerDTO.setQuery("SELECT * WHERE { ?s ?p ?o }");
+
+        // Mock the LayerService createLayer method
+        when(layerService.createLayer(any(String.class), any(LayerRequest.class))).thenReturn(layerDTO);
+
+        // Call the controller method
+        ResponseEntity<LayerDTO> response = layerController.createLayer(layerRequest);
+
+        // Assert the response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(layerDTO, response.getBody());
+    }
+
+    @Test
+    public void testCreateLayer_InvalidRequestException() {
+        // Mock SecurityContext and Authentication
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Mock authentication behavior
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("testUser");
+
+        // Prepare the LayerRequest
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Test Layer");
+        layerRequest.setDescription("Test Description");
+        layerRequest.setSparqlQuery("SELECT * WHERE { ?s ?p ?o }");
+
+        // Mock the LayerService createLayer method to throw InvalidRequestException
+        when(layerService.createLayer(any(String.class), any(LayerRequest.class)))
+                .thenThrow(new InvalidRequestException("Invalid layer request"));
+
+        // Call the controller method and handle the exception
+        ResponseEntity<LayerDTO> response = layerController.createLayer(layerRequest);
+
+        // Assert the response
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    public void testCreateLayer_GeneralException() {
+        // Mock SecurityContext and Authentication
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Mock authentication behavior
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("testUser");
+
+        // Prepare the LayerRequest
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Test Layer");
+        layerRequest.setDescription("Test Description");
+        layerRequest.setSparqlQuery("SELECT * WHERE { ?s ?p ?o }");
+
+        // Mock the LayerService createLayer method to throw a general exception
+        when(layerService.createLayer(any(String.class), any(LayerRequest.class)))
+                .thenThrow(new RuntimeException("Unexpected error"));
+
+        // Call the controller method and handle the exception
+        ResponseEntity<LayerDTO> response = layerController.createLayer(layerRequest);
+
+        // Assert the response
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    @Test
+    public void testUpdateLayer_Success() {
+        // Prepare the LayerRequest
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Updated Layer");
+        layerRequest.setDescription("Updated Description");
+        layerRequest.setSparqlQuery("SELECT * WHERE { ?s ?p ?o }");
+
+        // Prepare the LayerDTO
+        LayerDTO layerDTO = new LayerDTO();
+        layerDTO.setLayerName("Updated Layer");
+        layerDTO.setDescription("Updated Description");
+        layerDTO.setQuery("SELECT * WHERE { ?s ?p ?o }");
+
+        // Mock the LayerService updateLayer method
+        when(layerService.updateLayer(eq(1L), any(LayerRequest.class))).thenReturn(layerDTO);
+
+        // Call the controller method
+        ResponseEntity<LayerDTO> response = layerController.updateLayer(1L, layerRequest);
+
+        // Assert the response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(layerDTO, response.getBody());
+    }
+
+    @Test
+    public void testUpdateLayer_NotFoundException() {
+        // Prepare the LayerRequest
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Updated Layer");
+        layerRequest.setDescription("Updated Description");
+        layerRequest.setSparqlQuery("SELECT * WHERE { ?s ?p ?o }");
+
+        // Mock the LayerService updateLayer method to throw NotFoundException
+        when(layerService.updateLayer(eq(1L), any(LayerRequest.class)))
+                .thenThrow(new NotFoundException("Layer not found with id: " + 1000L));
+
+        // Call the controller method and handle the exception
+        ResponseEntity<LayerDTO> response = layerController.updateLayer(1000L, layerRequest);
+
+        // Assert the response
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    public void testUpdateLayer_GeneralException() {
+        // Prepare the LayerRequest
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Updated Layer");
+        layerRequest.setDescription("Updated Description");
+        layerRequest.setSparqlQuery("SELECT * WHERE { ?s ?p ?o }");
+
+        // Mock the LayerService updateLayer method to throw a general exception
+        when(layerService.updateLayer(eq(1L), any(LayerRequest.class)))
+                .thenThrow(new RuntimeException("Unexpected error"));
+
+        // Call the controller method and handle the exception
+        ResponseEntity<LayerDTO> response = layerController.updateLayer(1L, layerRequest);
+
+        // Assert the response
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    @Test
+    public void testDeleteLayer_Success() {
+        // Mock SecurityContext and Authentication
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Mock authentication behavior
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("testUser");
+
+        // Mock the LayerService deleteLayer method
+        layerController.deleteLayer(1L);
+
+        // Assert the response
+        ResponseEntity<Void> response = layerController.deleteLayer(1L);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    public void testDeleteLayer_InvalidRequestException() {
+        // Mock the LayerService deleteLayer method to throw InvalidRequestException
+        Mockito.doThrow(new InvalidRequestException("Layer ID cannot be null"))
+                .when(layerService).deleteLayer(null);
+
+        // Assert the response
+        ResponseEntity<Void> response = layerController.deleteLayer(null);
+        assertThrows(InvalidRequestException.class, () -> {
+            layerController.deleteLayer(null);
+        });
+    }
+
+    @Test
+    public void testDeleteLayer_NotFoundException() {
+        // Mock the LayerService deleteLayer method to throw NotFoundException
+        Mockito.doThrow(new NotFoundException("Layer not found with id: 1"))
+                .when(layerService).deleteLayer(1L);
+
+        // Assert the response
+        ResponseEntity<Void> response = layerController.deleteLayer(1L);
+        assertThrows(NotFoundException.class, () -> {
+            layerController.deleteLayer(1L);
+        });
     }
 }
