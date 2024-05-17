@@ -1,6 +1,6 @@
 package projeto.projetoinformatico.service;
 
-import org.modelmapper.ModelMapper;
+import org.eclipse.rdf4j.http.protocol.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -8,9 +8,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import projeto.projetoinformatico.dtos.LayerDTO;
-import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
+import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.layers.LayersRepository;
@@ -25,7 +26,6 @@ import projeto.projetoinformatico.utils.ModelMapperUtils;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,21 +34,19 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final LayersRepository layersRepository;
     private final RoleUpgradeRepository roleUpgradeRepository;
-    private final ModelMapper modelMapper;
     private final ModelMapperUtils mapperUtils;
 
-
     @Autowired
-    public UserService(UserRepository userRepository, LayersRepository layersRepository,ModelMapper modelMapper, ModelMapperUtils mapperUtils, RoleUpgradeRepository roleUpgradeRepository) {
+    public UserService(UserRepository userRepository, LayersRepository layersRepository, ModelMapperUtils mapperUtils, RoleUpgradeRepository roleUpgradeRepository) {
         this.userRepository = userRepository;
         this.layersRepository = layersRepository;
-        this.modelMapper = modelMapper;
         this.mapperUtils = mapperUtils;
         this.roleUpgradeRepository = roleUpgradeRepository;
     }
     public UserDetailsService userDetailsService(){
         return userRepository::findByUsername;
     }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
@@ -58,49 +56,42 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
+
     @Cacheable(value = "searchCache", key = "#username")
     public UserDTO getUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new NotFoundException("User not found with username: " + username);
         }
-        UserDTO userDTO = convertUserToDTO(user);
-        return userDTO;
+        return convertUserToDTO(user);
     }
+
 
 
     @Cacheable(value = "userCache")
     public List<UserDTO> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
+        return userRepository.findAll().stream()
                 .map(this::convertUserToDTO)
                 .collect(Collectors.toList());
     }
 
     @Cacheable(value = "userCache", key = "#role")
     public List<UserDTO> getAllUsersByRole(String role) {
-        try {
-            Role roleEnum = Role.valueOf(role.toUpperCase());
-            List<User> users = userRepository.findAllByRole(roleEnum);
-            if (users.isEmpty()) {
-                throw new NotFoundException("No users found with role: " + role);
-            }
-            return users.stream()
-                    .map(this::convertUserToDTO)
-                    .collect(Collectors.toList());
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Role not found: " + role);
+        Role roleEnum = getRoleEnum(role);
+        List<User> users = userRepository.findAllByRole(roleEnum);
+        if (users.isEmpty()) {
+            throw new NotFoundException("No users found with role: " + role);
         }
+        return users.stream()
+                .map(this::convertUserToDTO)
+                .collect(Collectors.toList());
     }
 
     @Cacheable(value = "userCache", key = "#id")
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
-        UserDTO userDTO = convertUserToDTO(user);
-
-
-        return userDTO;
+        return convertUserToDTO(user);
     }
 
     @Cacheable(value = "layerCache", key = "#id")
@@ -116,22 +107,15 @@ public class UserService implements UserDetailsService {
 
     @Cacheable(value = "userCache", key = "#name")
     public List<UserDTO> getUsersByNameAndRole(String name, String role) {
-        try {
-            Role roleEnum = Role.valueOf(role.toUpperCase());
-            List<User> users = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, roleEnum);
-            if (users.isEmpty()) {
-                throw new NotFoundException("No users found with name starting with: " + name + " and role: " + role);
-            }
-            return users.stream()
-                    .map(this::convertUserToDTO)
-                    .collect(Collectors.toList());
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Role not found: " + role);
-        } catch (NullPointerException e) {
-            throw new IllegalArgumentException("Role cannot be null");
+        Role roleEnum = getRoleEnum(role);
+        List<User> users = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, roleEnum);
+        if (users.isEmpty()) {
+            throw new NotFoundException("No users found with name starting with: " + name + " and role: " + role);
         }
+        return users.stream()
+                .map(this::convertUserToDTO)
+                .collect(Collectors.toList());
     }
-
 
     @Cacheable(value = "userCache", key = "#name")
     public List<UserDTO> getUserContainingUsername(String name) {
@@ -146,117 +130,58 @@ public class UserService implements UserDetailsService {
 
     @CacheEvict(value = "userCache", key = "#id")
     public UserDTO updateUserRole(Long id, String role) {
-        User user = userRepository.findUserById(id);
-        if (user == null) {
-            throw new NotFoundException("User not found with id: " + id);
-        }
-
-        try {
-            Role roleEnum = Role.valueOf(role.toUpperCase());
-            user.setRole(roleEnum);
-            userRepository.save(user);
-            return convertUserToDTO(user);
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Role not found: " + role);
-        }
+        User user = findUserById(id);
+        Role roleEnum = getRoleEnum(role);
+        user.setRole(roleEnum);
+        userRepository.save(user);
+        return convertUserToDTO(user);
     }
 
     @CacheEvict(value = "userCache", key = "#newUsername")
     public AuthenticationResponse updateUserUsernameEmail(String username, String newUsername, String newEmail) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new NotFoundException("User not found with username: " + username);
-        }
-        try {
-            user.setUsername(newUsername);
-            user.setEmail(newEmail);
-            var jwt = JWTServiceImpl.generateToken(user);
-            var refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
-            AuthenticationResponse response = new AuthenticationResponse();
-            response.setAccessToken(jwt);
-            response.setRefreshToken(refreshToken);
-            UserDTO userDTO = convertUserToDTO(user);
-            userRepository.save(user);
-            response.setUser(userDTO);
-            return response;
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Error altering email and username");
-        }
+        User user = findUserByUsername(username);
+        user.setUsername(newUsername);
+        user.setEmail(newEmail);
+        return generateAuthenticationResponse(user);
     }
 
     @CacheEvict(value = "userCache", key = "#newUsername")
     public AuthenticationResponse updateUserUsername(String username, String newUsername) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new NotFoundException("User not found with username: " + username);
-        }
-        try {
-            user.setUsername(newUsername);
-            var jwt = JWTServiceImpl.generateToken(user);
-            var refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
-            AuthenticationResponse response = new AuthenticationResponse();
-            response.setAccessToken(jwt);
-            response.setRefreshToken(refreshToken);
-            UserDTO userDTO = convertUserToDTO(user);
-            userRepository.save(user);
-            response.setUser(userDTO);
-            return response;
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Error altering username");
-        }
+        User user = findUserByUsername(username);
+        user.setUsername(newUsername);
+        return generateAuthenticationResponse(user);
     }
-
 
     @CacheEvict(value = "userCache", key = "#newEmail")
     public AuthenticationResponse updateUserEmail(String username, String newEmail) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new NotFoundException("User not found with username: " + username);
-        }
-        try {
-            user.setEmail(newEmail);
-            userRepository.save(user);
-            AuthenticationResponse response = new AuthenticationResponse();
-            UserDTO userDTO = convertUserToDTO(user);
-            response.setUser(userDTO);
-            return response;
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Error altering email");
-        }
+        User user = findUserByUsername(username);
+        user.setEmail(newEmail);
+        userRepository.save(user);
+        AuthenticationResponse response = new AuthenticationResponse();
+        response.setUser(convertUserToDTO(user));
+        return response;
     }
-
-    private UserDTO convertUserToDTO(User user) {
-        UserDTO dto = mapperUtils.userToDTO(user, UserDTO.class);
-        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUserId(user.getId());
-        if (roleUpgrade != null) {
-            RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
-            // Populate RoleUpgradeDTO from RoleUpgrade entity
-            // You can use a similar approach as shown in the previous response
-            dto.setRoleUpgrade(roleUpgrade);
-        }
-        return dto;
-    }
-    private LayerDTO convertLayerToDTO(Layer layer) {
-        return mapperUtils.layerToDTO(layer, LayerDTO.class);
-    }
-
-
 
     @CacheEvict(value = "userCache", key = "#userId")
+    @Transactional
     public void deleteUser(Long userId) {
-        // Find the user by ID
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
-
-        // Delete associated layers
+        User targetUser = findUserById(userId);
+        // Ensure an admin cannot delete another admin
+        if (targetUser.getRole() == Role.ADMIN) {
+            throw new InvalidRequestException("Admin users cannot delete other admin users.");
+        }
         deleteLayersByUserId(userId);
-        // Delete associated role upgrade requests
         deleteRoleUpgradeRequestsByUserId(userId);
-
-        // Delete the user
-        userRepository.delete(user);
+        userRepository.delete(targetUser);
     }
-
+    @CacheEvict(value = "userCache", key = "#userId")
+    @Transactional
+    public void deleteOwnUser(Long userId) {
+        User targetUser = findUserById(userId);
+        deleteLayersByUserId(userId);
+        deleteRoleUpgradeRequestsByUserId(userId);
+        userRepository.delete(targetUser);
+    }
     private void deleteLayersByUserId(Long userId) {
         List<Layer> layers = layersRepository.findLayersByUserId(userId);
         if (!layers.isEmpty()) {
@@ -269,5 +194,51 @@ public class UserService implements UserDetailsService {
         if (!roleUpgradeRequests.isEmpty()) {
             roleUpgradeRepository.deleteAll(roleUpgradeRequests);
         }
+    }
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+    }
+
+    private User findUserByUsername(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found with username: " + username);
+        }
+        return user;
+    }
+
+
+    private Role getRoleEnum(String role) {
+        try {
+            return Role.valueOf(role.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Role not found: " + role);
+        }
+    }
+
+    private AuthenticationResponse generateAuthenticationResponse(User user) {
+        String jwt = JWTServiceImpl.generateToken(user);
+        String refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
+        AuthenticationResponse response = new AuthenticationResponse();
+        response.setAccessToken(jwt);
+        response.setRefreshToken(refreshToken);
+        response.setUser(convertUserToDTO(user));
+        userRepository.save(user);
+        return response;
+    }
+
+    private UserDTO convertUserToDTO(User user) {
+        UserDTO dto = mapperUtils.userToDTO(user, UserDTO.class);
+        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUserId(user.getId());
+        if (roleUpgrade != null) {
+            dto.setRoleUpgrade(roleUpgrade);
+        }
+        return dto;
+    }
+
+    private LayerDTO convertLayerToDTO(Layer layer) {
+        return mapperUtils.layerToDTO(layer, LayerDTO.class);
     }
 }
