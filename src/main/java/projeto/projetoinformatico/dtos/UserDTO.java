@@ -2,17 +2,14 @@ package projeto.projetoinformatico.dtos;
 
 import lombok.Data;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
-import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
-import projeto.projetoinformatico.model.users.User;
-
-import java.util.Date;
 
 @Data
 public class UserDTO {
     private Long id;
     private String username;
     private String email;
-    private String role; // Changed to String
+    private String role;
+    private boolean blocked;
     private RoleUpgradeDTO roleUpgrade;
 
     public void setRoleUpgrade(RoleUpgrade roleUpgrade) {

@@ -39,7 +39,9 @@ public class User implements UserDetails {
     @Setter
     private String email;
 
-
+    @Getter
+    @Setter
+    private boolean accountNonLocked = true;  // Default to true
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -54,7 +56,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return accountNonLocked;  // Use this field for account lock status
     }
 
     @Override

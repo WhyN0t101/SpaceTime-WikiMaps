@@ -1,6 +1,5 @@
 package projeto.projetoinformatico.service;
 
-import org.eclipse.rdf4j.http.protocol.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -44,10 +43,10 @@ public class UserService implements UserDetailsService {
         this.mapperUtils = mapperUtils;
         this.roleUpgradeRepository = roleUpgradeRepository;
     }
+
     public UserDetailsService userDetailsService(){
         return userRepository::findByUsername;
     }
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
@@ -57,8 +56,7 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-
-    @Cacheable(value = "searchCache", key = "#username")
+    @Cacheable(value = "userCache", key = "#username")
     public UserDTO getUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -66,8 +64,6 @@ public class UserService implements UserDetailsService {
         }
         return convertUserToDTO(user);
     }
-
-
 
     @Cacheable(value = "userCache")
     public List<UserDTO> getAllUsers() {
@@ -144,44 +140,41 @@ public class UserService implements UserDetailsService {
         if (userRepository.existsByUsername(newUsername)) {
             throw new InvalidParamsRequestException("Username already exists");
         }
-        // Check if the email is already taken
         if (userRepository.existsByEmail(newEmail)) {
             throw new InvalidParamsRequestException("Email already registered");
         }
         user.setUsername(newUsername);
         user.setEmail(newEmail);
+        userRepository.save(user);
         return generateAuthenticationResponse(user);
     }
 
     @CacheEvict(value = "userCache", key = "#newUsername")
     public AuthenticationResponse updateUserUsername(String username, String newUsername) {
         User user = findUserByUsername(username);
-        if (userRepository.existsByUsername(newUsername)){
+        if (userRepository.existsByUsername(newUsername)) {
             throw new InvalidParamsRequestException("Username already exists");
         }
         user.setUsername(newUsername);
+        userRepository.save(user);
         return generateAuthenticationResponse(user);
     }
 
     @CacheEvict(value = "userCache", key = "#newEmail")
     public AuthenticationResponse updateUserEmail(String username, String newEmail) {
         User user = findUserByUsername(username);
-        // Check if the email is already taken
         if (userRepository.existsByEmail(newEmail)) {
             throw new InvalidParamsRequestException("Email already registered");
         }
         user.setEmail(newEmail);
         userRepository.save(user);
-        AuthenticationResponse response = new AuthenticationResponse();
-        response.setUser(convertUserToDTO(user));
-        return response;
+        return generateAuthenticationResponse(user);
     }
 
-    @CacheEvict(value = "userCache", key = "#userId")
+    @CacheEvict(value = "userCache")
     @Transactional
     public void deleteUser(Long userId) {
         User targetUser = findUserById(userId);
-        // Ensure an admin cannot delete another admin
         if (targetUser.getRole() == Role.ADMIN) {
             throw new InvalidRequestException("Admin users cannot delete other admin users.");
         }
@@ -189,6 +182,7 @@ public class UserService implements UserDetailsService {
         deleteRoleUpgradeRequestsByUserId(userId);
         userRepository.delete(targetUser);
     }
+
     @CacheEvict(value = "userCache", key = "#userId")
     @Transactional
     public void deleteOwnUser(Long userId) {
@@ -197,6 +191,7 @@ public class UserService implements UserDetailsService {
         deleteRoleUpgradeRequestsByUserId(userId);
         userRepository.delete(targetUser);
     }
+
     private void deleteLayersByUserId(Long userId) {
         List<Layer> layers = layersRepository.findLayersByUserId(userId);
         if (!layers.isEmpty()) {
@@ -224,7 +219,6 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-
     private Role getRoleEnum(String role) {
         try {
             return Role.valueOf(role.toUpperCase());
@@ -250,10 +244,29 @@ public class UserService implements UserDetailsService {
         if (roleUpgrade != null) {
             dto.setRoleUpgrade(roleUpgrade);
         }
+        dto.setBlocked(!user.isAccountNonLocked());
         return dto;
     }
 
     private LayerDTO convertLayerToDTO(Layer layer) {
-        return mapperUtils.layerToDTO(layer, LayerDTO.class);
+        return mapperUtils.map(layer, LayerDTO.class);
+    }
+
+    public void blockUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        if (!user.getRole().equals(Role.ADMIN)) {
+            user.setAccountNonLocked(false);
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("Cannot block an admin user.");
+        }
+    }
+
+    public void unblockUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setAccountNonLocked(true);
+        userRepository.save(user);
     }
 }
+
+

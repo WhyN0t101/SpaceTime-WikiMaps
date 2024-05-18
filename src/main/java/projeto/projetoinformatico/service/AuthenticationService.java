@@ -13,6 +13,7 @@ import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.exceptions.Exception.InvalidPasswordException;
+import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
@@ -25,6 +26,7 @@ import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 
+import javax.security.auth.login.AccountLockedException;
 import java.util.HashMap;
 
 @Service
@@ -80,6 +82,7 @@ public class AuthenticationService {
         if (user == null) {
             throw new NotFoundException("User not found");
         }
+
 
         // Validate the provided password against the stored hashed password
         boolean valid = passwordEncoder.matches(signInRequest.getPassword(), user.getPassword());

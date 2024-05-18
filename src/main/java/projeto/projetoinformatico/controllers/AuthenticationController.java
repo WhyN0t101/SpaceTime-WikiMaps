@@ -9,11 +9,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import projeto.projetoinformatico.dtos.UserDTO;
-import projeto.projetoinformatico.exceptions.Exception.JwtExpiredException;
+import projeto.projetoinformatico.exceptions.Exception.*;
+import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.*;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
 import projeto.projetoinformatico.service.AuthenticationService;
+import projeto.projetoinformatico.service.UserService;
+
+import javax.security.auth.login.AccountLockedException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,6 +25,7 @@ import projeto.projetoinformatico.service.AuthenticationService;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final UserRepository userRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<UserDTO> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
@@ -30,6 +35,15 @@ public class AuthenticationController {
 
     @PostMapping("/signin")
     public ResponseEntity<AuthenticationResponse> signin(@Valid @RequestBody SignInRequest signInRequest) {
+        var user = userRepository.findByUsername(signInRequest.getUsername());
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        // Check if the user account is locked
+        if (!user.isAccountNonLocked()) {
+            throw new AccountBlockedException("User account is locked");
+        }
         AuthenticationResponse response = authenticationService.signin(signInRequest);
         return ResponseEntity.ok(response);
     }

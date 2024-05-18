@@ -97,13 +97,11 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
         return new ResponseEntity<>(errorResponse, status);
     }
-
-
-    /*@ExceptionHandler(JwtExpiredException.class)
-    public void handleJwtForbiddenException(JwtExpiredException e, HttpServletResponse response) {
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        // You can log the exception or handle it in any other way if needed
-    }*/
-
+    @ExceptionHandler(AccountBlockedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountBlockedException(Exception ex) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), status, ex.getMessage());
+        return new ResponseEntity<>(errorResponse, status);
+    }
 
 }
