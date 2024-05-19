@@ -1,5 +1,6 @@
 package projeto.projetoinformatico.controllers;
 
+import com.google.common.util.concurrent.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,9 @@ public class ResourceController {
 
     @Autowired
     private ResourceService resourceService;
+    private static final double REQUESTS_PER_SECOND = 20.0;
 
+    private static final RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
     @Autowired
     public ResourceController(ResourceService resourceService) {
         this.resourceService = resourceService;
@@ -27,6 +30,9 @@ public class ResourceController {
     @GetMapping("/items/{itemId}")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<SearchResult> getWikidataItem(@PathVariable String itemId) {
+        if (!rateLimiter.tryAcquire()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+        }
         SearchResult item = resourceService.getItem(itemId);
         return ResponseEntity.ok(item);
     }
@@ -34,12 +40,18 @@ public class ResourceController {
     @GetMapping("/properties/{propertyId}")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<SearchResult> getWikidataProperty(@PathVariable String propertyId) {
+        if (!rateLimiter.tryAcquire()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+        }
        SearchResult property = resourceService.getProperty(propertyId);
         return ResponseEntity.ok(property);
     }
     @GetMapping("/data/geolocation/{item_id}")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getGeolocationData(@PathVariable("item_id") String itemId) {
+        if (!rateLimiter.tryAcquire()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+        }
         try {
             SearchResult geolocationData = resourceService.getGeolocationData(itemId);
             return ResponseEntity.ok(geolocationData);
@@ -51,6 +63,9 @@ public class ResourceController {
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getPropertyValues(@PathVariable("item_id") String itemId,
                                                @PathVariable("property_id") String propertyId) {
+        if (!rateLimiter.tryAcquire()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+        }
         try {
             SearchResult propertyValue = resourceService.getPropertyValues(itemId, propertyId);
             return ResponseEntity.ok(propertyValue);

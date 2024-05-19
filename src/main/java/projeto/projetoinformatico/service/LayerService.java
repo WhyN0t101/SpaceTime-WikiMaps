@@ -155,6 +155,11 @@ public class LayerService {
         Page<Layer> layers = layersRepository.findAll(pageable);
         return layers.map(this::convertLayerToDTO);
     }
+    public Page<LayerDTO> findByKeywordsPaged(String query, Pageable pageable) {
+        String lowercaseQuery = query.toLowerCase();
+        Page<Layer> layers = layersRepository.findByKeywordsPage(lowercaseQuery,pageable);
+        return layers.map(this::convertLayerToDTO);
+    }
     private LayerDTO convertLayerToDTO(Layer layer) {
         return mapperUtils.layerToDTO(layer, LayerDTO.class);
     }

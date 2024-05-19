@@ -21,4 +21,6 @@ public interface LayersRepository extends JpaRepository<Layer, Long> {
     List<Layer> findLayersByUserId(Long id);
     Page<Layer> findAll(Pageable pageable);
 
+    @Query("SELECT l FROM Layer l WHERE lower(l.layerName) LIKE %:query% OR lower(l.description) LIKE %:query%")
+    Page<Layer> findByKeywordsPage(@Param("query") String query, Pageable pageable);
 }

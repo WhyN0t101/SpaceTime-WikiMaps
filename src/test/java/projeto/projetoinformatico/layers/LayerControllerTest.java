@@ -4,14 +4,23 @@ import com.github.jsonldjava.shaded.com.google.common.util.concurrent.RateLimite
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import projeto.projetoinformatico.controllers.LayerController;
 import projeto.projetoinformatico.controllers.UserController;
 import projeto.projetoinformatico.dtos.LayerDTO;
+import projeto.projetoinformatico.dtos.Paged.LayerPageDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
@@ -24,18 +33,19 @@ import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.utils.Validation;
 
 import javax.naming.directory.SearchControls;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class LayerControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
 
     private LayerService layerService;
     private Validation validation;
@@ -44,26 +54,32 @@ public class LayerControllerTest {
 
     @BeforeEach
     public void setUp() {
-        layerService = Mockito.mock(LayerService.class);
-        validation = Mockito.mock(Validation.class);
-        rateLimiter = Mockito.mock(RateLimiter.class);
+        layerService = mock(LayerService.class);
+        validation = mock(Validation.class);
+        rateLimiter = mock(RateLimiter.class);
         layerController = new LayerController(layerService, validation);
     }
     @Test
     public void testGetAllLayers_Success() {
         // Mock dependencies
-        List<LayerDTO> layers = Arrays.asList(new LayerDTO(), new LayerDTO());
+        LayerService layerService = mock(LayerService.class);
+        LayerController layerController = new LayerController(layerService,validation);
 
+        // Mock data
+        LayerDTO layerDTO1 = new LayerDTO();
+        LayerDTO layerDTO2 = new LayerDTO();
+        List<LayerDTO> layerDTOList = Arrays.asList(layerDTO1, layerDTO2);
+        Page<LayerDTO> layerDTOPage = new PageImpl<>(layerDTOList);
 
         // Set up mock behavior
-        when(layerService.getAllLayers()).thenReturn(layers);
+        when(layerService.getAllLayersPaged(Pageable.unpaged())).thenReturn(layerDTOPage);
 
         // Call the endpoint
-        ResponseEntity<List<LayerDTO>> response = layerController.getAllLayers();
+        ResponseEntity<LayerPageDTO> response = layerController.getAllLayers(0, 10);
 
         // Assert the response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(layers, response.getBody());
+        assertEquals(layerDTOList, response);
     }
 
     @Test
@@ -82,7 +98,32 @@ public class LayerControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(layerDTO, response.getBody());
     }
+    @Test
+    public void testRateLimiter() throws Exception {
+        when(validation.isValidCoordinate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble())).thenReturn(true);
 
+        // Send requests more than the rate limit within a short period
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(MockMvcRequestBuilders.get("/api/layers/1")
+                            .param("lat1", "38")
+                            .param("lon1", "-9")
+                            .param("lat2", "41")
+                            .param("lon2", "-8")
+                            .param("start", "2000")
+                            .param("end", "2020"))
+                    .andExpect(MockMvcResultMatchers.status().isOk());
+        }
+
+        // The next request should be rate limited
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/layers/1")
+                        .param("lat1", "38")
+                        .param("lon1", "-9")
+                        .param("lat2", "41")
+                        .param("lon2", "-8")
+                        .param("start", "2000")
+                        .param("end", "2020"))
+                .andExpect(MockMvcResultMatchers.status().isTooManyRequests());
+    }
     @Test
     public void testGetLayerById_LayerNotFound() {
         // Mock dependencies
@@ -161,8 +202,8 @@ public class LayerControllerTest {
     @Test
     public void testCreateLayer_Success() {
         // Mock SecurityContext and Authentication
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.setContext(securityContext);
 
         // Mock authentication behavior
@@ -195,8 +236,8 @@ public class LayerControllerTest {
     @Test
     public void testCreateLayer_InvalidRequestException() {
         // Mock SecurityContext and Authentication
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.setContext(securityContext);
 
         // Mock authentication behavior
@@ -223,8 +264,8 @@ public class LayerControllerTest {
     @Test
     public void testCreateLayer_GeneralException() {
         // Mock SecurityContext and Authentication
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.setContext(securityContext);
 
         // Mock authentication behavior
@@ -314,8 +355,8 @@ public class LayerControllerTest {
     @Test
     public void testDeleteLayer_Success() {
         // Mock SecurityContext and Authentication
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.setContext(securityContext);
 
         // Mock authentication behavior

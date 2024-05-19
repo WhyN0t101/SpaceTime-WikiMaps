@@ -21,7 +21,7 @@ public class SearchController {
 
     private final SearchService searchService;
     private final Validation validation;
-    private static final double REQUESTS_PER_SECOND = 20.0; // Set the desired rate here
+    private static final double REQUESTS_PER_SECOND = 20.0;
     private static final RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
 
     @Autowired
@@ -98,7 +98,6 @@ public class SearchController {
     }
 
     @PostMapping("/sparql")
-    //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<SearchResult> executeSparqlQuery(@RequestBody String sparqlQuery) {
         if (!rateLimiter.tryAcquire()) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();

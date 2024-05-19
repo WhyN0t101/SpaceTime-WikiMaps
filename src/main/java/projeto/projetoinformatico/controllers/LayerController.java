@@ -29,7 +29,7 @@ import java.util.List;
 public class LayerController {
 
     private final LayerService layerService;
-    private static final double REQUESTS_PER_SECOND = 20.0; // Set the desired rate here
+    private static final double REQUESTS_PER_SECOND = 20.0;
 
     private static final RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
     private final Validation validation;
@@ -42,7 +42,8 @@ public class LayerController {
     @GetMapping("/layers")
     public ResponseEntity<LayerPageDTO> getAllLayers(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String query) {
         if(size < 1){
             throw new InvalidParamsRequestException("Invalid size of pagination");
         }
@@ -50,8 +51,12 @@ public class LayerController {
             throw new InvalidParamsRequestException("Invalid page of pagination");
         }
         Pageable pageable = PageRequest.of(page, size);
-        Page<LayerDTO> layers = layerService.getAllLayersPaged(pageable);
-
+        Page<LayerDTO> layers;
+        if(query != null){
+            layers =  layerService.findByKeywordsPaged(query,pageable);
+        }else{
+            layers = layerService.getAllLayersPaged(pageable);
+        }
         LayerPageDTO response = new LayerPageDTO(
                 layers.getContent(),
                 layers.getNumber(),
@@ -120,10 +125,4 @@ public class LayerController {
         layerService.deleteLayer(id);
         return ResponseEntity.noContent().build();
     }
-
-    @GetMapping("/layers/search")
-    public List<LayerDTO> searchLayers(@RequestParam("query") String query) {
-        return layerService.findByKeywords(query);
-    }
-
 }
