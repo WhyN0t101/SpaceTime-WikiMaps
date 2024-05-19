@@ -3,6 +3,8 @@ package projeto.projetoinformatico.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
@@ -148,6 +150,30 @@ public class UpgradeService {
                 .map(this::convertUpgradeToDTO)
                 .collect(Collectors.toList());
     }
+/// PAGINATION
+
+    public Page<RoleUpgradeDTO> getByStatusPaged(String status, Pageable pageable) {
+        RoleStatus statusEnum = RoleStatus.valueOf(status.toUpperCase());
+        Page<RoleUpgrade> requests = roleUpgradeRepository.findByStatus(statusEnum, pageable);
+        return requests.map(this::convertUpgradeToDTO);
+    }
+
+    public Page<RoleUpgradeDTO> getAllRequestsPaged(Pageable pageable) {
+        Page<RoleUpgrade> requests = roleUpgradeRepository.findAll(pageable);
+        return requests.map(this::convertUpgradeToDTO);
+    }
+
+    public Page<RoleUpgradeDTO> getRequestsByNameAndStatusPaged(String username, String status, Pageable pageable) {
+        RoleStatus statusEnum = RoleStatus.valueOf(status.toUpperCase());
+        Page<RoleUpgrade> requests = roleUpgradeRepository.findByUserUsernameContainingIgnoreCaseAndStatus(username, statusEnum, pageable);
+        return requests.map(this::convertUpgradeToDTO);
+    }
+
+    public Page<RoleUpgradeDTO> getRequestsContainingUsernamePaged(String username, Pageable pageable) {
+        Page<RoleUpgrade> requests = roleUpgradeRepository.findByUserUsernameContainingIgnoreCase(username, pageable);
+        return requests.map(this::convertUpgradeToDTO);
+    }
+
 
     private RoleUpgradeDTO convertUpgradeToDTO(RoleUpgrade upgrade) {
         RoleUpgradeDTO dto = mapperUtils.roleUpgradeToDTO(upgrade, RoleUpgradeDTO.class);

@@ -1,6 +1,7 @@
 package projeto.projetoinformatico.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,9 @@ import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +40,7 @@ public class UserService implements UserDetailsService {
     private final RoleUpgradeRepository roleUpgradeRepository;
     private final ModelMapperUtils mapperUtils;
 
+
     @Autowired
     public UserService(UserRepository userRepository, LayersRepository layersRepository, ModelMapperUtils mapperUtils, RoleUpgradeRepository roleUpgradeRepository) {
         this.userRepository = userRepository;
@@ -43,7 +48,7 @@ public class UserService implements UserDetailsService {
         this.mapperUtils = mapperUtils;
         this.roleUpgradeRepository = roleUpgradeRepository;
     }
-
+    CacheManager cacheManager;
     public UserDetailsService userDetailsService(){
         return userRepository::findByUsername;
     }
@@ -65,12 +70,11 @@ public class UserService implements UserDetailsService {
         return convertUserToDTO(user);
     }
 
-    @Cacheable(value = "userCache")
+    @Cacheable(value = "userCache",key = "'userId'")
     public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::convertUserToDTO)
-                .collect(Collectors.toList());
-    }
+       return userRepository.findAll().stream()
+               .map(this::convertUserToDTO)
+               .collect(Collectors.toList());}
 
     @Cacheable(value = "userCache", key = "#role")
     public List<UserDTO> getAllUsersByRole(String role) {
@@ -134,7 +138,7 @@ public class UserService implements UserDetailsService {
         return convertUserToDTO(user);
     }
 
-    @CacheEvict(value = "userCache", key = "#newUsername")
+    @CacheEvict(value = "userCache", key = "#username")
     public AuthenticationResponse updateUserUsernameEmail(String username, String newUsername, String newEmail) {
         User user = findUserByUsername(username);
         if (userRepository.existsByUsername(newUsername)) {
@@ -149,7 +153,7 @@ public class UserService implements UserDetailsService {
         return generateAuthenticationResponse(user);
     }
 
-    @CacheEvict(value = "userCache", key = "#newUsername")
+    @CacheEvict(value = "userCache", key = "#username")
     public AuthenticationResponse updateUserUsername(String username, String newUsername) {
         User user = findUserByUsername(username);
         if (userRepository.existsByUsername(newUsername)) {
@@ -160,7 +164,7 @@ public class UserService implements UserDetailsService {
         return generateAuthenticationResponse(user);
     }
 
-    @CacheEvict(value = "userCache", key = "#newEmail")
+    @CacheEvict(value = "userCache", key = "#username")
     public AuthenticationResponse updateUserEmail(String username, String newEmail) {
         User user = findUserByUsername(username);
         if (userRepository.existsByEmail(newEmail)) {
@@ -171,8 +175,7 @@ public class UserService implements UserDetailsService {
         return generateAuthenticationResponse(user);
     }
 
-    @CacheEvict(value = "userCache")
-    @Transactional
+
     public void deleteUser(Long userId) {
         User targetUser = findUserById(userId);
         if (targetUser.getRole() == Role.ADMIN) {
@@ -180,6 +183,7 @@ public class UserService implements UserDetailsService {
         }
         deleteLayersByUserId(userId);
         deleteRoleUpgradeRequestsByUserId(userId);
+       //cacheManager.getCache("userCache").evict(convertUserToDTO(targetUser));
         userRepository.delete(targetUser);
     }
 
@@ -266,6 +270,38 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         user.setAccountNonLocked(true);
         userRepository.save(user);
+    }
+
+    // PAGED
+    public Page<UserDTO> getUsersByNameAndRolePaged(String name, String role, Pageable pageable) {
+        Role roleEnum = getRoleEnum(role);
+        Page<User> usersPage = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, roleEnum,pageable);
+        if (usersPage.isEmpty()) {
+            throw new NotFoundException("No users found with name starting with: " + name + " and role: " + role);
+        }
+        return usersPage.map(this::convertUserToDTO);
+    }
+
+    public Page<UserDTO> getUserContainingUsernamePaged(String name, Pageable pageable) {
+        Page<User> usersPage = userRepository.findByUsernameStartingWithIgnoreCase(name, pageable);
+        if (usersPage.isEmpty()) {
+            throw new NotFoundException("No users found with name starting with: " + name);
+        }
+        return usersPage.map(this::convertUserToDTO);
+    }
+
+    public Page<UserDTO> getAllUsersByRolePaged(String role, Pageable pageable) {
+        Role roleEnum = getRoleEnum(role);
+        Page<User> usersPage = userRepository.findAllByRole(roleEnum, pageable);
+        if (usersPage.isEmpty()) {
+            throw new NotFoundException("No users found with role: " + role);
+        }
+        return usersPage.map(this::convertUserToDTO);
+    }
+
+    public Page<UserDTO> getAllUsersPaged(Pageable pageable) {
+        Page<User> usersPage = userRepository.findAll(pageable);
+        return usersPage.map(this::convertUserToDTO);
     }
 }
 

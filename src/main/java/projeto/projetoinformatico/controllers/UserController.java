@@ -2,6 +2,9 @@ package projeto.projetoinformatico.controllers;
 
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -9,7 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
-import projeto.projetoinformatico.model.layers.Layer;
+import projeto.projetoinformatico.dtos.Paged.UserPageDTO;
+import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.requests.AlterRequest;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.service.UserService;
@@ -34,23 +38,39 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users")
-    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam(required = false) String name,
-                                                          @RequestParam(required = false) String role) {
-        List<UserDTO> users;
+    public ResponseEntity<UserPageDTO> getAllUsers(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String role,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        if(size < 1){
+            throw new InvalidParamsRequestException("Invalid size of pagination");
+        }
+        if(page < 0){
+            throw new InvalidParamsRequestException("Invalid page of pagination");
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserDTO> users;
         if (name != null && role != null) {
             // Filter users by name and role
-            users = userService.getUsersByNameAndRole(name, role);
+            users = userService.getUsersByNameAndRolePaged(name, role, pageable);
         } else if (name != null) {
             // Filter users by name only
-            users = userService.getUserContainingUsername(name);
+            users = userService.getUserContainingUsernamePaged(name, pageable);
         } else if (role != null) {
             // Filter users by role only
-            users = userService.getAllUsersByRole(role);
+            users = userService.getAllUsersByRolePaged(role, pageable);
         } else {
             // No filtering, return all users
-            users = userService.getAllUsers();
+            users = userService.getAllUsersPaged(pageable);
         }
-        return ResponseEntity.ok(users);
+        UserPageDTO response = new UserPageDTO(
+                users.getContent(),
+                users.getNumber(),
+                (int) users.getTotalElements(),
+                users.getTotalPages()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")

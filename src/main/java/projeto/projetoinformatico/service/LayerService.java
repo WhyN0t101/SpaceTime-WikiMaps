@@ -5,6 +5,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
@@ -147,6 +149,11 @@ public class LayerService {
         if (layersRepository.existsByLayerName(name)) {
             throw new InvalidRequestException("Layer name already exists: " + name);
         }
+    }
+    @Cacheable(value = "layerCache")
+    public Page<LayerDTO> getAllLayersPaged(Pageable pageable) {
+        Page<Layer> layers = layersRepository.findAll(pageable);
+        return layers.map(this::convertLayerToDTO);
     }
     private LayerDTO convertLayerToDTO(Layer layer) {
         return mapperUtils.layerToDTO(layer, LayerDTO.class);
