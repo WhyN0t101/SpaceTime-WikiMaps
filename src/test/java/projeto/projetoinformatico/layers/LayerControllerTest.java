@@ -57,29 +57,59 @@ public class LayerControllerTest {
         validation = mock(Validation.class);
         rateLimiter = mock(RateLimiter.class);
         layerController = new LayerController(layerService, validation);
-    }/*
+    }
+
     @Test
-    public void testGetAllLayers_Success() {
-        // Mock dependencies
-        LayerService layerService = mock(LayerService.class);
-        LayerController layerController = new LayerController(layerService,validation);
+    public void testGetAllLayers_Success_NoQuery() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<LayerDTO> layerDTOList = List.of(new LayerDTO(), new LayerDTO());
+        Page<LayerDTO> layers = new PageImpl<>(layerDTOList, pageable, layerDTOList.size());
 
-        // Mock data
-        LayerDTO layerDTO1 = new LayerDTO();
-        LayerDTO layerDTO2 = new LayerDTO();
-        List<LayerDTO> layerDTOList = Arrays.asList(layerDTO1, layerDTO2);
-        Page<LayerDTO> layerDTOPage = new PageImpl<>(layerDTOList);
+        when(layerService.getAllLayersPaged(pageable)).thenReturn(layers);
 
-        // Set up mock behavior
-        when(layerService.getAllLayersPaged(Pageable.unpaged())).thenReturn(layerDTOPage);
+        ResponseEntity<LayerPageDTO> response = layerController.getAllLayers(0, 10, null);
 
-        // Call the endpoint
-        //ResponseEntity<LayerPageDTO> response = layerController.getAllLayers(0, 10);
-
-        // Assert the response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(layerDTOList, response);
-    }*/
+        assertEquals(layerDTOList, response.getBody().getLayers());
+        assertEquals(0, response.getBody().getCurrentPage());
+        assertEquals(layerDTOList.size(), response.getBody().getTotalItems());
+        assertEquals(1, response.getBody().getTotalPages());
+    }
+
+    @Test
+    public void testGetAllLayers_Success_WithQuery() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<LayerDTO> layerDTOList = List.of(new LayerDTO(), new LayerDTO());
+        Page<LayerDTO> layers = new PageImpl<>(layerDTOList, pageable, layerDTOList.size());
+
+        when(layerService.findByKeywordsPaged("keyword", pageable)).thenReturn(layers);
+
+        ResponseEntity<LayerPageDTO> response = layerController.getAllLayers(0, 10, "keyword");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(layerDTOList, response.getBody().getLayers());
+        assertEquals(0, response.getBody().getCurrentPage());
+        assertEquals(layerDTOList.size(), response.getBody().getTotalItems());
+        assertEquals(1, response.getBody().getTotalPages());
+    }
+
+    @Test
+    public void testGetAllLayers_InvalidSize() {
+        try {
+            layerController.getAllLayers(0, 0, null);
+        } catch (InvalidParamsRequestException e) {
+            assertEquals("Invalid size of pagination", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAllLayers_InvalidPage() {
+        try {
+            layerController.getAllLayers(-1, 10, null);
+        } catch (InvalidParamsRequestException e) {
+            assertEquals("Invalid page of pagination", e.getMessage());
+        }
+    }
 
     @Test
     public void testGetLayerById_Success() {
