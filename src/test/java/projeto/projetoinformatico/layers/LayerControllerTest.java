@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -45,9 +47,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+
+@SpringBootTest
+@AutoConfigureMockMvc
 public class LayerControllerTest {
 
+
+
+    @Autowired
     private MockMvc mockMvc;
+
 
     private LayerService layerService;
     private Validation validation;
@@ -341,12 +350,13 @@ public class LayerControllerTest {
             layerController.deleteLayer(null);
         });
     }
-    /*
+
     @Test
     public void testRateLimiter() throws Exception {
+        // Mock the validation method to always return true
         when(validation.isValidCoordinate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble())).thenReturn(true);
 
-        // Send requests more than the rate limit within a short period
+        // Send requests within the rate limit
         for (int i = 0; i < 5; i++) {
             mockMvc.perform(MockMvcRequestBuilders.get("/api/layers/1")
                             .param("lat1", "38")
@@ -356,6 +366,8 @@ public class LayerControllerTest {
                             .param("start", "2000")
                             .param("end", "2020"))
                     .andExpect(MockMvcResultMatchers.status().isOk());
+            // Adding a small delay to simulate the requests being made in quick succession
+            Thread.sleep(100); // Adjust the delay according to your rate limiting configuration
         }
 
         // The next request should be rate limited
@@ -368,6 +380,8 @@ public class LayerControllerTest {
                         .param("end", "2020"))
                 .andExpect(MockMvcResultMatchers.status().isTooManyRequests());
     }
+
+     /*
     @Test
     public void testGetLayerById_LayerNotFound() {
         // Mock dependencies
