@@ -1,12 +1,19 @@
 package projeto.projetoinformatico.authenticationTest;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import projeto.projetoinformatico.controllers.AuthenticationController;
 import projeto.projetoinformatico.controllers.UserController;
 import projeto.projetoinformatico.dtos.UserDTO;
+import projeto.projetoinformatico.exceptions.Exception.AccountBlockedException;
+import projeto.projetoinformatico.exceptions.Exception.InvalidPasswordException;
+import projeto.projetoinformatico.exceptions.Exception.JwtExpiredException;
+import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.RefreshTokenRequest;
@@ -19,15 +26,27 @@ import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
 import projeto.projetoinformatico.service.UserService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 public class AuthenticationControllerTest {
-/*
+
+
+    private UserRepository userRepository;
+    private AuthenticationService authenticationService;
+    private AuthenticationManager authenticationManager;
+    private AuthenticationController authenticationController;
+
+    @BeforeEach
+    public void setUp() {
+        userRepository = Mockito.mock(UserRepository.class);
+        authenticationService = Mockito.mock(AuthenticationService.class);
+        authenticationManager = Mockito.mock(AuthenticationManager.class);
+        authenticationController = new AuthenticationController(authenticationService, userRepository);
+    }
+
     @Test
     public void testSignUp_Success() {
-        // Mock dependencies
-        AuthenticationService authService = Mockito.mock(AuthenticationService.class);
-        AuthenticationController authController = new AuthenticationController(authService);
 
         // Create a mock sign-up request
         SignUpRequest signUpRequest = new SignUpRequest();
@@ -40,76 +59,145 @@ public class AuthenticationControllerTest {
         mockUserDTO.setUsername("testUser");
         mockUserDTO.setEmail("test@example.com");
         mockUserDTO.setRole("USER");
-        when(authService.signup(signUpRequest)).thenReturn(mockUserDTO);
+        when(authenticationService.signup(signUpRequest)).thenReturn(mockUserDTO);
 
 
         // Call the endpoint
-        ResponseEntity<UserDTO> response = authController.signup(signUpRequest);
+        ResponseEntity<UserDTO> response = authenticationController.signup(signUpRequest);
 
         // Assert the response
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(mockUserDTO, response.getBody());
     }
 
+
     @Test//Falha
     public void testSignIn_Success() {
         // Mock dependencies
-        AuthenticationService authService = Mockito.mock(AuthenticationService.class);
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        AuthenticationController authController = new AuthenticationController(authService);
-
-        // Create a mock sign-up request
-        // Create a mock sign-in request
         SignInRequest signInRequest = new SignInRequest();
-        signInRequest.setUsername("Admin");
-        signInRequest.setPassword("admin");
+        signInRequest.setUsername("testuser");
+        signInRequest.setPassword("password");
 
-        // Mock behavior of authService.signin
-        AuthenticationResponse mockResponse = new AuthenticationResponse();
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword("hashedpassword"); // Assume the password is already hashed
+        user.setAccountNonLocked(true);
 
-        // Call the endpoint
-        ResponseEntity<AuthenticationResponse> response = authController.signin(signInRequest);
+        AuthenticationResponse authResponse = new AuthenticationResponse();
+        authResponse.setAccessToken("access-token");
+        authResponse.setRefreshToken("refresh-token");
 
-        // Assert the response
+        when(userRepository.findByUsername("testuser")).thenReturn(user);
+        when(authenticationService.signin(signInRequest)).thenReturn(authResponse);
+
+        ResponseEntity<AuthenticationResponse> response = authenticationController.signin(signInRequest);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(mockResponse, response.getBody());
+        assertEquals(authResponse, response.getBody());
     }
 
     @Test
-    public void testRefreshToken_Success() {
-        // Mock dependencies
-        AuthenticationService authService = Mockito.mock(AuthenticationService.class);
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        AuthenticationController authController = new AuthenticationController(authService);
+    public void testSignin_UserNotFound() {
+        SignInRequest signInRequest = new SignInRequest();
+        signInRequest.setUsername("nonexistentuser");
+        signInRequest.setPassword("password");
 
-        // Mock request
-        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
-        refreshTokenRequest.setToken("valid_jwt_token");
+        when(userRepository.findByUsername("nonexistentuser")).thenReturn(null);
 
-        // Mock behavior of JWTServiceImpl methods
-        when(JWTServiceImpl.extractUsername(refreshTokenRequest.getToken())).thenReturn("testUser");
-        when(JWTServiceImpl.isTokenValid(refreshTokenRequest.getToken(), null)).thenReturn(true);
-        when(JWTServiceImpl.generateToken(Mockito.any(User.class))).thenReturn("new_jwt_token");
-
-        // Mock user retrieval
-        User mockUser = new User();
-        mockUser.setUsername("testUser");
-        when(userRepository.findByUsername("testUser")).thenReturn(mockUser);
-
-        // Mock behavior of authService.refreshToken
-        JwtAuthenticationResponse mockResponse = new JwtAuthenticationResponse();
-        mockResponse.setToken("new_jwt_token");
-        mockResponse.setRefreshToken(refreshTokenRequest.getToken());
-        when(authService.refreshToken(refreshTokenRequest)).thenReturn(mockResponse);
-
-        // Call the endpoint
-        ResponseEntity<JwtAuthenticationResponse> response = authController.refresh(refreshTokenRequest);
-
-        // Assert the response
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(mockResponse, response.getBody());
+        try {
+            authenticationController.signin(signInRequest);
+        } catch (NotFoundException e) {
+            assertEquals("User not found", e.getMessage());
+        }
     }
 
+    @Test
+    public void testSignin_AccountBlocked() {
+        SignInRequest signInRequest = new SignInRequest();
+        signInRequest.setUsername("lockeduser");
+        signInRequest.setPassword("password");
 
-*/
+        User user = new User();
+        user.setUsername("lockeduser");
+        user.setPassword("hashedpassword");
+        user.setAccountNonLocked(false);
+
+        when(userRepository.findByUsername("lockeduser")).thenReturn(user);
+
+        try {
+            authenticationController.signin(signInRequest);
+        } catch (AccountBlockedException e) {
+            assertEquals("User account is locked", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSignin_InvalidPassword() {
+        SignInRequest signInRequest = new SignInRequest();
+        signInRequest.setUsername("testuser");
+        signInRequest.setPassword("wrongpassword");
+
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword("hashedpassword");
+        user.setAccountNonLocked(true);
+
+        when(userRepository.findByUsername("testuser")).thenReturn(user);
+        doThrow(new InvalidPasswordException("Invalid Password")).when(authenticationManager).authenticate
+                (new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword()));
+
+        try {
+            authenticationController.signin(signInRequest);
+        } catch (InvalidPasswordException e) {
+            assertEquals("Invalid Password", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRefresh_Success() throws JwtExpiredException {
+        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
+        refreshTokenRequest.setToken("valid-refresh-token");
+
+        JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
+        jwtAuthenticationResponse.setToken("new-jwt-token");
+        jwtAuthenticationResponse.setRefreshToken("valid-refresh-token");
+
+        when(authenticationService.refreshToken(refreshTokenRequest)).thenReturn(jwtAuthenticationResponse);
+
+        ResponseEntity<JwtAuthenticationResponse> response = authenticationController.refresh(refreshTokenRequest);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(jwtAuthenticationResponse, response.getBody());
+    }
+
+    @Test
+    public void testRefresh_UserNotFound() throws JwtExpiredException {
+        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
+        refreshTokenRequest.setToken("valid-refresh-token");
+
+        when(authenticationService.refreshToken(refreshTokenRequest)).thenThrow(new NotFoundException("User not found"));
+
+        try {
+            authenticationController.refresh(refreshTokenRequest);
+        } catch (NotFoundException e) {
+            assertEquals("User not found", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRefresh_InvalidToken() throws JwtExpiredException {
+        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
+        refreshTokenRequest.setToken("invalid-refresh-token");
+
+        when(authenticationService.refreshToken(refreshTokenRequest)).thenThrow(new JwtExpiredException("Token is expired"));
+
+        try {
+            authenticationController.refresh(refreshTokenRequest);
+        } catch (JwtExpiredException e) {
+            assertEquals("Token is expired", e.getMessage());
+        }
+    }
+
 }
+
+
