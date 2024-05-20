@@ -7,18 +7,26 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import projeto.projetoinformatico.controllers.AdminController;
+import projeto.projetoinformatico.service.LayerService;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.utils.Validation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 public class AdminControllerTest {
 
+    private UserService userService;
+
+    @BeforeEach
+    public void setUp(){
+        userService = mock(UserService.class);
+
+    }
     @Test
     public void testSayHello_Success() {
         // Mock dependencies
-        AdminController adminController = new AdminController();
+        AdminController adminController = new AdminController(userService);
 
         // Call the endpoint
         ResponseEntity<String> response = adminController.sayHello();
@@ -26,5 +34,73 @@ public class AdminControllerTest {
         // Assert the response
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Welcome Admin", response.getBody());
+    }
+
+    @Test
+    public void testblockUser_Success() {
+        // Mock dependencies
+        AdminController adminController = new AdminController(userService);
+
+        // Set up mock behavior
+        doNothing().when(userService).blockUser(anyLong());
+
+        // Call the endpoint
+        ResponseEntity<Void> response = adminController.blockUser(1L);
+
+        // Assert the response
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+
+    }
+
+    @Test
+    public void testBlockUser_UserNotFound(){
+        AdminController adminController = new AdminController(userService);
+
+        // Mock the UserService blockUser method to throw an exception for user not found
+        doThrow(new RuntimeException("User not found")).when(userService).blockUser(anyLong());
+
+        // Call the controller method and handle the exception
+        try {
+            adminController.blockUser(1L);
+        } catch (RuntimeException e) {
+            // Assert the exception
+            assertEquals("User not found", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testBlockUser_BlockAdminUser() {
+        AdminController adminController = new AdminController(userService);
+
+        // Mock the UserService blockUser method to throw an exception for blocking an admin user
+        doThrow(new RuntimeException("Cannot block an admin user.")).when(userService).blockUser(anyLong());
+
+        // Call the controller method and handle the exception
+        try {
+            adminController.blockUser(1L);
+        } catch (RuntimeException e) {
+            // Assert the exception
+            assertEquals("Cannot block an admin user.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testUnblockUser_Success() {
+
+    }
+
+    @Test
+    public void testUnblockUser_ThrowRunTimeException(){
+
+    }
+
+    @Test
+    public void testdeleteUserById_Success() {
+
+    }
+
+    @Test
+    public void testdeleteUserById_InvalidRequestException(){
+
     }
 }
