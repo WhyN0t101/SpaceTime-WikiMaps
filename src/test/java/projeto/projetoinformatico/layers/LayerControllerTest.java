@@ -27,6 +27,9 @@ import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.exceptions.Exception.SparqlQueryException;
 import projeto.projetoinformatico.model.SearchResult;
+import projeto.projetoinformatico.model.users.Role;
+import projeto.projetoinformatico.model.users.User;
+import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.service.LayerService;
 import projeto.projetoinformatico.service.UserService;
@@ -49,6 +52,7 @@ public class LayerControllerTest {
     private LayerService layerService;
     private Validation validation;
     private RateLimiter rateLimiter;
+    private UserRepository userRepository;
     private LayerController layerController;
 
     @BeforeEach
@@ -56,6 +60,7 @@ public class LayerControllerTest {
         layerService = mock(LayerService.class);
         validation = mock(Validation.class);
         rateLimiter = mock(RateLimiter.class);
+        userRepository = mock(UserRepository.class);
         layerController = new LayerController(layerService, validation);
     }
 
@@ -111,22 +116,145 @@ public class LayerControllerTest {
         }
     }
 
+
     @Test
     public void testGetLayerById_Success() {
-        // Mock dependencies
-        LayerDTO layerDTO = new LayerDTO();
+        Long validId = 1L;
+        LayerDTO mockLayerDTO = new LayerDTO();
 
+        when(layerService.getLayerById(validId)).thenReturn(mockLayerDTO);
 
-        // Set up mock behavior
-        when(layerService.getLayerById(1L)).thenReturn(layerDTO);
+        ResponseEntity<LayerDTO> response = layerController.getLayerById(validId);
 
-        // Call the endpoint
-        ResponseEntity<LayerDTO> response = layerController.getLayerById(1L);
-
-        // Assert the response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(layerDTO, response.getBody());
+        assertEquals(mockLayerDTO, response.getBody());
     }
+
+    @Test
+    public void testGetLayerById_NotFound() {
+        Long invalidId = 2L;
+
+        when(layerService.getLayerById(invalidId)).thenThrow(new NotFoundException("Layer not found with id: " + invalidId));
+
+        assertThrows(NotFoundException.class, () -> {
+            layerController.getLayerById(invalidId);
+        });
+    }
+
+    @Test
+    public void testGetLayerResultsByIdWithParams_Success() {
+        // Mock parameters
+        Long id = 1L;
+        Double lat1 = 1.0;
+        Double lon2 = 2.0;
+        Double lat2 = 3.0;
+        Double lon1 = 4.0;
+        Long start = 1000L;
+        Long end = 2000L;
+
+        // Mock dependencies
+        when(rateLimiter.tryAcquire()).thenReturn(true);
+        when(validation.isValidCoordinate(lat1, lon2, lat2, lon1)).thenReturn(true);
+
+        // Mock layer service response
+        SearchResult mockSearchResult = new SearchResult(Collections.emptyList());
+        when(layerService.getLayerByIdWithParams(id, lat1, lon1, lat2, lon2, start, end)).thenReturn(mockSearchResult);
+
+        // Call the controller method
+        ResponseEntity<?> response = layerController.getLayerResultsByIdWithParams(id, lat1, lon2, lat2, lon1, start, end);
+
+        // Verify response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockSearchResult, response.getBody());
+    }
+
+    @Test
+    public void testGetLayerResultsByIdWithParams_InvalidParams() {
+        // Mock parameters
+        Long id = 1L;
+        Double lat1 = 1.0;
+        Double lon2 = 2.0;
+        Double lat2 = 3.0;
+        Double lon1 = 4.0;
+        Long start = 1000L;
+        Long end = 2000L;
+
+        // Mock dependencies
+        when(rateLimiter.tryAcquire()).thenReturn(true);
+        when(validation.isValidCoordinate(lat1, lon2, lat2, lon1)).thenReturn(false);
+
+        // Call the controller method and expect InvalidParamsRequestException
+        assertThrows(InvalidParamsRequestException.class, () -> {
+            layerController.getLayerResultsByIdWithParams(id, lat1, lon2, lat2, lon1, start, end);
+        });
+    }
+
+    @Test//Falha ao ir buscar a Layer Por ID
+    public void testGetLayerResultsByIdWithParams_SparqlQueryException() {
+        // Mock parameters
+        Long id = 1L;
+        Double lat1 = 1.0;
+        Double lon2 = 2.0;
+        Double lat2 = 3.0;
+        Double lon1 = 4.0;
+        Long start = 1000L;
+        Long end = 2000L;
+
+        // Mock dependencies
+        when(rateLimiter.tryAcquire()).thenReturn(true);
+        when(validation.isValidCoordinate(lat1, lon2, lat2, lon1)).thenReturn(true);
+
+        // Mock the service to throw SparqlQueryException when called
+        when(layerService.getLayerByIdWithParams(id, lat1, lon1, lat2, lon2, start, end))
+                .thenThrow(new SparqlQueryException("Invalid Sparql Query"));
+
+        // Call the controller method and expect SparqlQueryException
+        assertThrows(SparqlQueryException.class, () -> {
+            layerController.getLayerResultsByIdWithParams(id, lat1, lon2, lat2, lon1, start, end);
+        });
+    }
+
+    @Test
+    public void testCreateLayer_Success() {
+        // Mock authentication
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("username");
+
+        // Mock layer request
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("LayerName");
+        layerRequest.setDescription("LayerDescription");
+        layerRequest.setSparqlQuery("LayerQuery");
+
+        // Mock user
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("username");
+        user.setEmail("user@example.com");
+        user.setRole(Role.USER); // Assuming Role is an enum
+        when(userRepository.findByUsername("username")).thenReturn(user);
+
+        // Mock layer service response
+        LayerDTO expectedLayerDTO = new LayerDTO();
+        expectedLayerDTO.setId(1L);
+        expectedLayerDTO.setLayerName("LayerName");
+        expectedLayerDTO.setDescription("LayerDescription");
+        expectedLayerDTO.setQuery("LayerQuery");
+        expectedLayerDTO.setUser(user);
+        when(layerService.createLayer("username", layerRequest)).thenReturn(expectedLayerDTO);
+
+        // Call the controller method
+        ResponseEntity<LayerDTO> response = layerController.createLayer(layerRequest);
+
+        // Verify response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedLayerDTO, response.getBody());
+    }
+
+    /*
     @Test
     public void testRateLimiter() throws Exception {
         when(validation.isValidCoordinate(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble())).thenReturn(true);
@@ -425,6 +553,6 @@ public class LayerControllerTest {
             layerController.deleteLayer(1L);
         });
     }
-
+*/
 
 }
