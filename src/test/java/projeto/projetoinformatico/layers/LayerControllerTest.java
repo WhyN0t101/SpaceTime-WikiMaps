@@ -27,6 +27,7 @@ import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.exceptions.Exception.SparqlQueryException;
 import projeto.projetoinformatico.model.SearchResult;
+import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
@@ -42,8 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class LayerControllerTest {
 
@@ -254,6 +254,93 @@ public class LayerControllerTest {
         assertEquals(expectedLayerDTO, response.getBody());
     }
 
+    @Test
+    public void testUpdateLayer_Success() {
+        // Mock layer request
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("UpdatedLayerName");
+        layerRequest.setDescription("UpdatedLayerDescription");
+        layerRequest.setSparqlQuery("UpdatedLayerQuery");
+
+        // Mock updated layer
+        Layer updatedLayer = new Layer();
+        updatedLayer.setId(1L);
+        updatedLayer.setLayerName("UpdatedLayerName");
+        updatedLayer.setDescription("UpdatedLayerDescription");
+        updatedLayer.setQuery("UpdatedLayerQuery");
+
+        // Mock layer service response
+        LayerDTO expectedLayerDTO = new LayerDTO();
+        expectedLayerDTO.setId(1L);
+        expectedLayerDTO.setLayerName("UpdatedLayerName");
+        expectedLayerDTO.setDescription("UpdatedLayerDescription");
+        expectedLayerDTO.setQuery("UpdatedLayerQuery");
+        when(layerService.updateLayer(1L, layerRequest)).thenReturn(expectedLayerDTO);
+
+        // Call the controller method
+        ResponseEntity<LayerDTO> response = layerController.updateLayer(1L, layerRequest);
+
+        // Verify response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedLayerDTO, response.getBody());
+    }
+
+    @Test
+    public void testUpdateLayer_LayerNotFound() {
+        // Mock layer request
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("UpdatedLayerName");
+        layerRequest.setDescription("UpdatedLayerDescription");
+        layerRequest.setSparqlQuery("UpdatedLayerQuery");
+
+        // Mock layer service to throw NotFoundException
+        when(layerService.updateLayer(1L, layerRequest)).thenThrow(NotFoundException.class);
+
+        // Call the controller method and expect NotFoundException
+        assertThrows(NotFoundException.class, () -> {
+            layerController.updateLayer(1L, layerRequest);
+        });
+    }
+    @Test
+    public void testDeleteLayer_Success() {
+        // Mock SecurityContext and Authentication
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Mock authentication behavior
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("testUser");
+
+        // Mock the LayerService deleteLayer method
+        layerController.deleteLayer(1L);
+
+        // Assert the response
+        ResponseEntity<Void> response = layerController.deleteLayer(1L);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    public void testDeleteLayer_LayerNotFound() {
+        // Mock layer ID
+        Long layerId = 1L;
+
+        // Mock layer service to throw NotFoundException
+        doThrow(NotFoundException.class).when(layerService).deleteLayer(layerId);
+
+        // Call the controller method and expect NotFoundException
+        assertThrows(NotFoundException.class, () -> {
+            layerController.deleteLayer(layerId);
+        });
+    }
+
+    @Test//Falha - Ver dps
+    public void testDeleteLayer_NullId() {
+        // Call the controller method with null ID and expect InvalidRequestException
+        assertThrows(InvalidRequestException.class, () -> {
+            layerController.deleteLayer(null);
+        });
+    }
     /*
     @Test
     public void testRateLimiter() throws Exception {
@@ -528,31 +615,7 @@ public class LayerControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
-    @Test
-    public void testDeleteLayer_InvalidRequestException() {
-        // Mock the LayerService deleteLayer method to throw InvalidRequestException
-        Mockito.doThrow(new InvalidRequestException("Layer ID cannot be null"))
-                .when(layerService).deleteLayer(null);
 
-        // Assert the response
-        ResponseEntity<Void> response = layerController.deleteLayer(null);
-        assertThrows(InvalidRequestException.class, () -> {
-            layerController.deleteLayer(null);
-        });
-    }
-
-    @Test
-    public void testDeleteLayer_NotFoundException() {
-        // Mock the LayerService deleteLayer method to throw NotFoundException
-        Mockito.doThrow(new NotFoundException("Layer not found with id: 1"))
-                .when(layerService).deleteLayer(1L);
-
-        // Assert the response
-        ResponseEntity<Void> response = layerController.deleteLayer(1L);
-        assertThrows(NotFoundException.class, () -> {
-            layerController.deleteLayer(1L);
-        });
-    }
 */
 
 }
