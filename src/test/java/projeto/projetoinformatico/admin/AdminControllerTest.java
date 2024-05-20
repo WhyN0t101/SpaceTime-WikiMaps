@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import projeto.projetoinformatico.controllers.AdminController;
+import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.service.LayerService;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.utils.Validation;
@@ -86,21 +87,77 @@ public class AdminControllerTest {
 
     @Test
     public void testUnblockUser_Success() {
+        AdminController adminController = new AdminController(userService);
 
+        // Mock the UserService unblockUser method
+        doNothing().when(userService).unblockUser(anyLong());
+
+        // Call the controller method
+        ResponseEntity<Void> response = adminController.unlockUser(1L);
+
+        // Assert the response
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
     @Test
-    public void testUnblockUser_ThrowRunTimeException(){
+    public void testUnblockUser_UserNotFound(){
+        AdminController adminController = new AdminController(userService);
 
+        // Mock the UserService unblockUser method to throw an exception for user not found
+        doThrow(new RuntimeException("User not found")).when(userService).unblockUser(anyLong());
+
+        // Call the controller method and handle the exception
+        try {
+            adminController.unlockUser(1L);
+        } catch (RuntimeException e) {
+            // Assert the exception
+            assertEquals("User not found", e.getMessage());
+        }
     }
 
     @Test
     public void testdeleteUserById_Success() {
+        AdminController adminController = new AdminController(userService);
 
+        // Mock the UserService deleteUser method
+        doNothing().when(userService).deleteUser(anyLong());
+
+        // Call the controller method
+        ResponseEntity<Void> response = adminController.deleteUserById(1L);
+
+        // Assert the response
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
     @Test
-    public void testdeleteUserById_InvalidRequestException(){
+    public void testdeleteUserById_UserNotFound(){
+        AdminController adminController = new AdminController(userService);
 
+        // Mock the UserService deleteUser method to throw an exception for user not found
+        doThrow(new RuntimeException("User not found")).when(userService).deleteUser(anyLong());
+
+        // Call the controller method and handle the exception
+        try {
+            adminController.deleteUserById(1L);
+        } catch (RuntimeException e) {
+            // Assert the exception
+            assertEquals("User not found", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDeleteUserById_AdminDeletionNotAllowed() {
+        AdminController adminController = new AdminController(userService);
+
+        // Mock the UserService deleteUser method to throw InvalidRequestException for deleting an admin user
+        doThrow(new InvalidRequestException("Admin users cannot delete other admin users.")).when(userService).deleteUser(anyLong());
+
+        // Call the controller method and handle the exception
+        try {
+            adminController.deleteUserById(1L);
+        } catch (InvalidRequestException e) {
+            // Assert the exception
+            assertEquals("Admin users cannot delete other admin users.", e.getMessage());
+        }
     }
 }
