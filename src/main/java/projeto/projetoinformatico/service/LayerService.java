@@ -128,9 +128,9 @@ public class LayerService {
     }
 
     private boolean isSparqlQueryValid(String query) {
-        return !query.startsWith("SELECT DISTINCT ?item ?itemLabel ?description ?coordinates ?image ?itemSchemaLabel WHERE {\n")
+        return !query.startsWith("SELECT DISTINCT ?item ?itemLabel ?description ?coordinates ?image ?itemSchemaLabel ?url WHERE {\n")
                 || !query.contains("SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\". }\n")
-                || !query.contains("SELECT DISTINCT ?item ?itemLabel ?coordinates ?itemSchemaLabel WHERE {")
+                || !query.contains("SELECT DISTINCT ?item ?itemLabel ?coordinates ?itemSchemaLabel ?url WHERE {\n")
                 || !query.contains("wdt:P625");
     }
 
