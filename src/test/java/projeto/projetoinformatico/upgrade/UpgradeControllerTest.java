@@ -3,17 +3,26 @@ package projeto.projetoinformatico.upgrade;
 import com.github.jsonldjava.shaded.com.google.common.util.concurrent.RateLimiter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import projeto.projetoinformatico.controllers.SearchController;
 import projeto.projetoinformatico.controllers.UpgradeController;
 import projeto.projetoinformatico.dtos.Paged.RoleUpgradePageDTO;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
+import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
+import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
+import projeto.projetoinformatico.requests.StatusRequest;
+import projeto.projetoinformatico.requests.UpgradeRequest;
 import projeto.projetoinformatico.service.SearchService;
 import projeto.projetoinformatico.service.UpgradeService;
 import projeto.projetoinformatico.utils.Validation;
@@ -29,9 +38,17 @@ public class UpgradeControllerTest {
     private UpgradeService upgradeService;
 
     private UpgradeController upgradeController;
+    @Mock
+    private SecurityContext securityContext;
+    @Mock
+    private Authentication authentication;
 
     @BeforeEach
     public void setUp() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken("testuser", null);
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(securityContext);
         upgradeService = mock(UpgradeService.class);
         upgradeController = new UpgradeController(upgradeService);
     }
@@ -141,4 +158,107 @@ public class UpgradeControllerTest {
         assertEquals("Invalid page of pagination", exception.getMessage());
         verify(upgradeService, never()).getAllRequestsPaged(any(Pageable.class));
     }
+
+    @Test
+    public void testRequestUpgrade_Success() {
+        String username = "testuser";
+        String message = "Please upgrade my role.";
+        UpgradeRequest upgradeRequest = new UpgradeRequest();
+        upgradeRequest.setMessage(message);
+
+        RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
+        when(upgradeService.requestUpgrade(username, message)).thenReturn(roleUpgradeDTO);
+
+        ResponseEntity<RoleUpgradeDTO> responseEntity = upgradeController.requestUpgrade(upgradeRequest);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(roleUpgradeDTO, responseEntity.getBody());
+        verify(upgradeService).requestUpgrade(username, message);
+    }
+
+    @Test
+    public void testRequestUpgrade_UserNotFound() {
+        String username = "testuser";
+        String message = "Please upgrade my role.";
+        UpgradeRequest upgradeRequest = new UpgradeRequest();
+        upgradeRequest.setMessage(message);
+
+        when(upgradeService.requestUpgrade(username, message)).thenThrow(new NotFoundException("User not found"));
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            upgradeController.requestUpgrade(upgradeRequest);
+        });
+
+        assertEquals("User not found", exception.getMessage());
+        verify(upgradeService).requestUpgrade(username, message);
+    }
+
+    @Test
+    public void testRequestUpgrade_InvalidRequest() {
+        String username = "testuser";
+        String message = "Please upgrade my role.";
+        UpgradeRequest upgradeRequest = new UpgradeRequest();
+        upgradeRequest.setMessage(message);
+
+        when(upgradeService.requestUpgrade(username, message)).thenThrow(new InvalidRequestException("A request is still pending or has already been accepted."));
+
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
+            upgradeController.requestUpgrade(upgradeRequest);
+        });
+
+        assertEquals("A request is still pending or has already been accepted.", exception.getMessage());
+        verify(upgradeService).requestUpgrade(username, message);
+    }
+
+    @Test
+    public void testProcessUpgradeRequest_Success() {
+        Long requestId = 1L;
+        StatusRequest statusRequest = new StatusRequest();
+        statusRequest.setStatus("ACCEPTED");
+        statusRequest.setMessage("Request approved.");
+
+        RoleUpgradeDTO roleUpgradeDTO = new RoleUpgradeDTO();
+        when(upgradeService.handleRequest(statusRequest, requestId)).thenReturn(roleUpgradeDTO);
+
+        ResponseEntity<RoleUpgradeDTO> responseEntity = upgradeController.processUpgradeRequest(requestId, statusRequest);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(roleUpgradeDTO, responseEntity.getBody());
+        verify(upgradeService).handleRequest(statusRequest, requestId);
+    }
+
+    @Test
+    public void testProcessUpgradeRequest_RequestNotFound() {
+        Long requestId = 1L;
+        StatusRequest statusRequest = new StatusRequest();
+        statusRequest.setStatus("ACCEPTED");
+        statusRequest.setMessage("Request approved.");
+
+        when(upgradeService.handleRequest(statusRequest, requestId)).thenThrow(new NotFoundException("Upgrade request not found"));
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            upgradeController.processUpgradeRequest(requestId, statusRequest);
+        });
+
+        assertEquals("Upgrade request not found", exception.getMessage());
+        verify(upgradeService).handleRequest(statusRequest, requestId);
+    }
+
+    @Test
+    public void testProcessUpgradeRequest_InvalidStatus() {
+        Long requestId = 1L;
+        StatusRequest statusRequest = new StatusRequest();
+        statusRequest.setStatus("INVALID_STATUS");
+        statusRequest.setMessage("Invalid status request.");
+
+        when(upgradeService.handleRequest(statusRequest, requestId)).thenThrow(new IllegalArgumentException("No enum constant"));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            upgradeController.processUpgradeRequest(requestId, statusRequest);
+        });
+
+        assertEquals("No enum constant", exception.getMessage());
+        verify(upgradeService).handleRequest(statusRequest, requestId);
+    }
+
 }
