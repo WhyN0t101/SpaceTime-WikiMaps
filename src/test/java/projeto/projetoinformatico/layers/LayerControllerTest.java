@@ -47,8 +47,6 @@ import static org.mockito.Mockito.*;
 
 public class LayerControllerTest {
 
-    private MockMvc mockMvc;
-
     private LayerService layerService;
     private Validation validation;
     private RateLimiter rateLimiter;
