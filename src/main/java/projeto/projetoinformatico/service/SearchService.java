@@ -38,41 +38,6 @@ public class SearchService {
         this.objectMapper = objectMapper;
     }
 
-    @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2}")
-    public SearchResult performSearch(Double lat1, Double lon1, Double lat2, Double lon2) {
-        try {
-            validateCoordinates(lat1, lon1, lat2, lon2);
-            String sparqlQuery = sparqlQueryProvider.constructSparqlQuery(lat1, lon1, lat2, lon2);
-            return executeSparqlQuery(sparqlQuery);
-        } catch (IllegalArgumentException e) {
-            logger.error("Invalid coordinates provided: " + e.getMessage());
-            return new SearchResult(Collections.emptyList());
-        }
-    }
-
-    @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2, #startTime, #endTime }")
-    public SearchResult performSearchTime(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime) {
-        try {
-            validateCoordinates(lat1, lon1, lat2, lon2);
-            String sparqlQuery = sparqlQueryProvider.constructSparqlQueryTime(lat1, lon1, lat2, lon2, startTime, endTime);
-            return executeSparqlQuery(sparqlQuery);
-        } catch (IllegalArgumentException e) {
-            logger.error("Invalid coordinates provided: " + e.getMessage());
-            return new SearchResult(Collections.emptyList());
-        }
-    }
-
-    @Cacheable(value = "searchCache", key = "{ #lat1, #lat2, #lon1, #lon2, #startTime, #endTime }")
-    public SearchResult performSearchYear(String country, Long year) {
-        try {
-            String sparqlQuery = sparqlQueryProvider.constructSparqlQueryTimeAndCountry(year, country);
-            return executeSparqlQuery(sparqlQuery);
-        } catch (IllegalArgumentException e) {
-            logger.error("Invalid coordinates provided: " + e.getMessage());
-            return new SearchResult(Collections.emptyList());
-        }
-    }
-
     @Cacheable(value = "searchCache", key = "{ #sparqlQuery.hashCode() }")
     public SearchResult executeSparqlQuery(String sparqlQuery) {
         try {
@@ -95,7 +60,8 @@ public class SearchService {
 
     public SearchResult executeSparqlQueryFromJsonString(String jsonString) {
         try {
-            Map<String, String> jsonMap = objectMapper.readValue(jsonString, new TypeReference<Map<String, String>>(){});
+            Map<String, String> jsonMap = objectMapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+            });
             String sparqlQuery = jsonMap.get("query");
             sparqlQuery = sparqlQueryProvider.constructSparqlQuery(sparqlQuery);
             return executeSparqlQuery(sparqlQuery);
@@ -121,15 +87,5 @@ public class SearchService {
             resultList.add(resultMap);
         }
         return resultList;
-    }
-
-    private void validateCoordinates(Double lat1, Double lon1, Double lat2, Double lon2) {
-        if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
-            throw new IllegalArgumentException("Latitude and longitude values cannot be null");
-        }
-        if (lat1 < -90 || lat1 > 90 || lon1 < -180 || lon1 > 180 ||
-                lat2 < -90 || lat2 > 90 || lon2 < -180 || lon2 > 180) {
-            throw new IllegalArgumentException("Invalid latitude or longitude values");
-        }
     }
 }

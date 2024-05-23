@@ -60,7 +60,6 @@ public class ResourceController {
         }
     }
     @GetMapping("/data/property-values/{item_id}/{property_id}")
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getPropertyValues(@PathVariable("item_id") String itemId,
                                                @PathVariable("property_id") String propertyId) {
         if (!rateLimiter.tryAcquire()) {

@@ -25,23 +25,17 @@ import javax.security.auth.login.AccountLockedException;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @PostMapping("/signup")
     public ResponseEntity<UserDTO> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
-        // Check if the username already exists
         return ResponseEntity.ok(authenticationService.signup(signUpRequest));
     }
 
     @PostMapping("/signin")
     public ResponseEntity<AuthenticationResponse> signin(@Valid @RequestBody SignInRequest signInRequest) {
-        var user = userRepository.findByUsername(signInRequest.getUsername());
-        if (user == null) {
-            throw new NotFoundException("User not found");
-        }
-
-        // Check if the user account is locked
-        if (!user.isAccountNonLocked()) {
+        UserDTO user = userService.getUserByUsername(signInRequest.getUsername());
+        if (user.isBlocked()) {
             throw new AccountBlockedException("User account is locked");
         }
         AuthenticationResponse response = authenticationService.signin(signInRequest);

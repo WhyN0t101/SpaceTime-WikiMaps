@@ -25,7 +25,6 @@ import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.HashMap;
@@ -48,7 +47,6 @@ public class UserService implements UserDetailsService {
         this.mapperUtils = mapperUtils;
         this.roleUpgradeRepository = roleUpgradeRepository;
     }
-    CacheManager cacheManager;
     public UserDetailsService userDetailsService(){
         return userRepository::findByUsername;
     }
@@ -69,12 +67,6 @@ public class UserService implements UserDetailsService {
         }
         return convertUserToDTO(user);
     }
-
-    @Cacheable(value = "userCache",key = "'userId'")
-    public List<UserDTO> getAllUsers() {
-       return userRepository.findAll().stream()
-               .map(this::convertUserToDTO)
-               .collect(Collectors.toList());}
 
     @Cacheable(value = "userCache", key = "#role")
     public List<UserDTO> getAllUsersByRole(String role) {
@@ -103,29 +95,6 @@ public class UserService implements UserDetailsService {
         }
         return layers.stream()
                 .map(this::convertLayerToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Cacheable(value = "userCache", key = "#name")
-    public List<UserDTO> getUsersByNameAndRole(String name, String role) {
-        Role roleEnum = getRoleEnum(role);
-        List<User> users = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, roleEnum);
-        if (users.isEmpty()) {
-            throw new NotFoundException("No users found with name starting with: " + name + " and role: " + role);
-        }
-        return users.stream()
-                .map(this::convertUserToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Cacheable(value = "userCache", key = "#name")
-    public List<UserDTO> getUserContainingUsername(String name) {
-        List<User> users = userRepository.findByUsernameStartingWithIgnoreCase(name);
-        if (users.isEmpty()) {
-            throw new NotFoundException("No users found with name starting with: " + name);
-        }
-        return users.stream()
-                .map(this::convertUserToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -183,7 +152,6 @@ public class UserService implements UserDetailsService {
         }
         deleteLayersByUserId(userId);
         deleteRoleUpgradeRequestsByUserId(userId);
-       //cacheManager.getCache("userCache").evict(convertUserToDTO(targetUser));
         userRepository.delete(targetUser);
     }
 
@@ -272,7 +240,6 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    // PAGED
     public Page<UserDTO> getUsersByNameAndRolePaged(String name, String role, Pageable pageable) {
         Role roleEnum = getRoleEnum(role);
         Page<User> usersPage = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, roleEnum,pageable);

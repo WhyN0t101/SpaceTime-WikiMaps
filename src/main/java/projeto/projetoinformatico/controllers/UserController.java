@@ -80,7 +80,6 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-   //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @GetMapping("/users/id/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         UserDTO user = userService.getUserById(id);
@@ -88,7 +87,6 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}/layers")
-    //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<List<LayerDTO>> getUserLayers(@PathVariable Long id) {
         List<LayerDTO> userLayers = userService.getUserLayers(id);
         return ResponseEntity.ok(userLayers);
@@ -110,7 +108,7 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    @PutMapping("/user") //FALTA UNIT TEST
+    @PutMapping("/user")
     public ResponseEntity<AuthenticationResponse> updateUserRole(@Valid @RequestBody AlterRequest alterRequest,
                                                                  Authentication authentication) {
         String username = authentication.getName();
@@ -127,7 +125,7 @@ public class UserController {
 
     @DeleteMapping("/user")
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
-    public ResponseEntity<Void> deleteUser() { // FALTA UNIT TEST
+    public ResponseEntity<Void> deleteUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String authenticatedUsername = authentication.getName();
         Long userId = userService.getUserByUsername(authenticatedUsername).getId();

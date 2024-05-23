@@ -44,7 +44,6 @@ public class UpgradeService {
             throw new NotFoundException("User not found");
         }
 
-        // Check if the user has a pending or accepted request
         Optional<RoleUpgrade> existingRequest = roleUpgradeRepository.findFirstByUserIdAndStatusInOrderByTimestampDesc(user.getId(),
                 List.of(RoleStatus.PENDING, RoleStatus.ACCEPTED));
 
@@ -64,7 +63,6 @@ public class UpgradeService {
             }
         }
 
-        // Create a new upgrade request
         RoleUpgrade request = new RoleUpgrade();
         request.setUser(user);
         request.setReason(reason);
@@ -94,63 +92,6 @@ public class UpgradeService {
         roleUpgradeRepository.save(roleUpgrade);
         return convertUpgradeToDTO(roleUpgrade);
     }
-
-    @Cacheable(value = "requestCache", key = "#status")
-    public List<RoleUpgradeDTO> getByStatus(String status) {
-        RoleStatus statusEnum;
-        try {
-            statusEnum = RoleStatus.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Status not found: " + status);
-        }
-
-        List<RoleUpgrade> requests = roleUpgradeRepository.findByStatus(statusEnum);
-        if (requests.isEmpty()) {
-            throw new NotFoundException("No requests found with status: " + status);
-        }
-
-        return requests.stream()
-                .map(this::convertUpgradeToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Cacheable(value = "requestCache")
-    public List<RoleUpgradeDTO> getAllRequests() {
-        List<RoleUpgrade> requests = roleUpgradeRepository.findAll();
-        return requests.stream()
-                .map(this::convertUpgradeToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<RoleUpgradeDTO> getRequestsByNameAndStatus(String username, String status) {
-        RoleStatus statusEnum;
-        try {
-            statusEnum = RoleStatus.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Status not found: " + status);
-        }
-
-        List<RoleUpgrade> requests = roleUpgradeRepository.findByUserUsernameContainingIgnoreCaseAndStatus(username, statusEnum);
-        if (requests.isEmpty()) {
-            throw new NotFoundException("No requests found with name containing: " + username + " and status: " + status);
-        }
-
-        return requests.stream()
-                .map(this::convertUpgradeToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<RoleUpgradeDTO> getRequestsContainingUsername(String username) {
-        List<RoleUpgrade> requests = roleUpgradeRepository.findByUserUsernameContainingIgnoreCase(username);
-        if (requests.isEmpty()) {
-            throw new NotFoundException("No requests found with name containing: " + username);
-        }
-
-        return requests.stream()
-                .map(this::convertUpgradeToDTO)
-                .collect(Collectors.toList());
-    }
-/// PAGINATION
 
     public Page<RoleUpgradeDTO> getByStatusPaged(String status, Pageable pageable) {
         RoleStatus statusEnum = RoleStatus.valueOf(status.toUpperCase());

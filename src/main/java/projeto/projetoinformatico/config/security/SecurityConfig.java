@@ -53,6 +53,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/sparql").permitAll()
                     .requestMatchers("/api/users/{id}/layers").permitAll()
                     .requestMatchers("/api/users/id/{id}").permitAll()
+                    .requestMatchers("/data/property-values/{item_id}/{property_id}").permitAll()
                     .anyRequest().authenticated()
             )
                     /*

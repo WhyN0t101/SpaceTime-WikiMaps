@@ -12,13 +12,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.Paged.RoleUpgradePageDTO;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
-import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.requests.StatusRequest;
 import projeto.projetoinformatico.requests.UpgradeRequest;
 import projeto.projetoinformatico.service.UpgradeService;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/upgrade")
