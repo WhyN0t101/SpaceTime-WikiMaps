@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.service.SearchService;
 import projeto.projetoinformatico.exceptions.Exception.SparqlQueryException;
-import projeto.projetoinformatico.utils.Validation;
 
 import java.util.Collections;
 
@@ -20,14 +19,12 @@ import java.util.Collections;
 public class SearchController {
 
     private final SearchService searchService;
-    private final Validation validation;
     private static final double REQUESTS_PER_SECOND = 20.0;
     private static final RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
 
     @Autowired
-    public SearchController(SearchService searchService, Validation validation) {
+    public SearchController(SearchService searchService) {
         this.searchService = searchService;
-        this.validation = validation;
     }
 
     @PostMapping("/sparql")

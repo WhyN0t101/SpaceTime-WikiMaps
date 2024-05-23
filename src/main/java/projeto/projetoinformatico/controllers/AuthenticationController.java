@@ -10,14 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.*;
-import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.*;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
 import projeto.projetoinformatico.service.AuthenticationService;
 import projeto.projetoinformatico.service.UserService;
 
-import javax.security.auth.login.AccountLockedException;
 
 @RestController
 @RequestMapping("/api/auth")

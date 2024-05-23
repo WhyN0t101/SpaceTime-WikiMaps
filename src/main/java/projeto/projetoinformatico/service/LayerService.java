@@ -1,6 +1,5 @@
 package projeto.projetoinformatico.service;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -82,7 +81,7 @@ public class LayerService {
         validateLayerRequest(layerRequest);
         checkDuplicateLayerName(layerRequest.getName());
         Layer existingLayer = layersRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Layer not found with id: " + id));;
+                .orElseThrow(() -> new NotFoundException("Layer not found with id: " + id));
 
         BeanUtils.copyProperties(layerRequest, existingLayer, "id");
         existingLayer.setTimestamp(new Date());

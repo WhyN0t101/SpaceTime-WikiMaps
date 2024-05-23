@@ -22,7 +22,6 @@ import projeto.projetoinformatico.service.LayerService;
 import projeto.projetoinformatico.utils.Validation;
 
 import java.util.Collections;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")

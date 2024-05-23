@@ -60,7 +60,7 @@ public class SearchService {
 
     public SearchResult executeSparqlQueryFromJsonString(String jsonString) {
         try {
-            Map<String, String> jsonMap = objectMapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+            Map<String, String> jsonMap = objectMapper.readValue(jsonString, new TypeReference<>() {
             });
             String sparqlQuery = jsonMap.get("query");
             sparqlQuery = sparqlQueryProvider.constructSparqlQuery(sparqlQuery);
