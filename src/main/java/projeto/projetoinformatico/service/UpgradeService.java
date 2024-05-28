@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
+import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
@@ -177,7 +178,17 @@ public class UpgradeService {
 
     private RoleUpgradeDTO convertUpgradeToDTO(RoleUpgrade upgrade) {
         RoleUpgradeDTO dto = mapperUtils.roleUpgradeToDTO(upgrade, RoleUpgradeDTO.class);
-        dto.setUsername(upgrade.getUser().getUsername());
+        dto.setUser(convertUserToDTO(upgrade.getUser()));
+        return dto;
+    }
+
+    private UserDTO convertUserToDTO(User user) {
+        UserDTO dto = mapperUtils.userToDTO(user, UserDTO.class);
+        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUserId(user.getId());
+        if (roleUpgrade != null) {
+            dto.setRoleUpgrade(roleUpgrade);
+        }
+        dto.setBlocked(!user.isAccountNonLocked());
         return dto;
     }
 }

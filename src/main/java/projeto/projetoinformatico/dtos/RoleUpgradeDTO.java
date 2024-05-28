@@ -8,7 +8,7 @@ import java.util.Date;
 @Data
 public class RoleUpgradeDTO {
     private Long id;
-    private String username;
+    private UserDTO user;
     private String reason;
     private Date timestamp;
     private RoleStatus status;
