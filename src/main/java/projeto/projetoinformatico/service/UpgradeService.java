@@ -116,7 +116,7 @@ public class UpgradeService {
 
     private RoleUpgradeDTO convertUpgradeToDTO(RoleUpgrade upgrade) {
         RoleUpgradeDTO dto = mapperUtils.roleUpgradeToDTO(upgrade, RoleUpgradeDTO.class);
-        dto.setUsername(upgrade.getUser().getUsername());
+        dto.setUser(upgrade.getUser());
         return dto;
     }
 }

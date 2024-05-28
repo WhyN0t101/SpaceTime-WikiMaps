@@ -16,7 +16,7 @@ public class UserDTO {
         if (roleUpgrade != null) {
             this.roleUpgrade = new RoleUpgradeDTO();
             this.roleUpgrade.setId(roleUpgrade.getId());
-            this.roleUpgrade.setUsername(roleUpgrade.getUser().getUsername());
+            this.roleUpgrade.setUser(roleUpgrade.getUser());
             this.roleUpgrade.setReason(roleUpgrade.getReason());
             this.roleUpgrade.setTimestamp(roleUpgrade.getTimestamp());
             this.roleUpgrade.setStatus(roleUpgrade.getStatus());
