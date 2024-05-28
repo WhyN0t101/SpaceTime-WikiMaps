@@ -2,12 +2,10 @@ package projeto.projetoinformatico.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
-import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
@@ -22,7 +20,6 @@ import projeto.projetoinformatico.utils.ModelMapperUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UpgradeService {
@@ -45,7 +42,6 @@ public class UpgradeService {
             throw new NotFoundException("User not found");
         }
 
-        // Check if the user has a pending or accepted request
         Optional<RoleUpgrade> existingRequest = roleUpgradeRepository.findFirstByUserIdAndStatusInOrderByTimestampDesc(user.getId(),
                 List.of(RoleStatus.PENDING, RoleStatus.ACCEPTED));
 
@@ -65,7 +61,6 @@ public class UpgradeService {
             }
         }
 
-        // Create a new upgrade request
         RoleUpgrade request = new RoleUpgrade();
         request.setUser(user);
         request.setReason(reason);
@@ -96,63 +91,6 @@ public class UpgradeService {
         return convertUpgradeToDTO(roleUpgrade);
     }
 
-    @Cacheable(value = "requestCache", key = "#status")
-    public List<RoleUpgradeDTO> getByStatus(String status) {
-        RoleStatus statusEnum;
-        try {
-            statusEnum = RoleStatus.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Status not found: " + status);
-        }
-
-        List<RoleUpgrade> requests = roleUpgradeRepository.findByStatus(statusEnum);
-        if (requests.isEmpty()) {
-            throw new NotFoundException("No requests found with status: " + status);
-        }
-
-        return requests.stream()
-                .map(this::convertUpgradeToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Cacheable(value = "requestCache")
-    public List<RoleUpgradeDTO> getAllRequests() {
-        List<RoleUpgrade> requests = roleUpgradeRepository.findAll();
-        return requests.stream()
-                .map(this::convertUpgradeToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<RoleUpgradeDTO> getRequestsByNameAndStatus(String username, String status) {
-        RoleStatus statusEnum;
-        try {
-            statusEnum = RoleStatus.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new NotFoundException("Status not found: " + status);
-        }
-
-        List<RoleUpgrade> requests = roleUpgradeRepository.findByUserUsernameContainingIgnoreCaseAndStatus(username, statusEnum);
-        if (requests.isEmpty()) {
-            throw new NotFoundException("No requests found with name containing: " + username + " and status: " + status);
-        }
-
-        return requests.stream()
-                .map(this::convertUpgradeToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<RoleUpgradeDTO> getRequestsContainingUsername(String username) {
-        List<RoleUpgrade> requests = roleUpgradeRepository.findByUserUsernameContainingIgnoreCase(username);
-        if (requests.isEmpty()) {
-            throw new NotFoundException("No requests found with name containing: " + username);
-        }
-
-        return requests.stream()
-                .map(this::convertUpgradeToDTO)
-                .collect(Collectors.toList());
-    }
-/// PAGINATION
-
     public Page<RoleUpgradeDTO> getByStatusPaged(String status, Pageable pageable) {
         RoleStatus statusEnum = RoleStatus.valueOf(status.toUpperCase());
         Page<RoleUpgrade> requests = roleUpgradeRepository.findByStatus(statusEnum, pageable);
@@ -178,17 +116,7 @@ public class UpgradeService {
 
     private RoleUpgradeDTO convertUpgradeToDTO(RoleUpgrade upgrade) {
         RoleUpgradeDTO dto = mapperUtils.roleUpgradeToDTO(upgrade, RoleUpgradeDTO.class);
-        dto.setUser(convertUserToDTO(upgrade.getUser()));
-        return dto;
-    }
-
-    private UserDTO convertUserToDTO(User user) {
-        UserDTO dto = mapperUtils.userToDTO(user, UserDTO.class);
-        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUserId(user.getId());
-        if (roleUpgrade != null) {
-            dto.setRoleUpgrade(roleUpgrade);
-        }
-        dto.setBlocked(!user.isAccountNonLocked());
+        dto.setUser(upgrade.getUser());
         return dto;
     }
 }

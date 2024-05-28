@@ -53,14 +53,4 @@ public class ResourceService {
         }
         return result;
     }
-
-    public List<SearchResult> getImages(List<String> itemIds) {
-        List<SearchResult> results = new ArrayList<>();
-        for (String itemId : itemIds) {
-            String sparqlQuery = sparqlQueryProvider.buildImageQuery(itemId);
-            SearchResult result = executeSparqlQuery(sparqlQuery);
-            results.add(result);
-        }
-        return results;
-    }
 }

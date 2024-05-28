@@ -53,33 +53,10 @@ public class SecurityConfig {
                     .requestMatchers("/api/sparql").permitAll()
                     .requestMatchers("/api/users/{id}/layers").permitAll()
                     .requestMatchers("/api/users/id/{id}").permitAll()
+                    .requestMatchers("/data/property-values/{item_id}/{property_id}").permitAll()
                     .anyRequest().authenticated()
             )
-                    /*
-                    .requestMatchers("/api/search").permitAll()
-                    .requestMatchers("/api/search/time").permitAll()
-                    .requestMatchers("/api/sparql").permitAll()
-                    //.requestMatchers("/api/admin").hasAnyAuthority(Role.ADMIN.name())
-                    //.requestMatchers("/api").hasAnyAuthority(Role.USER.name())
-                    .requestMatchers("/api/items/{itemId}").permitAll()
-                    .requestMatchers("/api/properties/{propertyId}").permitAll()
-                    .requestMatchers("/api/data/geolocation/{itemId}").permitAll()
-                    .requestMatchers("/api/data/property-values/{item_id}/{property_id}").permitAll()
-                    .requestMatchers("/api/layers").permitAll()
-                    .requestMatchers("/api/layers/{id}").permitAll()
-                    .requestMatchers("/api/layers/id/{id}").permitAll()
-                    .requestMatchers("/api/layers/create").authenticated()
-                    .requestMatchers("/api/users/{id}/layers").permitAll()
-                    .requestMatchers("/api/user").permitAll()
-                    /*.requestMatchers("/api/users/{username}").permitAll()
-                    .requestMatchers("/api/users").permitAll()
-                    .requestMatchers("/api/users/role/{role}").permitAll()
-                    .requestMatchers("/api/users/id/{id}").permitAll()
-
-            )*/
-            //.httpBasic(Customizer.withDefaults())
             .exceptionHandling(customizer -> customizer.authenticationEntryPoint(authenticationEntryPoint()))
-            //.authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class
             );
         return http.build();

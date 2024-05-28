@@ -1,6 +1,5 @@
 package projeto.projetoinformatico.service;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -8,15 +7,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import projeto.projetoinformatico.dtos.LayerDTO;
-import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
-import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.layers.LayersRepository;
-import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.LayerRequest;
@@ -24,8 +21,6 @@ import projeto.projetoinformatico.utils.ModelMapperUtils;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
 
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LayerService {
@@ -49,6 +44,7 @@ public class LayerService {
 
 
     @CacheEvict(value = "layerCache", allEntries = true)
+    @Transactional
     public LayerDTO createLayer(String username, LayerRequest layerRequest) {
         User user = userRepository.findByUsername(username);
         validateLayerRequest(layerRequest);
@@ -72,15 +68,6 @@ public class LayerService {
         return searchService.executeSparqlQuery(filterQuery);
     }
 
-
-    @Cacheable(value = "layerCache")
-    public List<LayerDTO> getAllLayers() {
-        List<Layer> layers = layersRepository.findAll();
-        return layers.stream()
-                .map(this::convertLayerToDTO)
-                .collect(Collectors.toList());
-    }
-
     @Cacheable(value = "layerCache", key = "#id")
     public LayerDTO getLayerById(Long id) {
         Layer layer = layersRepository.findById(id)
@@ -89,20 +76,22 @@ public class LayerService {
     }
 
     @CacheEvict(value = "layerCache", key = "#id")
+    @Transactional
     public LayerDTO updateLayer(Long id, LayerRequest layerRequest) {
         validateLayerRequest(layerRequest);
         checkDuplicateLayerName(layerRequest.getName());
         Layer existingLayer = layersRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Layer not found with id: " + id));;
+                .orElseThrow(() -> new NotFoundException("Layer not found with id: " + id));
 
         BeanUtils.copyProperties(layerRequest, existingLayer, "id");
         existingLayer.setTimestamp(new Date());
-        Layer newLayer = saveLayer(existingLayer);
-        newLayer.setLayerName(layerRequest.getName());
-        return convertLayerToDTO(newLayer);
+        Layer updatedLayer = saveLayer(existingLayer);
+        updatedLayer.setLayerName(layerRequest.getName());
+        return convertLayerToDTO(updatedLayer);
     }
 
     @CacheEvict(value = "layerCache", key = "#id")
+    @Transactional
     public void deleteLayer(Long id) {
         if (id == null) {
             throw new InvalidRequestException("Layer ID cannot be null");
@@ -114,33 +103,16 @@ public class LayerService {
         }
     }
 
-
     private Layer saveLayer(Layer layer) {
         return layersRepository.save(layer);
     }
-
-    public List<LayerDTO> findByKeywords(String query) {
-        String lowercaseQuery = query.toLowerCase();
-        List<Layer> layers = layersRepository.findByKeywords(lowercaseQuery);
-        return layers.stream()
-                .map(this::convertLayerToDTO)
-                .collect(Collectors.toList());
-    }
-
-    private boolean isSparqlQueryValid(String query) {
-        return !query.startsWith("SELECT DISTINCT ?item ?itemLabel ?description ?coordinates ?image ?itemSchemaLabel ?url WHERE {\n")
-                || !query.contains("SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]\". }\n")
-                || !query.contains("SELECT DISTINCT ?item ?itemLabel ?coordinates ?itemSchemaLabel ?url WHERE {\n")
-                || !query.contains("wdt:P625");
-    }
-
     private void validateSparqlQuery(String query) {
-        if (isSparqlQueryValid(query)) {
+        if (sparqlQueryProvider.isSparqlQueryValid(query)) {
             throw new InvalidRequestException("Invalid SPARQL query");
         }
     }
     private void validateLayerRequest(LayerRequest layerRequest) {
-        if (layerRequest == null || isSparqlQueryValid(layerRequest.getQuery())) {
+        if (layerRequest == null || sparqlQueryProvider.isSparqlQueryValid(layerRequest.getQuery())) {
             throw new InvalidRequestException("Invalid layer request");
         }
     }

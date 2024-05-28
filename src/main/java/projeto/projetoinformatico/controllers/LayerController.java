@@ -22,7 +22,6 @@ import projeto.projetoinformatico.service.LayerService;
 import projeto.projetoinformatico.utils.Validation;
 
 import java.util.Collections;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -77,7 +76,6 @@ public class LayerController {
     }
 
     @GetMapping("/layers/{id}")
-    //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getLayerResultsByIdWithParams(
             @PathVariable Long id,
             @RequestParam Double lat1,
