@@ -34,7 +34,7 @@ public class SearchControllerTest {
         searchService = mock(SearchService.class);
         validation = mock(Validation.class);
         rateLimiter = mock(RateLimiter.class);
-        searchController = new SearchController(searchService, validation);
+        searchController = new SearchController(searchService);
     }
 
     @Test

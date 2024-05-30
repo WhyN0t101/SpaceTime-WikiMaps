@@ -23,4 +23,5 @@ public class UserDTO {
             this.roleUpgrade.setMessage(roleUpgrade.getMessage());
         }
     }
+
 }
