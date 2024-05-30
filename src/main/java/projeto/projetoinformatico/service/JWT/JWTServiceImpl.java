@@ -7,11 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.SneakyThrows;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import projeto.projetoinformatico.exceptions.Exception.JwtExpiredException;
 
 import java.security.Key;
@@ -19,7 +15,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
-//@Service
 public class JWTServiceImpl {
 
 
@@ -38,9 +33,6 @@ public class JWTServiceImpl {
         try {
             return Jwts.parser().setSigningKey(getSiginKey()).build().parseClaimsJws(token).getBody();
         } catch (JwtException e) {
-            // Log or handle the exception
-            //e.printStackTrace();
-
             throw new JwtExpiredException(e.getLocalizedMessage());
         }
     }
