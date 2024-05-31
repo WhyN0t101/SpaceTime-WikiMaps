@@ -217,4 +217,30 @@ public class LayerServiceTest {
         );
     }
 
+    @Test
+    void getLayerById_Success() {
+        // Arrange
+        Long id = 1L;
+        Layer layer = new Layer(); // Create a new Layer object
+        LayerDTO expectedDTO = new LayerDTO(); // Create a new LayerDTO object
+        when(layersRepository.findById(id)).thenReturn(java.util.Optional.of(layer)); // Mocking repository behavior
+        when(mapperUtils.layerToDTO(layer, LayerDTO.class)).thenReturn(expectedDTO); // Mocking mapper behavior
+
+        // Act
+        LayerDTO resultDTO = layerService.getLayerById(id);
+
+        // Assert
+        assertEquals(expectedDTO, resultDTO); // Check if the returned DTO is the expected one
+    }
+
+    @Test
+    void getLayerById_LayerNotFound() {
+        // Arrange
+        Long id = 1L;
+        when(layersRepository.findById(id)).thenReturn(java.util.Optional.empty()); // Mocking repository behavior
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> layerService.getLayerById(id)); // Check if NotFoundException is thrown
+    }
+
 }
