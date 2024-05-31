@@ -23,15 +23,11 @@ import projeto.projetoinformatico.utils.ModelMapperUtils;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
 import projeto.projetoinformatico.utils.Validation;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class LayerServiceTest {
 
@@ -242,5 +238,101 @@ public class LayerServiceTest {
         // Act & Assert
         assertThrows(NotFoundException.class, () -> layerService.getLayerById(id)); // Check if NotFoundException is thrown
     }
+
+    @Test
+    void updateLayer_Success() {
+        // Arrange
+        Long id = 1L;
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Test Layer");
+        layerRequest.setDescription("Test Description");
+        layerRequest.setSparqlQuery("Test Query");
+
+        Layer existingLayer = new Layer();
+        existingLayer.setId(id);
+        existingLayer.setLayerName("Existing Layer");
+        existingLayer.setDescription("Existing Description");
+        existingLayer.setQuery("Existing Query");
+
+        Layer updatedLayer = new Layer();
+        updatedLayer.setId(id);
+        updatedLayer.setLayerName(layerRequest.getName());
+        updatedLayer.setDescription(layerRequest.getDescription());
+        updatedLayer.setQuery(layerRequest.getQuery());
+        updatedLayer.setTimestamp(new Date());
+
+        when(layersRepository.findById(id)).thenReturn(Optional.of(existingLayer));
+        when(layersRepository.existsByLayerName(layerRequest.getName())).thenReturn(false);
+        when(layersRepository.save(existingLayer)).thenReturn(updatedLayer);
+
+        LayerDTO expectedDTO = new LayerDTO();
+        expectedDTO.setId(id);
+        expectedDTO.setLayerName(layerRequest.getName());
+        expectedDTO.setDescription(layerRequest.getDescription());
+        expectedDTO.setQuery(layerRequest.getQuery());
+        expectedDTO.setTimestamp(updatedLayer.getTimestamp());
+
+        when(mapperUtils.layerToDTO(updatedLayer, LayerDTO.class)).thenReturn(expectedDTO);
+
+        // Act
+        LayerDTO resultDTO = layerService.updateLayer(id, layerRequest);
+
+        // Assert
+        assertNotNull(resultDTO);
+        assertEquals(expectedDTO, resultDTO);
+    }
+
+    @Test
+    void updateLayer_LayerNotFound() {
+        // Arrange
+        Long id = 1L;
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Test Layer");
+        layerRequest.setDescription("Test Description");
+        layerRequest.setSparqlQuery("Test Query");
+
+        when(layersRepository.findById(id)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> layerService.updateLayer(id, layerRequest));
+    }
+
+    @Test
+    void updateLayer_DuplicateLayerName() {
+        // Arrange
+        Long id = 1L;
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Test Layer");
+        layerRequest.setDescription("Test Description");
+        layerRequest.setSparqlQuery("Test Query");
+
+        Layer existingLayer = new Layer();
+        existingLayer.setId(id);
+        existingLayer.setLayerName(layerRequest.getName());
+
+        when(layersRepository.findById(id)).thenReturn(Optional.of(existingLayer));
+        when(layersRepository.existsByLayerName(layerRequest.getName())).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(InvalidRequestException.class, () -> layerService.updateLayer(id, layerRequest));
+    }
+
+    @Test
+    void updateLayer_InvalidLayerRequest() {
+        // Arrange
+        Long id = 1L;
+        LayerRequest layerRequest = new LayerRequest();
+        layerRequest.setName("Test Layer");
+        layerRequest.setDescription("Test Description");
+        layerRequest.setSparqlQuery("Invalid Query");
+
+        when(layersRepository.findById(id)).thenReturn(Optional.of(new Layer())); // Mock layer retrieval
+        when(sparqlQueryProvider.isSparqlQueryValid("Invalid Query")).thenReturn(true); // Mock invalid SPARQL query
+
+        // Act & Assert
+        assertThrows(InvalidRequestException.class, () -> layerService.updateLayer(id, layerRequest));
+        verify(layersRepository, never()).save(any()); // Ensure that the repository save method is not called
+    }
+
 
 }
