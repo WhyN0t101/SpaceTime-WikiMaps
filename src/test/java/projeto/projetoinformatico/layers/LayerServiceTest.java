@@ -334,5 +334,36 @@ public class LayerServiceTest {
         verify(layersRepository, never()).save(any()); // Ensure that the repository save method is not called
     }
 
+    @Test
+    void deleteLayer_Success() {
+        // Arrange
+        Long id = 1L;
+        when(layersRepository.existsById(id)).thenReturn(true); // Mock layer existence
+
+        // Act
+        assertDoesNotThrow(() -> layerService.deleteLayer(id));
+
+        // Assert
+        verify(layersRepository, times(1)).deleteById(id); // Verify that deleteById is called once with the provided ID
+    }
+
+    @Test
+    void deleteLayer_LayerNotFound() {
+        // Arrange
+        Long id = 1L;
+        when(layersRepository.existsById(id)).thenReturn(false); // Mock layer non-existence
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> layerService.deleteLayer(id)); // Ensure NotFoundException is thrown
+        verify(layersRepository, never()).deleteById(any()); // Ensure that deleteById is never called
+    }
+
+    @Test
+    void deleteLayer_NullId() {
+        // Act & Assert
+        assertThrows(InvalidRequestException.class, () -> layerService.deleteLayer(null)); // Ensure InvalidRequestException is thrown
+        verify(layersRepository, never()).deleteById(any()); // Ensure that deleteById is never called
+    }
+
 
 }
