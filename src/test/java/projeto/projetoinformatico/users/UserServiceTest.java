@@ -282,4 +282,86 @@ public class UserServiceTest {
         verifyNoInteractions(mapperUtils);
     }
 
+    @Test
+    public void deleteOwnUser_UserDeleted_Success() {
+        // Arrange
+        Long userId = 1L;
+        User mockUser = new User();
+        mockUser.setId(userId);
+        when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(mockUser));
+        when(layersRepository.findLayersByUserId(userId)).thenReturn(new ArrayList<>());
+        when(roleUpgradeRepository.findALlByUserId(userId)).thenReturn(new ArrayList<>());
+
+        // Act
+        userService.deleteOwnUser(userId);
+
+        // Assert
+        verify(userRepository, times(1)).findById(userId);
+        verify(layersRepository, times(1)).findLayersByUserId(userId);
+        verify(layersRepository, times(0)).deleteAll(any());
+        verify(roleUpgradeRepository, times(1)).findALlByUserId(userId);
+        verify(roleUpgradeRepository, times(0)).deleteAll(any());
+        verify(userRepository, times(1)).delete(mockUser);
+    }
+
+    @Test
+    public void deleteOwnUser_UserNotFound_ThrowsNotFoundException() {
+        // Arrange
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(java.util.Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> {
+            userService.deleteOwnUser(userId);
+        });
+
+        verify(userRepository, times(1)).findById(userId);
+        verifyNoMoreInteractions(userRepository);
+        verifyNoInteractions(layersRepository);
+        verifyNoInteractions(roleUpgradeRepository);
+    }
+
+    @Test
+    public void deleteOwnUser_LayersExist_Success() {
+        // Arrange
+        Long userId = 1L;
+        User mockUser = new User();
+        mockUser.setId(userId);
+        when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(mockUser));
+        List<Layer> mockLayers = new ArrayList<>();
+        mockLayers.add(new Layer());
+        when(layersRepository.findLayersByUserId(userId)).thenReturn(mockLayers);
+        when(roleUpgradeRepository.findALlByUserId(userId)).thenReturn(new ArrayList<>());
+
+        // Act
+        userService.deleteOwnUser(userId);
+
+        // Assert
+        verify(layersRepository, times(1)).deleteAll(mockLayers);
+        verify(roleUpgradeRepository, times(1)).findALlByUserId(userId);
+        verify(roleUpgradeRepository, times(0)).deleteAll(any());
+        verify(userRepository, times(1)).delete(mockUser);
+    }
+
+    @Test
+    public void deleteOwnUser_RoleUpgradeRequestsExist_Success() {
+        // Arrange
+        Long userId = 1L;
+        User mockUser = new User();
+        mockUser.setId(userId);
+        when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(mockUser));
+        when(layersRepository.findLayersByUserId(userId)).thenReturn(new ArrayList<>());
+        List<RoleUpgrade> mockRoleUpgradeRequests = new ArrayList<>();
+        mockRoleUpgradeRequests.add(new RoleUpgrade());
+        when(roleUpgradeRepository.findALlByUserId(userId)).thenReturn(mockRoleUpgradeRequests);
+
+        // Act
+        userService.deleteOwnUser(userId);
+
+        // Assert
+        verify(layersRepository, times(1)).findLayersByUserId(userId);
+        verify(layersRepository, times(0)).deleteAll(any());
+        verify(roleUpgradeRepository, times(1)).deleteAll(mockRoleUpgradeRequests);
+        verify(userRepository, times(1)).delete(mockUser);
+    }
 }
