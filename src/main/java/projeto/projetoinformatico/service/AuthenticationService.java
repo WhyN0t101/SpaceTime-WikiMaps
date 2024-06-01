@@ -116,11 +116,13 @@ public class AuthenticationService {
         }
         if(JWTServiceImpl.isTokenValid(refreshTokenRequest.getToken(), user)){
             var jwt = JWTServiceImpl.generateToken(user);
+            var refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
+
 
             JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
 
             jwtAuthenticationResponse.setToken(jwt);
-            jwtAuthenticationResponse.setRefreshToken(refreshTokenRequest.getToken());
+            jwtAuthenticationResponse.setRefreshToken(refreshToken);
             return jwtAuthenticationResponse;
         }
         return null;
