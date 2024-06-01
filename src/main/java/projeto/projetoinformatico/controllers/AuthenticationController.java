@@ -40,7 +40,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
+    //@PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
     @PostMapping("/refresh")
     public ResponseEntity<JwtAuthenticationResponse> refresh(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) throws JwtExpiredException {
         return ResponseEntity.ok(authenticationService.refreshToken(refreshTokenRequest));
