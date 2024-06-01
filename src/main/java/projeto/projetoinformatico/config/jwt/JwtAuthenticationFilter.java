@@ -41,19 +41,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        username = JWTServiceImpl.extractUsername(jwt);
-        if(StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = userService.userDetailsService().loadUserByUsername(username);
-            if(JWTServiceImpl.isTokenValid(jwt, userDetails)){
-                SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                securityContext.setAuthentication(token);
-                SecurityContextHolder.setContext(securityContext);
+
+        try {
+            if (JWTServiceImpl.isTokenExpired(jwt)) {
+                throw new JwtExpiredException("JWT Expired");
             }
+            username = JWTServiceImpl.extractUsername(jwt);
+            if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userService.userDetailsService().loadUserByUsername(username);
+                if (JWTServiceImpl.isTokenValid(jwt, userDetails)) {
+                    SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+                    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+                    token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    securityContext.setAuthentication(token);
+                    SecurityContextHolder.setContext(securityContext);
+                }
+            }
+            filterChain.doFilter(request, response);
+        } catch (JwtExpiredException e) {
+            request.setAttribute("exception", e);
+            filterChain.doFilter(request, response);
         }
-        filterChain.doFilter(request, response);
     }
 }
