@@ -41,7 +41,7 @@ public class SearchService {
     @Cacheable(value = "searchCache", key = "{ #sparqlQuery.hashCode() }")
     public SearchResult executeSparqlQuery(String sparqlQuery) {
         try {
-            String sparqlQueryWithPrefixes = sparqlQueryProvider.constructSparqlQuery(sparqlQuery); // Prepend prefixes
+            String sparqlQueryWithPrefixes = sparqlQueryProvider.constructSparqlQuery(sparqlQuery);
             CompletableFuture<List<Map<String, String>>> futureResults = CompletableFuture.supplyAsync(() -> {
                 try (QueryExecution qexec = QueryExecutionFactory.sparqlService(sparqlEndpoint, sparqlQueryWithPrefixes)) {
                     ResultSet resultSet = qexec.execSelect();
