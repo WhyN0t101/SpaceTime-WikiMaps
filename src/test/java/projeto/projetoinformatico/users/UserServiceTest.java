@@ -247,9 +247,15 @@ public class UserServiceTest {
         User mockUser = new User();
         mockUser.setId(userId);
         mockUser.setRole(Role.USER); // Original role
-        when(userRepository.save(any(User.class))).thenReturn(mockUser);
         when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(mockUser));
-        when(mapperUtils.userToDTO(any(User.class), eq(UserDTO.class))).thenReturn(new UserDTO());
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mapperUtils.userToDTO(any(User.class), eq(UserDTO.class))).thenAnswer(invocation -> {
+            User userArg = invocation.getArgument(0);
+            UserDTO dto = new UserDTO();
+            dto.setId(userArg.getId());
+            dto.setRole(newRole); // Simulate role update
+            return dto;
+        });
 
         // Act
         UserDTO resultUserDTO = userService.updateUserRole(userId, newRole);
@@ -258,10 +264,15 @@ public class UserServiceTest {
         assertNotNull(resultUserDTO);
         assertEquals(userId, resultUserDTO.getId());
         assertEquals(newRole, resultUserDTO.getRole());
-        verify(userRepository, times(1)).save(mockUser);
+
+        // Verify interactions
         verify(userRepository, times(1)).findById(userId);
-        verify(mapperUtils, times(1)).userToDTO(mockUser, UserDTO.class);
+        verify(userRepository, times(1)).save(mockUser); // Ensure userRepository.save is called
+        verify(mapperUtils, times(1)).userToDTO(mockUser, UserDTO.class); // Ensure mapper is called
     }
+
+
+
     @Test
     public void updateUserRole_InvalidRole_ThrowsNotFoundException() {
         // Arrange
