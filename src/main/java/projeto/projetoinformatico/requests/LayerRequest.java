@@ -33,7 +33,7 @@ public class LayerRequest {
         return query;
     }
 
-    public void setSparqlQuery(String query) {
+    public void setQuery(String query) {
         this.query = query;
     }
 

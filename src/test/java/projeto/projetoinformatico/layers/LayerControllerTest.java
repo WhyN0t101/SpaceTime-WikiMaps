@@ -228,7 +228,7 @@ public class LayerControllerTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("LayerName");
         layerRequest.setDescription("LayerDescription");
-        layerRequest.setSparqlQuery("LayerQuery");
+        layerRequest.setQuery("LayerQuery");
 
         // Mock user
         User user = new User();
@@ -261,7 +261,7 @@ public class LayerControllerTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("UpdatedLayerName");
         layerRequest.setDescription("UpdatedLayerDescription");
-        layerRequest.setSparqlQuery("UpdatedLayerQuery");
+        layerRequest.setQuery("UpdatedLayerQuery");
 
         // Mock updated layer
         Layer updatedLayer = new Layer();
@@ -292,7 +292,7 @@ public class LayerControllerTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("UpdatedLayerName");
         layerRequest.setDescription("UpdatedLayerDescription");
-        layerRequest.setSparqlQuery("UpdatedLayerQuery");
+        layerRequest.setQuery("UpdatedLayerQuery");
 
         // Mock layer service to throw NotFoundException
         when(layerService.updateLayer(1L, layerRequest)).thenThrow(NotFoundException.class);
