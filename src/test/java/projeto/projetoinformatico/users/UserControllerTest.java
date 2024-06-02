@@ -18,7 +18,6 @@ import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestExcep
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.service.UserService;
-import projeto.projetoinformatico.utils.Validation;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +25,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class UserControllerTest {

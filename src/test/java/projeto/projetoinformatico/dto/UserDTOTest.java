@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.users;
+package projeto.projetoinformatico.dto;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

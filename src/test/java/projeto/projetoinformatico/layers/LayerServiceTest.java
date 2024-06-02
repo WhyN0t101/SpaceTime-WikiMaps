@@ -1,12 +1,7 @@
 package projeto.projetoinformatico.layers;
 
-import com.github.jsonldjava.shaded.com.google.common.util.concurrent.RateLimiter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import projeto.projetoinformatico.controllers.LayerController;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
@@ -21,7 +16,6 @@ import projeto.projetoinformatico.service.LayerService;
 import projeto.projetoinformatico.service.SearchService;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
-import projeto.projetoinformatico.utils.Validation;
 
 import java.util.*;
 

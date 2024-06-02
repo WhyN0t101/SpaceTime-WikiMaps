@@ -5,13 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import projeto.projetoinformatico.controllers.ResourceController;
 import projeto.projetoinformatico.controllers.SearchController;
-import projeto.projetoinformatico.model.users.UserRepository;
-import projeto.projetoinformatico.service.ResourceService;
 import projeto.projetoinformatico.service.SearchService;
-import projeto.projetoinformatico.utils.Validation;
 import projeto.projetoinformatico.model.SearchResult;
+import projeto.projetoinformatico.utils.Validation;
 
 
 import java.util.Collections;

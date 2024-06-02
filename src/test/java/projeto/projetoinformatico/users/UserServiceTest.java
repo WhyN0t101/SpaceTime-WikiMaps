@@ -4,13 +4,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import projeto.projetoinformatico.controllers.UserController;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.layers.LayersRepository;
-import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
 import projeto.projetoinformatico.model.users.Role;
@@ -20,7 +18,6 @@ import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +28,7 @@ public class UserServiceTest {
     private  UserRepository userRepository;
     private  LayersRepository layersRepository;
     private  RoleUpgradeRepository roleUpgradeRepository;
-    private  ModelMapperUtils mapperUtils;
+    private ModelMapperUtils mapperUtils;
     private  UserService userService;
 
 
