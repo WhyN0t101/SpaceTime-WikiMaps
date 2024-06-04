@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -211,10 +212,14 @@ public class UserService implements UserDetailsService {
 
     private UserDTO convertUserToDTO(User user) {
         UserDTO dto = mapperUtils.userToDTO(user, UserDTO.class);
-        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUserId(user.getId());
-        if (roleUpgrade != null) {
+
+        // Retrieve the most recent or relevant role upgrade for the user
+        Optional<RoleUpgrade> roleUpgradeOpt = roleUpgradeRepository.findFirstByUserIdOrderByTimestampDesc(user.getId());
+        if (roleUpgradeOpt.isPresent()) {
+            RoleUpgrade roleUpgrade = roleUpgradeOpt.get();
             dto.setRoleUpgrade(roleUpgrade);
         }
+
         dto.setBlocked(!user.isAccountNonLocked());
         return dto;
     }

@@ -37,4 +37,5 @@ public interface RoleUpgradeRepository extends JpaRepository<RoleUpgrade, Long> 
     Page<RoleUpgrade> findByStatus(RoleStatus statusEnum, Pageable pageable);
     Page<RoleUpgrade> findAll(Pageable pageable);
 
+    Optional<RoleUpgrade> findFirstByUserIdOrderByTimestampDesc(Long id);
 }
