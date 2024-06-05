@@ -214,6 +214,22 @@
             <version>2.0.9</version>
             <scope>test</scope>
         </dependency>
+        <!-- CACHE -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.5.2.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>3.10.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-jcache</artifactId>
+            <version>6.3.1.Final</version>
+        </dependency>
 
 
 
