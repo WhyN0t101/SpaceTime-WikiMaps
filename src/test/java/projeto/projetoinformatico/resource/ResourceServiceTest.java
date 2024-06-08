@@ -1,20 +1,16 @@
 package projeto.projetoinformatico.resource;
 
-import com.github.jsonldjava.shaded.com.google.common.util.concurrent.RateLimiter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import projeto.projetoinformatico.controllers.ResourceController;
 import projeto.projetoinformatico.exceptions.Exception.SparqlQueryNotFoundException;
 import projeto.projetoinformatico.model.SearchResult;
-import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.service.ResourceService;
 import projeto.projetoinformatico.service.SearchService;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
 
 import java.util.*;
 
-import static org.eclipse.rdf4j.model.util.Configurations.getPropertyValues;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;

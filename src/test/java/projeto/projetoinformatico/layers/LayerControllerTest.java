@@ -17,17 +17,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import projeto.projetoinformatico.controllers.LayerController;
-import projeto.projetoinformatico.controllers.UserController;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.Paged.LayerPageDTO;
-import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
-import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
-import projeto.projetoinformatico.exceptions.Exception.SparqlQueryException;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.users.Role;
@@ -35,10 +29,8 @@ import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.requests.LayerRequest;
 import projeto.projetoinformatico.service.LayerService;
-import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.utils.Validation;
 
-import javax.naming.directory.SearchControls;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -236,7 +228,7 @@ public class LayerControllerTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("LayerName");
         layerRequest.setDescription("LayerDescription");
-        layerRequest.setSparqlQuery("LayerQuery");
+        layerRequest.setQuery("LayerQuery");
 
         // Mock user
         User user = new User();
@@ -269,7 +261,7 @@ public class LayerControllerTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("UpdatedLayerName");
         layerRequest.setDescription("UpdatedLayerDescription");
-        layerRequest.setSparqlQuery("UpdatedLayerQuery");
+        layerRequest.setQuery("UpdatedLayerQuery");
 
         // Mock updated layer
         Layer updatedLayer = new Layer();
@@ -300,7 +292,7 @@ public class LayerControllerTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("UpdatedLayerName");
         layerRequest.setDescription("UpdatedLayerDescription");
-        layerRequest.setSparqlQuery("UpdatedLayerQuery");
+        layerRequest.setQuery("UpdatedLayerQuery");
 
         // Mock layer service to throw NotFoundException
         when(layerService.updateLayer(1L, layerRequest)).thenThrow(NotFoundException.class);

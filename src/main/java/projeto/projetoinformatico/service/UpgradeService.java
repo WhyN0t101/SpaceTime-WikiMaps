@@ -52,15 +52,18 @@ public class UpgradeService {
         // Check if the user made a request in the last 7 days
         Optional<RoleUpgrade> lastRequest = roleUpgradeRepository.findFirstByUserOrderByTimestampDesc(user);
         if (lastRequest.isPresent()) {
-            Date currentDate = new Date();
-            Date lastRequestDate = lastRequest.get().getTimestamp();
+            RoleUpgrade lastRoleUpgrade = lastRequest.get();
+           Date currentDate = new Date();
+            Date lastRequestDate = lastRoleUpgrade.getTimestamp();
             long differenceInMillis = currentDate.getTime() - lastRequestDate.getTime();
             long differenceInDays = differenceInMillis / (1000 * 60 * 60 * 24);
-            if (differenceInDays < 7 && lastRequest.get().getStatus() == RoleStatus.DECLINED) {
+            if (differenceInDays < 7 && lastRoleUpgrade.getStatus() == RoleStatus.DECLINED) {
                 throw new InvalidRequestException("Request has been denied. Please try again after 7 days.");
             }
+            // Delete the last request if it's not pending or accepted
+            roleUpgradeRepository.delete(lastRoleUpgrade);
         }
-
+       // roleUpgradeRepository.delete(lastRequest);
         RoleUpgrade request = new RoleUpgrade();
         request.setUser(user);
         request.setReason(reason);
@@ -80,13 +83,11 @@ public class UpgradeService {
         RoleStatus statusEnum = RoleStatus.valueOf(request.getStatus().toUpperCase());
         roleUpgrade.setStatus(statusEnum);
         roleUpgrade.setMessage(request.getMessage());
-
         if (statusEnum == RoleStatus.ACCEPTED) {
             User user = roleUpgrade.getUser();
             user.setRole(Role.EDITOR);
             userRepository.save(user);
         }
-
         roleUpgradeRepository.save(roleUpgrade);
         return convertUpgradeToDTO(roleUpgrade);
     }

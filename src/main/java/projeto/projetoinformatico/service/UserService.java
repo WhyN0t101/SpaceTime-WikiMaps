@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,15 +87,12 @@ public class UserService implements UserDetailsService {
         return convertUserToDTO(user);
     }
 
-    @Cacheable(value = "layerCache", key = "#id")
-    public List<LayerDTO> getUserLayers(Long id) {
-        List<Layer> layers = layersRepository.findLayersByUserId(id);
+    public Page<LayerDTO> getUserLayers(Long id, Pageable pageable) {
+        Page<Layer> layers = layersRepository.findLayersByUserId(id, pageable);
         if (layers.isEmpty()) {
             throw new NotFoundException("User layers not found for user with id: " + id);
         }
-        return layers.stream()
-                .map(this::convertLayerToDTO)
-                .collect(Collectors.toList());
+        return layers.map(this::convertLayerToDTO);
     }
 
     @CacheEvict(value = "userCache", key = "#id")
@@ -211,10 +209,14 @@ public class UserService implements UserDetailsService {
 
     private UserDTO convertUserToDTO(User user) {
         UserDTO dto = mapperUtils.userToDTO(user, UserDTO.class);
-        RoleUpgrade roleUpgrade = roleUpgradeRepository.findByUserId(user.getId());
-        if (roleUpgrade != null) {
+
+        // Retrieve the most recent or relevant role upgrade for the user
+        Optional<RoleUpgrade> roleUpgradeOpt = roleUpgradeRepository.findFirstByUserIdOrderByTimestampDesc(user.getId());
+        if (roleUpgradeOpt.isPresent()) {
+            RoleUpgrade roleUpgrade = roleUpgradeOpt.get();
             dto.setRoleUpgrade(roleUpgrade);
         }
+
         dto.setBlocked(!user.isAccountNonLocked());
         return dto;
     }

@@ -1,6 +1,5 @@
 package projeto.projetoinformatico.upgrade;
 
-import com.github.jsonldjava.shaded.com.google.common.util.concurrent.RateLimiter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -14,7 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import projeto.projetoinformatico.controllers.SearchController;
 import projeto.projetoinformatico.controllers.UpgradeController;
 import projeto.projetoinformatico.dtos.Paged.RoleUpgradePageDTO;
 import projeto.projetoinformatico.dtos.RoleUpgradeDTO;
@@ -23,9 +21,7 @@ import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.requests.StatusRequest;
 import projeto.projetoinformatico.requests.UpgradeRequest;
-import projeto.projetoinformatico.service.SearchService;
 import projeto.projetoinformatico.service.UpgradeService;
-import projeto.projetoinformatico.utils.Validation;
 
 import java.util.Collections;
 

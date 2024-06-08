@@ -1,6 +1,5 @@
 package projeto.projetoinformatico.users;
 
-import com.github.jsonldjava.shaded.com.google.common.util.concurrent.RateLimiter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,21 +10,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import projeto.projetoinformatico.controllers.LayerController;
 import projeto.projetoinformatico.controllers.UserController;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.Paged.UserPageDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
-import projeto.projetoinformatico.model.layers.Layer;
-import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.UserRepository;
-import projeto.projetoinformatico.requests.AlterRequest;
-import projeto.projetoinformatico.responses.AuthenticationResponse;
-import projeto.projetoinformatico.service.LayerService;
 import projeto.projetoinformatico.service.UserService;
-import projeto.projetoinformatico.utils.Validation;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,7 +25,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class UserControllerTest {

@@ -3,7 +3,6 @@ package projeto.projetoinformatico.password;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import projeto.projetoinformatico.controllers.PasswordController;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
@@ -18,7 +17,7 @@ import static org.mockito.Mockito.*;
 
 public class PasswordServiceTest {
     private PasswordService passwordService;
-    private  ModelMapperUtils mapperUtils;
+    private ModelMapperUtils mapperUtils;
     private  UserRepository userRepository;
     private  PasswordEncoder passwordEncoder;
 

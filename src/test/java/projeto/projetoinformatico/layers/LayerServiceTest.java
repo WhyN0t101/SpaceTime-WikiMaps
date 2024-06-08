@@ -1,12 +1,7 @@
 package projeto.projetoinformatico.layers;
 
-import com.github.jsonldjava.shaded.com.google.common.util.concurrent.RateLimiter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import projeto.projetoinformatico.controllers.LayerController;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidRequestException;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
@@ -21,7 +16,6 @@ import projeto.projetoinformatico.service.LayerService;
 import projeto.projetoinformatico.service.SearchService;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 import projeto.projetoinformatico.utils.SparqlQueryProvider;
-import projeto.projetoinformatico.utils.Validation;
 
 import java.util.*;
 
@@ -65,7 +59,7 @@ public class LayerServiceTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("Test Layer");
         layerRequest.setDescription("Test Description");
-        layerRequest.setSparqlQuery("Test Query");
+        layerRequest.setQuery("Test Query");
 
         User user = new User();
         user.setUsername(username);
@@ -98,7 +92,7 @@ public class LayerServiceTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("Test Layer");
         layerRequest.setDescription("Test Description");
-        layerRequest.setSparqlQuery("Invalid Query"); // Set the query here instead of sparqlQuery
+        layerRequest.setQuery("Invalid Query"); // Set the query here instead of sparqlQuery
         when(userRepository.findByUsername(username)).thenReturn(new User());
         when(sparqlQueryProvider.isSparqlQueryValid(anyString())).thenReturn(true); // Mock the behavior of the sparqlQueryProvider
 
@@ -113,7 +107,7 @@ public class LayerServiceTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("Test Layer");
         layerRequest.setDescription("Test Description");
-        layerRequest.setSparqlQuery("Valid Query");
+        layerRequest.setQuery("Valid Query");
         when(userRepository.findByUsername(username)).thenReturn(new User());
         when(layersRepository.existsByLayerName(layerRequest.getName())).thenReturn(true);
 
@@ -246,7 +240,7 @@ public class LayerServiceTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("Test Layer");
         layerRequest.setDescription("Test Description");
-        layerRequest.setSparqlQuery("Test Query");
+        layerRequest.setQuery("Test Query");
 
         Layer existingLayer = new Layer();
         existingLayer.setId(id);
@@ -289,7 +283,7 @@ public class LayerServiceTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("Test Layer");
         layerRequest.setDescription("Test Description");
-        layerRequest.setSparqlQuery("Test Query");
+        layerRequest.setQuery("Test Query");
 
         when(layersRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -304,7 +298,7 @@ public class LayerServiceTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("Test Layer");
         layerRequest.setDescription("Test Description");
-        layerRequest.setSparqlQuery("Test Query");
+        layerRequest.setQuery("Test Query");
 
         Layer existingLayer = new Layer();
         existingLayer.setId(id);
@@ -324,7 +318,7 @@ public class LayerServiceTest {
         LayerRequest layerRequest = new LayerRequest();
         layerRequest.setName("Test Layer");
         layerRequest.setDescription("Test Description");
-        layerRequest.setSparqlQuery("Invalid Query");
+        layerRequest.setQuery("Invalid Query");
 
         when(layersRepository.findById(id)).thenReturn(Optional.of(new Layer())); // Mock layer retrieval
         when(sparqlQueryProvider.isSparqlQueryValid("Invalid Query")).thenReturn(true); // Mock invalid SPARQL query

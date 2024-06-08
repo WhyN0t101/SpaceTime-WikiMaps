@@ -29,7 +29,7 @@ public class UserServiceTest {
     private  UserRepository userRepository;
     private  LayersRepository layersRepository;
     private  RoleUpgradeRepository roleUpgradeRepository;
-    private  ModelMapperUtils mapperUtils;
+    private ModelMapperUtils mapperUtils;
     private  UserService userService;
     private JWTServiceImpl jwtService;
 

@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.dtos.LayerDTO;
+import projeto.projetoinformatico.dtos.Paged.LayerPageDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.dtos.Paged.UserPageDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
@@ -87,9 +88,24 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}/layers")
-    public ResponseEntity<List<LayerDTO>> getUserLayers(@PathVariable Long id) {
-        List<LayerDTO> userLayers = userService.getUserLayers(id);
-        return ResponseEntity.ok(userLayers);
+    public ResponseEntity<LayerPageDTO> getUserLayers(@RequestParam(defaultValue = "0") int page,
+                                                      @RequestParam(defaultValue = "10") int size,
+                                                      @PathVariable Long id) {
+        if(size < 1){
+            throw new InvalidParamsRequestException("Invalid size of pagination");
+        }
+        if(page < 0){
+            throw new InvalidParamsRequestException("Invalid page of pagination");
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<LayerDTO> layers = userService.getUserLayers(id, pageable);
+        LayerPageDTO response = new LayerPageDTO(
+                layers.getContent(),
+                layers.getNumber(),
+                (int) layers.getTotalElements(),
+                layers.getTotalPages()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAuthority('EDITOR') or hasAuthority('ADMIN') or hasAuthority('USER')")
