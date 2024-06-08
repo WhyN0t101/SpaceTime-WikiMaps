@@ -1,19 +1,12 @@
 package projeto.projetoinformatico.authenticationTest;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import projeto.projetoinformatico.dtos.UserDTO;
@@ -24,16 +17,11 @@ import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
-import projeto.projetoinformatico.requests.RefreshTokenRequest;
 import projeto.projetoinformatico.requests.SignInRequest;
 import projeto.projetoinformatico.requests.SignUpRequest;
-import projeto.projetoinformatico.responses.AuthenticationResponse;
-import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
 import projeto.projetoinformatico.service.AuthenticationService;
-import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
+import projeto.projetoinformatico.config.jwt.JWTServiceImpl;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
-
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;

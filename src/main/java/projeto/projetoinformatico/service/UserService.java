@@ -21,7 +21,7 @@ import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
-import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
+import projeto.projetoinformatico.config.jwt.JWTServiceImpl;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

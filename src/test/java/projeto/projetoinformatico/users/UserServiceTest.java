@@ -4,23 +4,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import projeto.projetoinformatico.controllers.UserController;
 import projeto.projetoinformatico.dtos.LayerDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.NotFoundException;
 import projeto.projetoinformatico.model.layers.Layer;
 import projeto.projetoinformatico.model.layers.LayersRepository;
-import projeto.projetoinformatico.model.roleUpgrade.RoleStatus;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgrade;
 import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
+import projeto.projetoinformatico.config.jwt.JWTServiceImpl;
 import projeto.projetoinformatico.service.UserService;
 import projeto.projetoinformatico.utils.ModelMapperUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +31,7 @@ public class UserServiceTest {
     private  RoleUpgradeRepository roleUpgradeRepository;
     private  ModelMapperUtils mapperUtils;
     private  UserService userService;
+    private JWTServiceImpl jwtService;
 
 
     @BeforeEach
@@ -41,6 +40,7 @@ public class UserServiceTest {
         roleUpgradeRepository = mock(RoleUpgradeRepository.class);
         mapperUtils = mock(ModelMapperUtils.class);
         userRepository = mock(UserRepository.class);
+        jwtService = mock(JWTServiceImpl.class);
         userService = new UserService(userRepository, layersRepository, mapperUtils, roleUpgradeRepository);
     }
 
@@ -375,4 +375,40 @@ public class UserServiceTest {
         verify(roleUpgradeRepository, times(1)).deleteAll(mockRoleUpgradeRequests);
         verify(userRepository, times(1)).delete(mockUser);
     }
+
+    /*
+    @Test
+    public void convertUserToDTO_UserWithRoleUpgrade_ReturnsDTOWithRoleUpgrade() {
+        // Arrange
+        Long userId = 1L;
+        User mockUser = new User();
+        mockUser.setId(userId);
+        mockUser.setUsername("testUser");
+        mockUser.setEmail("test@example.com");
+        mockUser.setAccountNonLocked(true);
+
+        RoleUpgrade mockRoleUpgrade = new RoleUpgrade();
+        mockRoleUpgrade.setId(1L);
+        mockRoleUpgrade.setReason("Test upgrade");
+        mockRoleUpgrade.setStatus(RoleStatus.PENDING);
+        mockUser.setRoleUpgrade(mockRoleUpgrade);
+
+        when(roleUpgradeRepository.findByUserId(userId)).thenReturn(mockRoleUpgrade);
+
+        // Act
+        UserDTO resultDTO = userService.convertUserToDTO(mockUser);
+
+        // Assert
+        assertNotNull(resultDTO);
+        assertEquals(mockUser.getId(), resultDTO.getId());
+        assertEquals(mockUser.getUsername(), resultDTO.getUsername());
+        assertEquals(mockUser.getEmail(), resultDTO.getEmail());
+        assertTrue(resultDTO.isBlocked());
+        assertNotNull(resultDTO.getRoleUpgrade());
+        assertEquals(mockRoleUpgrade.getId(), resultDTO.getRoleUpgrade().getId());
+        assertEquals(mockRoleUpgrade.getReason(), resultDTO.getRoleUpgrade().getReason());
+        assertEquals(mockRoleUpgrade.getStatus(), resultDTO.getRoleUpgrade().getStatus());
+    }
+
+     */
 }

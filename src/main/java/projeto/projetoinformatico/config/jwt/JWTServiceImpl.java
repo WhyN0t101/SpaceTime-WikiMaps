@@ -1,4 +1,4 @@
-package projeto.projetoinformatico.service.JWT;
+package projeto.projetoinformatico.config.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

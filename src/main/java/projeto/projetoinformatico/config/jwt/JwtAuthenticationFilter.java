@@ -14,7 +14,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import projeto.projetoinformatico.exceptions.Exception.JwtExpiredException;
-import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
 import projeto.projetoinformatico.service.UserService;
 
 import java.io.IOException;

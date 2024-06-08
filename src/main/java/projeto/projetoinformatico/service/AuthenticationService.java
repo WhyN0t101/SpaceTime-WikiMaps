@@ -17,7 +17,7 @@ import projeto.projetoinformatico.model.roleUpgrade.RoleUpgradeRepository;
 import projeto.projetoinformatico.requests.*;
 import projeto.projetoinformatico.responses.AuthenticationResponse;
 import projeto.projetoinformatico.responses.JwtAuthenticationResponse;
-import projeto.projetoinformatico.service.JWT.JWTServiceImpl;
+import projeto.projetoinformatico.config.jwt.JWTServiceImpl;
 import projeto.projetoinformatico.model.users.Role;
 import projeto.projetoinformatico.model.users.User;
 import projeto.projetoinformatico.model.users.UserRepository;
