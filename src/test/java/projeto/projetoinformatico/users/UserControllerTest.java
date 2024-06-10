@@ -6,12 +6,14 @@ import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import projeto.projetoinformatico.controllers.UserController;
 import projeto.projetoinformatico.dtos.LayerDTO;
+import projeto.projetoinformatico.dtos.Paged.LayerPageDTO;
 import projeto.projetoinformatico.dtos.Paged.UserPageDTO;
 import projeto.projetoinformatico.dtos.UserDTO;
 import projeto.projetoinformatico.exceptions.Exception.InvalidParamsRequestException;
@@ -185,30 +187,31 @@ public class UserControllerTest {
         // Arrange
         Long userId = 1L;
         List<LayerDTO> expectedLayers = Arrays.asList(new LayerDTO(), new LayerDTO());
-        when(userService.getUserLayers(userId)).thenReturn(expectedLayers);
+        Page<LayerDTO> page = new PageImpl<>(expectedLayers);
+        when(userService.getUserLayers(eq(userId), any(Pageable.class))).thenReturn(page);
 
         // Act
-        ResponseEntity<List<LayerDTO>> response = userController.getUserLayers(userId);
+        ResponseEntity<LayerPageDTO> response = userController.getUserLayers(0, 10, userId);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(expectedLayers.size(), response.getBody().size());
+        assertEquals(expectedLayers.size(), response.getBody().getLayers().size());
     }
 
     @Test
     public void testGetUserLayersNotFoundError() {
         // Arrange
         Long userId = 1L;
-        when(userService.getUserLayers(userId)).thenThrow(new NotFoundException("User layers not found for user with id: " + userId));
+        when(userService.getUserLayers(eq(userId), any(Pageable.class)))
+                .thenThrow(new NotFoundException("User layers not found for user with id: " + userId));
 
         // Act and Assert
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            userController.getUserLayers(userId);
+            userController.getUserLayers(0, 10, userId);
         });
         assertTrue(exception.getMessage().contains("User layers not found for user with id: " + userId));
     }
-
     @Test
     public void testGetAuthenticatedUserSuccess() {
         // Arrange

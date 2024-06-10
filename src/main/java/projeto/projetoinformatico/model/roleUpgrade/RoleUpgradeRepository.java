@@ -14,7 +14,6 @@ import java.util.Optional;
 @Repository
 public interface RoleUpgradeRepository extends JpaRepository<RoleUpgrade, Long> {
 
-    List<RoleUpgrade> findByStatus(RoleStatus statusEnum);
 
     // Corrected method name
     RoleUpgrade findByUserId(Long id);
@@ -23,9 +22,6 @@ public interface RoleUpgradeRepository extends JpaRepository<RoleUpgrade, Long> 
     Optional<RoleUpgrade> findFirstByUserOrderByTimestampDesc(User user);
 
 
-    List<RoleUpgrade> findByUserUsernameContainingIgnoreCase(String username);
-
-    List<RoleUpgrade> findByUserUsernameContainingIgnoreCaseAndStatus(String username, RoleStatus roleEnum);
 
     Optional<RoleUpgrade> findFirstByUserIdAndStatusInOrderByTimestampDesc(Long id, List<RoleStatus> pending);
 

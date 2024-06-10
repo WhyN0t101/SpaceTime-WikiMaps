@@ -196,7 +196,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    private AuthenticationResponse generateAuthenticationResponse(User user) {
+    public AuthenticationResponse generateAuthenticationResponse(User user) {
         String jwt = JWTServiceImpl.generateToken(user);
         String refreshToken = JWTServiceImpl.generateRefreshToken(new HashMap<>(), user);
         AuthenticationResponse response = new AuthenticationResponse();
