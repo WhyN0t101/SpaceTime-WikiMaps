@@ -79,7 +79,7 @@ public class UpgradeService {
     public RoleUpgradeDTO handleRequest(StatusRequest request, Long id) {
         RoleUpgrade roleUpgrade = roleUpgradeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Upgrade request not found"));
-
+            
         RoleStatus statusEnum = RoleStatus.valueOf(request.getStatus().toUpperCase());
         roleUpgrade.setStatus(statusEnum);
         roleUpgrade.setMessage(request.getMessage());

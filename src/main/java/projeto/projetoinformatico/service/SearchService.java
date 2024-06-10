@@ -71,7 +71,7 @@ public class SearchService {
         }
     }
 
-    private List<Map<String, String>> processQueryResults(ResultSet results) {
+    public List<Map<String, String>> processQueryResults(ResultSet results) {
         List<Map<String, String>> resultList = new ArrayList<>();
         while (results.hasNext()) {
             QuerySolution solution = results.nextSolution();
