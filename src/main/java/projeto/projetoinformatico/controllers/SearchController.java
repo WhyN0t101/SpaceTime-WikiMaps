@@ -4,12 +4,15 @@ import com.google.common.util.concurrent.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import projeto.projetoinformatico.model.SearchResult;
 import projeto.projetoinformatico.service.SearchService;
 import projeto.projetoinformatico.exceptions.Exception.SparqlQueryException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.util.Collections;
 
@@ -27,8 +30,23 @@ public class SearchController {
         this.searchService = searchService;
     }
 
+    /**
+     * Endpoint to execute a SPARQL query.
+     *
+     * @param sparqlQuery The SPARQL query string.
+     * @return ResponseEntity with the search result.
+     */
+    @Operation(summary = "Execute SPARQL query", description = "Endpoint to execute a SPARQL query.")
     @PostMapping("/sparql")
-    public ResponseEntity<SearchResult> executeSparqlQuery(@RequestBody String sparqlQuery) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful execution of SPARQL query"),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "429", description = "Too Many Requests"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<SearchResult> executeSparqlQuery(
+            @Parameter(description = "SPARQL query string", required = true)
+            @RequestBody String sparqlQuery) {
         if (!rateLimiter.tryAcquire()) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
         }
