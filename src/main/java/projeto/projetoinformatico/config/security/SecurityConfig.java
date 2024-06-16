@@ -35,6 +35,10 @@ public class SecurityConfig {
     @Autowired
     private UserService userService;
 
+    private static final String[] WHITE_LIST_URL = { "/api/v1/auth/**", "/v2/api-docs", "/v3/api-docs",
+            "/v3/api-docs/**", "/swagger-resources", "/swagger-resources/**", "/configuration/ui",
+            "/configuration/security", "/swagger-ui/**", "/webjars/**", "/swagger-ui.html",
+            "/api/test/**" };
 
 
     @Value("${spring.security.debug:false}")
@@ -54,6 +58,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/users/{id}/layers").permitAll()
                     .requestMatchers("/api/users/id/{id}").permitAll()
                     .requestMatchers("/data/property-values/{item_id}/{property_id}").permitAll()
+                    .requestMatchers(WHITE_LIST_URL).permitAll()
                     .anyRequest().authenticated()
             )
             .exceptionHandling(customizer -> customizer.authenticationEntryPoint(authenticationEntryPoint()))

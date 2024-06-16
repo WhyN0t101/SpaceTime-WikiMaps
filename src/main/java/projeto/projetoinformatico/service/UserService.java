@@ -180,6 +180,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }
 
+
     private User findUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -241,6 +242,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    @Cacheable(value = "userCache", key = "#name")
     public Page<UserDTO> getUsersByNameAndRolePaged(String name, String role, Pageable pageable) {
         Role roleEnum = getRoleEnum(role);
         Page<User> usersPage = userRepository.findByUsernameStartingWithIgnoreCaseAndRole(name, roleEnum,pageable);
@@ -250,6 +252,7 @@ public class UserService implements UserDetailsService {
         return usersPage.map(this::convertUserToDTO);
     }
 
+    @Cacheable(value = "userCache", key = "#name")
     public Page<UserDTO> getUserContainingUsernamePaged(String name, Pageable pageable) {
         Page<User> usersPage = userRepository.findByUsernameStartingWithIgnoreCase(name, pageable);
         if (usersPage.isEmpty()) {
@@ -258,6 +261,7 @@ public class UserService implements UserDetailsService {
         return usersPage.map(this::convertUserToDTO);
     }
 
+    @Cacheable(value = "userCache", key = "#role")
     public Page<UserDTO> getAllUsersByRolePaged(String role, Pageable pageable) {
         Role roleEnum = getRoleEnum(role);
         Page<User> usersPage = userRepository.findAllByRole(roleEnum, pageable);
@@ -267,6 +271,7 @@ public class UserService implements UserDetailsService {
         return usersPage.map(this::convertUserToDTO);
     }
 
+    @Cacheable(value = "userCache")
     public Page<UserDTO> getAllUsersPaged(Pageable pageable) {
         Page<User> usersPage = userRepository.findAll(pageable);
         return usersPage.map(this::convertUserToDTO);

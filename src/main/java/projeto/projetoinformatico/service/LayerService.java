@@ -127,6 +127,8 @@ public class LayerService {
         Page<Layer> layers = layersRepository.findAll(pageable);
         return layers.map(this::convertLayerToDTO);
     }
+
+    @Cacheable(value = "layerCache")
     public Page<LayerDTO> findByKeywordsPaged(String query, Pageable pageable) {
         String lowercaseQuery = query.toLowerCase();
         Page<Layer> layers = layersRepository.findByKeywordsPage(lowercaseQuery,pageable);

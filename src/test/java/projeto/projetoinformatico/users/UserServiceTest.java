@@ -59,16 +59,11 @@ public class UserServiceTest {
 
     @Test
     public void loadUserByUsername_UserFound_Success() {
-        // Arrange
         String username = "testUser";
         User mockUser = new User();
         mockUser.setUsername(username);
         when(userRepository.findByUsername(username)).thenReturn(mockUser);
-
-        // Act
         UserDetails userDetails = userService.loadUserByUsername(username);
-
-        // Assert
         assertNotNull(userDetails);
         assertEquals(username, userDetails.getUsername());
         verify(userRepository, times(1)).findByUsername(username);

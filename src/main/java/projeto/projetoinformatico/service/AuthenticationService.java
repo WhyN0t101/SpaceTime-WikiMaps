@@ -51,8 +51,6 @@ public class AuthenticationService {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             throw new InvalidParamsRequestException("Email already registered");
         }
-
-        // Create a new user
         User user = new User();
         user.setEmail(signUpRequest.getEmail());
         user.setUsername(signUpRequest.getUsername());
