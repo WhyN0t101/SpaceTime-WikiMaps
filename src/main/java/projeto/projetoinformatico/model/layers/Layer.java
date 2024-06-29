@@ -2,8 +2,6 @@ package projeto.projetoinformatico.model.layers;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import projeto.projetoinformatico.model.users.User;
 
 import java.util.Date;

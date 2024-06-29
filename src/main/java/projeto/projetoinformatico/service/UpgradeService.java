@@ -93,27 +93,23 @@ public class UpgradeService {
         return convertUpgradeToDTO(roleUpgrade);
     }
 
-    @Cacheable(value = "requestCache")
     public Page<RoleUpgradeDTO> getByStatusPaged(String status, Pageable pageable) {
         RoleStatus statusEnum = RoleStatus.valueOf(status.toUpperCase());
         Page<RoleUpgrade> requests = roleUpgradeRepository.findByStatus(statusEnum, pageable);
         return requests.map(this::convertUpgradeToDTO);
     }
 
-    @Cacheable(value = "requestCache")
     public Page<RoleUpgradeDTO> getAllRequestsPaged(Pageable pageable) {
         Page<RoleUpgrade> requests = roleUpgradeRepository.findAll(pageable);
         return requests.map(this::convertUpgradeToDTO);
     }
 
-    @Cacheable(value = "requestCache")
     public Page<RoleUpgradeDTO> getRequestsByNameAndStatusPaged(String username, String status, Pageable pageable) {
         RoleStatus statusEnum = RoleStatus.valueOf(status.toUpperCase());
         Page<RoleUpgrade> requests = roleUpgradeRepository.findByUserUsernameContainingIgnoreCaseAndStatus(username, statusEnum, pageable);
         return requests.map(this::convertUpgradeToDTO);
     }
 
-    @Cacheable(value = "requestCache")
     public Page<RoleUpgradeDTO> getRequestsContainingUsernamePaged(String username, Pageable pageable) {
         Page<RoleUpgrade> requests = roleUpgradeRepository.findByUserUsernameContainingIgnoreCase(username, pageable);
         return requests.map(this::convertUpgradeToDTO);

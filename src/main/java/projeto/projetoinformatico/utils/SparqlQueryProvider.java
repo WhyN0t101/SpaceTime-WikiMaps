@@ -74,7 +74,7 @@ public class SparqlQueryProvider {
     public String generateFilterClause(Double lat1, Double lon1, Double lat2, Double lon2, Long startTime, Long endTime) {
         StringBuilder sb = new StringBuilder();
         sb.append("      SERVICE wikibase:box {\n");
-        sb.append("        ?place wdt:P625 ?pob.\n"); // coordenadas do local de nascimento
+        sb.append("        ?place wdt:P625 ?pob.\n");
         sb.append("        bd:serviceParam wikibase:cornerSouthWest \"Point(").append(lon1).append(" ").append(lat1).append(")\"^^geo:wktLiteral.\n");
         sb.append("        bd:serviceParam wikibase:cornerNorthEast \"Point(").append(lon2).append(" ").append(lat2).append(")\"^^geo:wktLiteral.\n");
         sb.append("      }\n");

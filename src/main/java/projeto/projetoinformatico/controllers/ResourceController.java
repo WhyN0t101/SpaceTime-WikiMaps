@@ -2,6 +2,7 @@ package projeto.projetoinformatico.controllers;
 
 import com.google.common.util.concurrent.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +21,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public class ResourceController {
 
     private  final ResourceService resourceService;
-    private static final double REQUESTS_PER_SECOND = 20.0;
+    @Value("${max.requests}")
+    private static int REQUESTS_PER_SECOND;
 
     private static final RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
 

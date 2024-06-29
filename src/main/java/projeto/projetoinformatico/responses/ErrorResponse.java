@@ -22,7 +22,6 @@ public class ErrorResponse {
 
     }
 
-    // Getters and setters
     public LocalDateTime getTimestamp() {
         return timestamp;
     }

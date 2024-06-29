@@ -2,6 +2,7 @@ package projeto.projetoinformatico.controllers;
 
 import com.google.common.util.concurrent.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +23,9 @@ import java.util.Collections;
 public class SearchController {
 
     private final SearchService searchService;
-    private static final double REQUESTS_PER_SECOND = 20.0;
+    @Value("${max.requests}")
+    private static int REQUESTS_PER_SECOND;
+
     private static final RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
 
     @Autowired
