@@ -32,7 +32,7 @@ public class ResourceControllerTest {
         resourceService = mock(ResourceService.class);
         userRepository = mock(UserRepository.class);
         rateLimiter = mock(RateLimiter.class);
-        resourceController = new ResourceController(resourceService);
+        resourceController = new ResourceController(resourceService,20.0);
     }
 
     @Test
