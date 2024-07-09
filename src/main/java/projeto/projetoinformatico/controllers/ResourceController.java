@@ -21,14 +21,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public class ResourceController {
 
     private  final ResourceService resourceService;
-    @Value("${max.requests}")
-    private static int REQUESTS_PER_SECOND;
 
-    private static final RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
+    private final RateLimiter rateLimiter;
 
     @Autowired
-    public ResourceController(ResourceService resourceService) {
+    public ResourceController(ResourceService resourceService, @Value("${max.requests}") double requestsPerSecond) {
         this.resourceService = resourceService;
+        this.rateLimiter = RateLimiter.create(requestsPerSecond);
     }
 
     /**

@@ -23,14 +23,14 @@ import java.util.Collections;
 public class SearchController {
 
     private final SearchService searchService;
-    @Value("${max.requests}")
-    private static int REQUESTS_PER_SECOND;
 
-    private static final RateLimiter rateLimiter = RateLimiter.create(REQUESTS_PER_SECOND);
+    private final RateLimiter rateLimiter;
 
     @Autowired
-    public SearchController(SearchService searchService) {
+    public SearchController(SearchService searchService, @Value("${max.requests}") double requestsPerSecond) {
         this.searchService = searchService;
+        this.rateLimiter = RateLimiter.create(requestsPerSecond);
+
     }
 
     /**
