@@ -79,7 +79,6 @@ public class LayerService {
     @Transactional
     public LayerDTO updateLayer(Long id, LayerRequest layerRequest) {
         validateLayerRequest(layerRequest);
-        checkDuplicateLayerName(layerRequest.getName());
         Layer existingLayer = layersRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Layer not found with id: " + id));
 
